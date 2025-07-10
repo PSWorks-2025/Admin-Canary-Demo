@@ -1,5 +1,7 @@
-import { useState, useRef } from "react";
-import cover from "/images/cover_2.jpg";
+import React,{ useState, useRef } from "react";
+import HeroSection from "./AboutPageSection/HeroSection.jsx";
+import MissionSection from "./AboutPageSection/MissionSection.jsx";
+import VisionSection from "./AboutPageSection/VisionSection.jsx";
 import {
   ScrollStoryList,
   ScrollStoryListItem,
@@ -13,6 +15,7 @@ import {
   ActivityHistoryListItem,
 } from "../../components/Lists/ActivityHistoryList.jsx";
 import ProjectLayout from "../../components/ProjectLayout/ProjectLayout";
+import cover from "/images/cover_2.jpg";
 import canary1 from "/images/canary1.jpg";
 import canary2 from "/images/canary2.jpg";
 import canary3 from "/images/canary3.jpg";
@@ -74,41 +77,13 @@ function Aboutpage() {
       },
     },
     members: {
-      member_0: {
-        name: "Tên",
-        role: "Chức vụ",
-        imageUrl: cover,
-      },
-      member_1: {
-        name: "Tên",
-        role: "Chức vụ",
-        imageUrl: cover,
-      },
-      member_2: {
-        name: "Tên",
-        role: "Chức vụ",
-        imageUrl: cover,
-      },
-      member_3: {
-        name: "Tên",
-        role: "Chức vụ",
-        imageUrl: cover,
-      },
-      member_4: {
-        name: "Tên",
-        role: "Chức vụ",
-        imageUrl: cover,
-      },
-      member_5: {
-        name: "Tên",
-        role: "Chức vụ",
-        imageUrl: cover,
-      },
-      member_6: {
-        name: "Tên",
-        role: "Chức vụ",
-        imageUrl: cover,
-      },
+      member_0: { name: "Tên", role: "Chức vụ", imageUrl: cover },
+      member_1: { name: "Tên", role: "Chức vụ", imageUrl: cover },
+      member_2: { name: "Tên", role: "Chức vụ", imageUrl: cover },
+      member_3: { name: "Tên", role: "Chức vụ", imageUrl: cover },
+      member_4: { name: "Tên", role: "Chức vụ", imageUrl: cover },
+      member_5: { name: "Tên", role: "Chức vụ", imageUrl: cover },
+      member_6: { name: "Tên", role: "Chức vụ", imageUrl: cover },
     },
     activityHistory: {
       activity_0: {
@@ -137,30 +112,35 @@ function Aboutpage() {
       },
     },
     projects: {
-      project_0: {
-        title: "Tên dự án 1",
-        imageUrl: canary1,
-      },
-      project_1: {
-        title: "Tên dự án 2",
-        imageUrl: canary2,
-      },
-      project_2: {
-        title: "Tên dự án 3",
-        imageUrl: canary3,
-      },
-      project_3: {
-        title: "Tên dự án 4",
-        imageUrl: canary4,
-      },
+      project_0: { title: "Tên dự án 1", imageUrl: canary1 },
+      project_1: { title: "Tên dự án 2", imageUrl: canary2 },
+      project_2: { title: "Tên dự án 3", imageUrl: canary3 },
+      project_3: { title: "Tên dự án 4", imageUrl: canary4 },
     },
   });
 
   const coverInputRef = useRef(null);
   const missionImageRef = useRef(null);
   const visionImageRef = useRef(null);
+  const storyImageRefs = useRef(
+    Object.keys(pageData.stories).reduce((acc, key) => {
+      acc[key] = React.createRef();
+      return acc;
+    }, {})
+  ).current;
+  const memberImageRefs = useRef(
+    Object.keys(pageData.members).reduce((acc, key) => {
+      acc[key] = React.createRef();
+      return acc;
+    }, {})
+  ).current;
+  const activityImageRefs = useRef(
+    Object.keys(pageData.activityHistory).reduce((acc, key) => {
+      acc[key] = { imageUrl1: React.createRef(), imageUrl2: React.createRef() };
+      return acc;
+    }, {})
+  ).current;
 
-  // Existing functions (unchanged)
   const handleFieldChange = (field, value) => {
     setPageData((prevData) => ({
       ...prevData,
@@ -171,10 +151,7 @@ function Aboutpage() {
   const handleNestedFieldChange = (section, field, value) => {
     setPageData((prevData) => ({
       ...prevData,
-      [section]: {
-        ...prevData[section],
-        [field]: value,
-      },
+      [section]: { ...prevData[section], [field]: value },
     }));
   };
 
@@ -197,10 +174,7 @@ function Aboutpage() {
       reader.onload = (e) => {
         setPageData((prevData) => ({
           ...prevData,
-          [section]: {
-            ...prevData[section],
-            [field]: e.target.result,
-          },
+          [section]: { ...prevData[section], [field]: e.target.result },
         }));
       };
       reader.readAsDataURL(file);
@@ -212,10 +186,7 @@ function Aboutpage() {
       ...prevData,
       stories: {
         ...prevData.stories,
-        [id]: {
-          ...prevData.stories[id],
-          [field]: value,
-        },
+        [id]: { ...prevData.stories[id], [field]: value },
       },
     }));
   };
@@ -228,10 +199,7 @@ function Aboutpage() {
           ...prevData,
           stories: {
             ...prevData.stories,
-            [id]: {
-              ...prevData.stories[id],
-              imageUrl: e.target.result,
-            },
+            [id]: { ...prevData.stories[id], imageUrl: e.target.result },
           },
         }));
       };
@@ -245,19 +213,16 @@ function Aboutpage() {
       ...prevData,
       stories: {
         ...prevData.stories,
-        [newId]: {
-          title: "",
-          description: "",
-          href: "#",
-          imageUrl: "",
-        },
+        [newId]: { title: "", description: "", href: "#", imageUrl: "" },
       },
     }));
+    storyImageRefs[newId] = React.createRef();
   };
 
   const deleteStory = (id) => {
     setPageData((prevData) => {
       const { [id]: _, ...rest } = prevData.stories;
+      delete storyImageRefs[id];
       return { ...prevData, stories: rest };
     });
   };
@@ -267,10 +232,7 @@ function Aboutpage() {
       ...prevData,
       members: {
         ...prevData.members,
-        [id]: {
-          ...prevData.members[id],
-          [field]: value,
-        },
+        [id]: { ...prevData.members[id], [field]: value },
       },
     }));
   };
@@ -283,10 +245,7 @@ function Aboutpage() {
           ...prevData,
           members: {
             ...prevData.members,
-            [id]: {
-              ...prevData.members[id],
-              imageUrl: e.target.result,
-            },
+            [id]: { ...prevData.members[id], imageUrl: e.target.result },
           },
         }));
       };
@@ -300,18 +259,16 @@ function Aboutpage() {
       ...prevData,
       members: {
         ...prevData.members,
-        [newId]: {
-          name: "",
-          role: "",
-          imageUrl: "",
-        },
+        [newId]: { name: "", role: "", imageUrl: "" },
       },
     }));
+    memberImageRefs[newId] = React.createRef();
   };
 
   const deleteMember = (id) => {
     setPageData((prevData) => {
       const { [id]: _, ...rest } = prevData.members;
+      delete memberImageRefs[id];
       return { ...prevData, members: rest };
     });
   };
@@ -324,10 +281,7 @@ function Aboutpage() {
         ...prevData,
         activityHistory: {
           ...prevData.activityHistory,
-          [id]: {
-            ...prevData.activityHistory[id],
-            [field]: value,
-          },
+          [id]: { ...prevData.activityHistory[id], [field]: value },
         },
       }));
     }
@@ -341,10 +295,7 @@ function Aboutpage() {
           ...prevData,
           activityHistory: {
             ...prevData.activityHistory,
-            [id]: {
-              ...prevData.activityHistory[id],
-              [field]: e.target.result,
-            },
+            [id]: { ...prevData.activityHistory[id], [field]: e.target.result },
           },
         }));
       };
@@ -358,25 +309,20 @@ function Aboutpage() {
       ...prevData,
       activityHistory: {
         ...prevData.activityHistory,
-        [newId]: {
-          startDate: "",
-          endDate: "",
-          description: "",
-          imageUrl1: "",
-          imageUrl2: "",
-        },
+        [newId]: { startDate: "", endDate: "", description: "", imageUrl1: "", imageUrl2: "" },
       },
     }));
+    activityImageRefs[newId] = { imageUrl1: React.createRef(), imageUrl2: React.createRef() };
   };
 
   const deleteActivity = (id) => {
     setPageData((prevData) => {
       const { [id]: _, ...rest } = prevData.activityHistory;
+      delete activityImageRefs[id];
       return { ...prevData, activityHistory: rest };
     });
   };
 
-  // New functions for projects
   const handleProjectChange = (id, field, value) => {
     if (field === "delete") {
       deleteProject(id);
@@ -385,10 +331,7 @@ function Aboutpage() {
         ...prevData,
         projects: {
           ...prevData.projects,
-          [id]: {
-            ...prevData.projects[id],
-            [field]: value,
-          },
+          [id]: { ...prevData.projects[id], [field]: value },
         },
       }));
     }
@@ -402,10 +345,7 @@ function Aboutpage() {
           ...prevData,
           projects: {
             ...prevData.projects,
-            [id]: {
-              ...prevData.projects[id],
-              imageUrl: e.target.result,
-            },
+            [id]: { ...prevData.projects[id], imageUrl: e.target.result },
           },
         }));
       };
@@ -419,10 +359,7 @@ function Aboutpage() {
       ...prevData,
       projects: {
         ...prevData.projects,
-        [newId]: {
-          title: "",
-          imageUrl: "",
-        },
+        [newId]: { title: "", imageUrl: "" },
       },
     }));
   };
@@ -436,165 +373,27 @@ function Aboutpage() {
 
   return (
     <div className="w-full" style={{ backgroundColor: pageData.backgroundColor }}>
-      <div className="relative">
-        <div
-          className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply"
-          style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url("${pageData.coverImage}")`,
-            height: "calc(100vh - 5rem)",
-          }}
-        >
-          <button
-            className="absolute top-2 left-2 p-2 bg-secondary text-secondary-title rounded-full cursor-pointer z-10"
-            onClick={() => coverInputRef.current.click()}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-              />
-            </svg>
-          </button>
-          <input
-            type="file"
-            ref={coverInputRef}
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleImageUpload("coverImage", e.target.files[0])}
-          />
-          <input
-            type="color"
-            className="absolute top-2 right-2 w-8 h-8 rounded-full cursor-pointer z-10"
-            value={pageData.backgroundColor}
-            onChange={(e) => handleFieldChange("backgroundColor", e.target.value)}
-          />
-          <div className="w-280">
-            <input
-              className="w-full text-[2.5rem] font-semibold text-secondary-title outline-none bg-transparent"
-              value={pageData.title}
-              onChange={(e) => handleFieldChange("title", e.target.value)}
-              placeholder="Nhập tiêu đề"
-            />
-            <textarea
-              className="w-full text-secondary-title mb-6 outline-none bg-transparent resize-none"
-              value={pageData.description}
-              onChange={(e) => handleFieldChange("description", e.target.value)}
-              placeholder="Nhập mô tả"
-              rows="4"
-            ></textarea>
-          </div>
-        </div>
-      </div>
-      <div className="w-full pt-20 flex">
-        <div className="w-1/2 px-4 relative">
-          <div
-            className="w-162 h-102 -mr-26 bg-cover bg-center float-right rounded-lg"
-            style={{ backgroundImage: `url("${pageData.mission.imageUrl}")` }}
-          ></div>
-          <button
-            className="absolute top-2 left-2 p-2 bg-secondary text-secondary-title rounded-full cursor-pointer z-10"
-            onClick={() => missionImageRef.current.click()}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-              />
-            </svg>
-          </button>
-          <input
-            type="file"
-            ref={missionImageRef}
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleNestedImageUpload("mission", "imageUrl", e.target.files[0])}
-          />
-        </div>
-        <div className="w-1/2 px-4 flex items-center">
-          <div className="w-136 h-62 rounded-lg bg-tag-2 text-primary-title shadow-[1.5rem_-1.5rem_#E6EBFB] z-20">
-            <input
-              className="w-full font-bold text-[2.5rem] pt-12 text-center outline-none bg-transparent"
-              value={pageData.mission.title}
-              onChange={(e) => handleNestedFieldChange("mission", "title", e.target.value)}
-              placeholder="Nhập tiêu đề sứ mệnh"
-            />
-            <textarea
-              className="w-full px-8 text-base/5 font-medium py-2 text-primary-paragraph text-center outline-none bg-transparent resize-none"
-              value={pageData.mission.description}
-              onChange={(e) => handleNestedFieldChange("mission", "description", e.target.value)}
-              placeholder="Nhập mô tả sứ mệnh"
-              rows="4"
-            ></textarea>
-          </div>
-        </div>
-      </div>
-      <div className="w-full pt-20 flex flex-row-reverse">
-        <div className="w-1/2 px-4 relative">
-          <div
-            className="w-162 h-102 -ml-26 bg-cover bg-center rounded-lg"
-            style={{ backgroundImage: `url("${pageData.vision.imageUrl}")` }}
-          ></div>
-          <button
-            className="absolute top-2 left-2 p-2 bg-secondary text-secondary-title rounded-full cursor-pointer z-10"
-            onClick={() => visionImageRef.current.click()}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-              />
-            </svg>
-          </button>
-          <input
-            type="file"
-            ref={visionImageRef}
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleNestedImageUpload("vision", "imageUrl", e.target.files[0])}
-          />
-        </div>
-        <div className="w-1/2 px-4 flex items-center justify-end">
-          <div className="w-136 h-62 rounded-lg bg-tag-2 text-primary-title shadow-[-1.5rem_-1.5rem_#E6EBFB] z-0">
-            <input
-              className="w-full font-bold text-[2.5rem] pt-12 text-center outline-none bg-transparent"
-              value={pageData.vision.title}
-              onChange={(e) => handleNestedFieldChange("vision", "title", e.target.value)}
-              placeholder="Nhập tiêu đề tầm nhìn"
-            />
-            <textarea
-              className="w-full px-8 text-base/5 font-medium py-2 text-primary-paragraph text-center outline-none bg-transparent resize-none"
-              value={pageData.vision.description}
-              onChange={(e) => handleNestedFieldChange("vision", "description", e.target.value)}
-              placeholder="Nhập mô tả tầm nhìn"
-              rows="4"
-            ></textarea>
-          </div>
-        </div>
-      </div>
+      <HeroSection
+        coverImage={pageData.coverImage}
+        backgroundColor={pageData.backgroundColor}
+        title={pageData.title}
+        description={pageData.description}
+        handleFieldChange={handleFieldChange}
+        handleImageUpload={handleImageUpload}
+        coverInputRef={coverInputRef}
+      />
+      <MissionSection
+        mission={pageData.mission}
+        handleNestedFieldChange={handleNestedFieldChange}
+        handleNestedImageUpload={handleNestedImageUpload}
+        missionImageRef={missionImageRef}
+      />
+      <VisionSection
+        vision={pageData.vision}
+        handleNestedFieldChange={handleNestedFieldChange}
+        handleNestedImageUpload={handleNestedImageUpload}
+        visionImageRef={visionImageRef}
+      />
       <div>
         <div className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center">
           Các câu chuyện ý nghĩa
@@ -622,7 +421,32 @@ function Aboutpage() {
                   onChange={handleStoryChange}
                   onImageUpload={handleStoryImageUpload}
                 />
-              
+                <button
+                  className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+                  onClick={() => deleteStory(`story_${key}`)}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+                <input
+                  type="file"
+                  ref={storyImageRefs[`story_${key}`]}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleStoryImageUpload(`story_${key}`, e.target.files[0])}
+                />
               </div>
             ))}
         </ScrollStoryList>
@@ -653,7 +477,32 @@ function Aboutpage() {
                   onChange={handleMemberChange}
                   onImageUpload={handleMemberImageUpload}
                 />
-               
+                <button
+                  className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+                  onClick={() => deleteMember(`member_${key}`)}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+                <input
+                  type="file"
+                  ref={memberImageRefs[`member_${key}`]}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleMemberImageUpload(`member_${key}`, e.target.files[0])}
+                />
               </div>
             ))}
         </ScrollMemberList>
@@ -686,7 +535,20 @@ function Aboutpage() {
                   onChange={handleActivityChange}
                   onImageUpload={handleActivityImageUpload}
                 />
-                
+                <input
+                  type="file"
+                  ref={activityImageRefs[`activity_${key}`]?.imageUrl1}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleActivityImageUpload(`activity_${key}`, "imageUrl1", e.target.files[0])}
+                />
+                <input
+                  type="file"
+                  ref={activityImageRefs[`activity_${key}`]?.imageUrl2}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleActivityImageUpload(`activity_${key}`, "imageUrl2", e.target.files[0])}
+                />
               </div>
             ))}
         </ActivityHistoryList>

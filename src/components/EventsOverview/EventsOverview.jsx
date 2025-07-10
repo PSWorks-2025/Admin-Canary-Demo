@@ -1,91 +1,88 @@
 import React, { useState } from "react";
 import "./styles.css";
-import canary1 from "/images/canary1.jpg"
-import canary2 from "/images/canary2.jpg";
-import canary3 from "/images/canary3.jpg";
-import canary4 from "/images/canary4.jpg";
-import canary5 from "/images/canary5.jpg";
-import canary6 from "/images/canary6.jpg";
-import canary7 from "/images/canary7.jpg";
-import canary8 from "/images/canary8.jpg";
-import canary9 from "/images/canary9.jpg";
-import canary10 from "/images/canary10.jpg";
-import canary11 from "/images/canary11.jpg";
-import canary12 from "/images/canary12.jpg";
-import canary13 from "/images/canary13.jpg";
-import canary14 from "/images/canary14.jpg";
-import canary15 from "/images/canary15.jpg";
-import canary16 from "/images/canary16.jpg";
-import canary17 from "/images/canary17.jpg";
-import canary18 from "/images/canary18.jpg";
-import canary19 from "/images/canary19.jpg";
-const events = [
-  {
-    imageUrl:
-      canary1,
-    title: "Tên sự kiện 1",
-  },
-  {
-    imageUrl:
-      canary2,
-    title: "Tên sự kiện 2",
-  },
-  {
-    imageUrl:
-      canary4,
-    title: "Tên sự kiện 3",
-  },
-  {
-    imageUrl:
-     canary9,
-    title: "Tên sự kiện 4",
-  },
-  {
-    imageUrl:
-     canary16,
-    title: "Tên sự kiện 5",
-  },
-];
 
-function EventsOverview() {
+function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const nextImage = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % events.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % pageData.events.length);
   };
 
   const prevImage = () => {
     setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + events.length) % events.length,
+      (prevIndex) => (prevIndex - 1 + pageData.events.length) % pageData.events.length
     );
   };
 
-  // Calculate the range of events to display
-  const displayedEvents = events
+  const displayedEvents = pageData.events
     .slice(currentIndex, currentIndex + 4)
-    .concat(events.slice(0, Math.max(0, currentIndex + 4 - events.length)));
+    .concat(pageData.events.slice(0, Math.max(0, currentIndex + 4 - pageData.events.length)));
 
   return (
-    <section>
-      <h2 className="text-2xl font-bold mb-4">Tổng kết các sự kiện đã qua</h2>
-      <div className="slider">
-        <button onClick={prevImage} className="prev-button">
+    <section className="px-8 py-8">
+      <input
+        className="w-full text-2xl font-bold text-black outline-none bg-transparent text-center mb-4"
+        value={pageData.heading}
+        onChange={(e) => handleFieldChange("heading", e.target.value)}
+        placeholder="Nhập tiêu đề phần"
+      />
+      <div className="flex items-center justify-between w-2/3 mx-auto mb-10">
+        <button
+          className="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200"
+          onClick={prevImage}
+        >
           Previous
         </button>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 ml-auto mr-auto mb-10 w-2/3 gap-5 h-64 overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 h-64 overflow-hidden w-full">
           {displayedEvents.map((event, index) => (
             <div
+              key={index}
               className="relative bg-cover bg-center h-64 rounded-lg overflow-hidden shadow-md flex p-2 text-white items-end"
               style={{
-                backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${event.imageUrl})`,
+                backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${
+                  event.imageUrl || "https://via.placeholder.com/300x256"
+                })`,
               }}
-              key={index}
             >
-              <h3 className="font-medium">{event.title}</h3>
+              <input
+                className="w-full text-base font-medium text-white outline-none bg-transparent"
+                value={event.title}
+                onChange={(e) => handleFieldChange(index, "title", e.target.value)}
+                placeholder="Nhập tiêu đề sự kiện"
+              />
+              <button
+                className="absolute top-2 left-2 p-2 bg-blue-500 text-white rounded-full cursor-pointer z-10"
+                onClick={() => imageInputRefs[index].current.click()}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
+                  />
+                </svg>
+              </button>
+              <input
+                type="file"
+                ref={imageInputRefs[index]}
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleImageUpload(index, e.target.files[0])}
+              />
             </div>
           ))}
         </div>
-        <button onClick={nextImage} className="next-button">
+        <button
+          className="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200"
+          onClick={nextImage}
+        >
           Next
         </button>
       </div>
@@ -93,4 +90,4 @@ function EventsOverview() {
   );
 }
 
-export default EventsOverview;
+export default EventsOverview;  
