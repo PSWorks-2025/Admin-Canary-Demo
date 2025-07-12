@@ -2,7 +2,8 @@ import { MdCircle } from "react-icons/md";
 import { BiSolidRightArrow } from "react-icons/bi";
 import PropTypes from "prop-types";
 import { useRef } from "react";
-
+import { ImageInput } from "../Inputs/ImageInput";
+import { TextInput } from "../Inputs/TextInput";
 export function ActivityHistoryList({ children }) {
   return (
     <div className="w-full">
@@ -32,8 +33,8 @@ export function ActivityHistoryListItem({
   onChange,
   onImageUpload,
 }) {
-  const image1Ref = useRef(null);
-  const image2Ref = useRef(null);
+  // const image1Ref = useRef(null);
+  // const image2Ref = useRef(null);
 
   return (
     <div className="relative">
@@ -44,62 +45,22 @@ export function ActivityHistoryListItem({
               className="absolute w-88 h-62 bg-cover bg-center rounded-lg top-0 left-0"
               style={{ backgroundImage: `url("${imageUrl1}")` }}
             >
-              <button
-                className="absolute top-2 left-2 p-2 bg-secondary text-secondary-title rounded-full cursor-pointer z-10"
-                onClick={() => image1Ref.current.click()}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-                  />
-                </svg>
-              </button>
-              <input
-                type="file"
-                ref={image1Ref}
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => onImageUpload(id, "imageUrl1", e.target.files[0])}
+              <ImageInput
+                handleImageUpload={(file) => onImageUpload(id, "imageUrl1", file.target.files[0])}
+                section="activity"
+                top="top-2"
+                left="left-2"
               />
             </div>
             <div
               className="absolute w-88 h-47 bg-cover bg-center rounded-lg bottom-0 right-0"
               style={{ backgroundImage: `url("${imageUrl2}")` }}
             >
-              <button
-                className="absolute top-2 left-2 p-2 bg-secondary text-secondary-title rounded-full cursor-pointer z-10"
-                onClick={() => image2Ref.current.click()}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-                  />
-                </svg>
-              </button>
-              <input
-                type="file"
-                ref={image2Ref}
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => onImageUpload(id, "imageUrl2", e.target.files[0])}
+              <ImageInput
+                handleImageUpload={(file) => onImageUpload(id, "imageUrl2", file.target.files[0])}
+                section="activity"
+                top="top-2"
+                right="right-2"
               />
             </div>
           </div>
@@ -107,13 +68,13 @@ export function ActivityHistoryListItem({
         <div className="w-1/2 h-full px-4">
           <div className="w-136 h-full">
             <div className="w-83 flex justify-between text-[1.6rem] font-bold text-primary-title">
-              <input
+              <TextInput
                 className="w-1/2 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
                 value={startDate}
                 onChange={(e) => onChange(id, "startDate", e.target.value)}
                 placeholder="Nhập ngày bắt đầu"
               />
-              <input
+              <TextInput
                 className="w-1/2 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent text-right"
                 value={endDate}
                 onChange={(e) => onChange(id, "endDate", e.target.value)}
@@ -127,7 +88,8 @@ export function ActivityHistoryListItem({
               <MdCircle className="w-5 h-5 mx-0.5 text-secondary" />
               <div className="w-20 h-0.75 rounded-full bg-secondary"></div>
             </div>
-            <textarea
+            <TextInput
+              type="textarea"
               className="w-136 text-base/5 pt-2 text-primary-paragraph outline-none bg-transparent resize-none"
               value={description}
               onChange={(e) => onChange(id, "description", e.target.value)}

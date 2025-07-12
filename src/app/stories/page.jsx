@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import HeroSection from "./StoriesSection/HeroSection";
 import StoriesSection from "./StoriesSection/StoriesSection";
 import "./styles.css";
@@ -20,9 +20,6 @@ function Story() {
     ],
   });
 
-  const heroImageRef = useRef(null);
-  const storyImageRefs = useRef(pageData.stories.map(() => React.createRef())).current;
-
   const handleFieldChange = (field, value) => {
     setPageData((prevData) => ({
       ...prevData,
@@ -40,20 +37,25 @@ function Story() {
   };
 
   const handleImageUpload = (field, file) => {
-    if (file) {
+    if (file instanceof File || file instanceof Blob) {
+      console.log(`Uploading hero image for field ${field}`);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPageData((prevData) => ({
           ...prevData,
           [field]: e.target.result,
         }));
+        console.log(`Hero image uploaded for field ${field}`);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.error(`Invalid file provided for hero image ${field}:`, file);
     }
   };
 
   const handleStoryImageUpload = (index, file) => {
-    if (file) {
+    if (file instanceof File || file instanceof Blob) {
+      console.log(`Uploading story image at index ${index}`);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPageData((prevData) => ({
@@ -62,8 +64,11 @@ function Story() {
             i === index ? { ...story, imageUrl: e.target.result } : story
           ),
         }));
+        console.log(`Story image uploaded at index ${index}`);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.error(`Invalid file provided for story image at index ${index}:`, file);
     }
   };
 
@@ -75,15 +80,15 @@ function Story() {
         { title: "", description: "", imageUrl: "" },
       ],
     }));
-    storyImageRefs.push(React.createRef());
   };
 
   const deleteStory = (index) => {
-    setPageData((prevData) => ({
-      ...prevData,
-      stories: prevData.stories.filter((_, i) => i !== index),
-    }));
-    storyImageRefs.splice(index, 1);
+    console.log(`Deleting story at index ${index}`);
+    setPageData((prevData) => {
+      const updatedStories = prevData.stories.filter((_, i) => i !== index);
+      console.log("Updated stories:", updatedStories);
+      return { ...prevData, stories: updatedStories };
+    });
   };
 
   return (
@@ -94,7 +99,6 @@ function Story() {
         heroImage={pageData.heroImage}
         handleFieldChange={handleFieldChange}
         handleImageUpload={handleImageUpload}
-        heroImageRef={heroImageRef}
       />
       <StoriesSection
         heading={pageData.heading}
@@ -104,7 +108,6 @@ function Story() {
         handleStoryImageUpload={handleStoryImageUpload}
         addStory={addStory}
         deleteStory={deleteStory}
-        storyImageRefs={storyImageRefs}
       />
     </>
   );

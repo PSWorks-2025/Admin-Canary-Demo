@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import PropTypes from "prop-types";
-
+import { ImageInput } from "../Inputs/ImageInput";
+import { TextInput } from "../Inputs/TextInput";
 function ProjectLayout({ projects, onChange, onImageUpload, addProject }) {
   return (
     <section className="flex flex-col items-center">
@@ -44,7 +45,6 @@ ProjectLayout.propTypes = {
 export default ProjectLayout;
 
 function ProjectListItem({ id, title, imageUrl, onChange, onImageUpload }) {
-  const imageRef = useRef(null);
 
   return (
     <div className="relative h-96 rounded-lg overflow-hidden shadow-md">
@@ -57,31 +57,11 @@ function ProjectListItem({ id, title, imageUrl, onChange, onImageUpload }) {
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60"></div>
-        <button
-          className="absolute top-2 left-2 p-2 bg-secondary text-secondary-title rounded-full cursor-pointer z-10"
-          onClick={() => imageRef.current.click()}
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-            />
-          </svg>
-        </button>
-        <input
-          type="file"
-          ref={imageRef}
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => onImageUpload(id, e.target.files[0])}
+        <ImageInput
+          handleImageUpload={(file) => onImageUpload(id, file.target.files[0])}
+          top="top-2"
+          left="left-2"
+          section="project"
         />
         <button
           className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
@@ -102,7 +82,7 @@ function ProjectListItem({ id, title, imageUrl, onChange, onImageUpload }) {
             />
           </svg>
         </button>
-        <input
+        <TextInput
           className="absolute bottom-0 left-0 p-4 w-full text-white font-semibold outline-none bg-transparent z-10"
           value={title}
           onChange={(e) => onChange(id, "title", e.target.value)}

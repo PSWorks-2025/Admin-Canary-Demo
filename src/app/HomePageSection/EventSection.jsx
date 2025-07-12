@@ -1,5 +1,5 @@
 import React,{ useRef } from "react";
-
+import { ImageInput } from "../../components/Inputs/ImageInput";
 const EventsSection = ({ events, setEvents, firstSection, setFirstSection }) => {
   const eventImageRefs = useRef(
     Object.keys(events).reduce((acc, key) => {
@@ -65,31 +65,12 @@ const EventsSection = ({ events, setEvents, firstSection, setFirstSection }) => 
                     className="w-136 h-full bg-cover bg-center float-right rounded-lg"
                     style={{ backgroundImage: `url("${event.imageUrl}")` }}
                   >
-                    <button
-                      className="absolute top-2 p-2 bg-secondary text-secondary-title rounded-full cursor-pointer z-10"
-                      onClick={() => eventImageRefs[eventKey].current.click()}
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-                        />
-                      </svg>
-                    </button>
-                    <input
-                      type="file"
+                    <ImageInput
                       ref={eventImageRefs[eventKey]}
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleEventImageUpload(eventKey, e.target.files[0])}
+                      handleImageUpload={(e) => handleEventImageUpload(eventKey, e.target.files[0])}
+                      // triggerFileInput={eventImageRefs[eventKey].current}
+                      section="event"
+                      top="top-2"
                     />
                   </div>
                 </div>

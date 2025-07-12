@@ -1,6 +1,7 @@
 import React from "react";
-
-const HeroSection = ({ heroTitle, heroDescription, heroImage, handleFieldChange, handleImageUpload, heroImageRef }) => {
+import { ImageInput } from "../../../components/Inputs/ImageInput";
+import { TextInput } from "../../../components/Inputs/TextInput";
+const HeroSection = ({ heroTitle, heroDescription, heroImage, handleFieldChange, handleImageUpload }) => {
   return (
     <div
       className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply hero_section"
@@ -10,40 +11,21 @@ const HeroSection = ({ heroTitle, heroDescription, heroImage, handleFieldChange,
         })`,
       }}
     >
-      <button
-        className="absolute top-2 left-2 p-2 bg-[#e6ebf5] text-white rounded-full cursor-pointer z-10"
-        onClick={() => heroImageRef.current.click()}
-      >
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-          />
-        </svg>
-      </button>
-      <input
-        type="file"
-        ref={heroImageRef}
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => handleImageUpload("heroImage", e.target.files[0])}
+      <ImageInput
+        handleImageUpload={(file) => handleImageUpload("heroImage", file.target.files[0])}
+        section="hero"
+        top="top-2"
+        left="left-2"
       />
       <div className="w-1/2 py-4 absolute bottom-30 left-10">
-        <input
+        <TextInput
           className="w-full text-[2.5rem] font-semibold text-white outline-none bg-transparent"
           value={heroTitle}
           onChange={(e) => handleFieldChange("heroTitle", e.target.value)}
           placeholder="Nhập tiêu đề câu chuyện"
         />
-        <textarea
+        <TextInput
+          type="textarea"
           className="w-full text-base text-white outline-none bg-transparent resize-none"
           value={heroDescription}
           onChange={(e) => handleFieldChange("heroDescription", e.target.value)}

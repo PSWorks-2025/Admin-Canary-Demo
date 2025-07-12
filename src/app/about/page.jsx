@@ -1,4 +1,4 @@
-import React,{ useState, useRef } from "react";
+import React, { useState } from "react";
 import HeroSection from "./AboutPageSection/HeroSection.jsx";
 import MissionSection from "./AboutPageSection/MissionSection.jsx";
 import VisionSection from "./AboutPageSection/VisionSection.jsx";
@@ -77,13 +77,13 @@ function Aboutpage() {
       },
     },
     members: {
-      member_0: { name: "Tên", role: "Chức vụ", imageUrl: cover },
-      member_1: { name: "Tên", role: "Chức vụ", imageUrl: cover },
-      member_2: { name: "Tên", role: "Chức vụ", imageUrl: cover },
-      member_3: { name: "Tên", role: "Chức vụ", imageUrl: cover },
-      member_4: { name: "Tên", role: "Chức vụ", imageUrl: cover },
-      member_5: { name: "Tên", role: "Chức vụ", imageUrl: cover },
-      member_6: { name: "Tên", role: "Chức vụ", imageUrl: cover },
+      member_0: { name: "Tên", role: "Chức vụ", imageUrl: "" },
+      member_1: { name: "Tên", role: "Chức vụ", imageUrl: "" },
+      member_2: { name: "Tên", role: "Chức vụ", imageUrl: "" },
+      member_3: { name: "Tên", role: "Chức vụ", imageUrl: "" },
+      member_4: { name: "Tên", role: "Chức vụ", imageUrl: "" },
+      member_5: { name: "Tên", role: "Chức vụ", imageUrl: "" },
+      member_6: { name: "Tên", role: "Chức vụ", imageUrl: "" },
     },
     activityHistory: {
       activity_0: {
@@ -119,28 +119,6 @@ function Aboutpage() {
     },
   });
 
-  const coverInputRef = useRef(null);
-  const missionImageRef = useRef(null);
-  const visionImageRef = useRef(null);
-  const storyImageRefs = useRef(
-    Object.keys(pageData.stories).reduce((acc, key) => {
-      acc[key] = React.createRef();
-      return acc;
-    }, {})
-  ).current;
-  const memberImageRefs = useRef(
-    Object.keys(pageData.members).reduce((acc, key) => {
-      acc[key] = React.createRef();
-      return acc;
-    }, {})
-  ).current;
-  const activityImageRefs = useRef(
-    Object.keys(pageData.activityHistory).reduce((acc, key) => {
-      acc[key] = { imageUrl1: React.createRef(), imageUrl2: React.createRef() };
-      return acc;
-    }, {})
-  ).current;
-
   const handleFieldChange = (field, value) => {
     setPageData((prevData) => ({
       ...prevData,
@@ -157,27 +135,35 @@ function Aboutpage() {
 
   const handleImageUpload = (field, file) => {
     if (file) {
+      console.log(`Uploading image for field ${field}`);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPageData((prevData) => ({
           ...prevData,
           [field]: e.target.result,
         }));
+        console.log(`Image uploaded for field ${field}`);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.error(`No file provided for field ${field}`);
     }
   };
 
   const handleNestedImageUpload = (section, field, file) => {
     if (file) {
+      console.log(`Uploading image for ${section} ${field}`);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPageData((prevData) => ({
           ...prevData,
           [section]: { ...prevData[section], [field]: e.target.result },
         }));
+        console.log(`Image uploaded for ${section} ${field}`);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.error(`No file provided for ${section} ${field}`);
     }
   };
 
@@ -193,6 +179,7 @@ function Aboutpage() {
 
   const handleStoryImageUpload = (id, file) => {
     if (file) {
+      console.log(`Uploading image for story ${id}`);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPageData((prevData) => ({
@@ -202,8 +189,11 @@ function Aboutpage() {
             [id]: { ...prevData.stories[id], imageUrl: e.target.result },
           },
         }));
+        console.log(`Image uploaded for story ${id}`);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.error(`No file provided for story ${id}`);
     }
   };
 
@@ -216,13 +206,13 @@ function Aboutpage() {
         [newId]: { title: "", description: "", href: "#", imageUrl: "" },
       },
     }));
-    storyImageRefs[newId] = React.createRef();
   };
 
   const deleteStory = (id) => {
+    console.log(`Deleting story with id: ${id}`);
     setPageData((prevData) => {
       const { [id]: _, ...rest } = prevData.stories;
-      delete storyImageRefs[id];
+      console.log("Updated stories:", rest);
       return { ...prevData, stories: rest };
     });
   };
@@ -237,7 +227,7 @@ function Aboutpage() {
     }));
   };
 
-  const handleMemberImageUpload = (id, file) => {
+const handleMemberImageUpload = (id, file) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -248,10 +238,13 @@ function Aboutpage() {
             [id]: { ...prevData.members[id], imageUrl: e.target.result },
           },
         }));
+        console.log(`Image uploaded for story ${id}`);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.error(`No file provided for story ${id}`);
     }
-  };
+};
 
   const addMember = () => {
     const newId = `member_${Object.keys(pageData.members).length}`;
@@ -262,15 +255,17 @@ function Aboutpage() {
         [newId]: { name: "", role: "", imageUrl: "" },
       },
     }));
-    memberImageRefs[newId] = React.createRef();
   };
 
   const deleteMember = (id) => {
-    setPageData((prevData) => {
-      const { [id]: _, ...rest } = prevData.members;
-      delete memberImageRefs[id];
-      return { ...prevData, members: rest };
-    });
+    console.log(id);
+    
+    setPageData((prevData) => ({
+      ...prevData,
+      members: Object.fromEntries(
+        Object.entries(prevData.members).filter(([key]) => key !== id)
+      ),
+    }));
   };
 
   const handleActivityChange = (id, field, value) => {
@@ -289,6 +284,7 @@ function Aboutpage() {
 
   const handleActivityImageUpload = (id, field, file) => {
     if (file) {
+      console.log(`Uploading image for activity ${id}, field ${field}`);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPageData((prevData) => ({
@@ -298,8 +294,11 @@ function Aboutpage() {
             [id]: { ...prevData.activityHistory[id], [field]: e.target.result },
           },
         }));
+        console.log(`Image uploaded for activity ${id}, field ${field}`);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.error(`No file provided for activity ${id}, field ${field}`);
     }
   };
 
@@ -312,13 +311,13 @@ function Aboutpage() {
         [newId]: { startDate: "", endDate: "", description: "", imageUrl1: "", imageUrl2: "" },
       },
     }));
-    activityImageRefs[newId] = { imageUrl1: React.createRef(), imageUrl2: React.createRef() };
   };
 
   const deleteActivity = (id) => {
+    console.log(`Deleting activity with id: ${id}`);
     setPageData((prevData) => {
       const { [id]: _, ...rest } = prevData.activityHistory;
-      delete activityImageRefs[id];
+      console.log("Updated activities:", rest);
       return { ...prevData, activityHistory: rest };
     });
   };
@@ -339,6 +338,7 @@ function Aboutpage() {
 
   const handleProjectImageUpload = (id, file) => {
     if (file) {
+      console.log(`Uploading image for project ${id}`);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPageData((prevData) => ({
@@ -348,8 +348,11 @@ function Aboutpage() {
             [id]: { ...prevData.projects[id], imageUrl: e.target.result },
           },
         }));
+        console.log(`Image uploaded for project ${id}`);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.error(`No file provided for project ${id}`);
     }
   };
 
@@ -365,8 +368,10 @@ function Aboutpage() {
   };
 
   const deleteProject = (id) => {
+    console.log(`Deleting project with id: ${id}`);
     setPageData((prevData) => {
       const { [id]: _, ...rest } = prevData.projects;
+      console.log("Updated projects:", rest);
       return { ...prevData, projects: rest };
     });
   };
@@ -380,19 +385,16 @@ function Aboutpage() {
         description={pageData.description}
         handleFieldChange={handleFieldChange}
         handleImageUpload={handleImageUpload}
-        coverInputRef={coverInputRef}
       />
       <MissionSection
         mission={pageData.mission}
         handleNestedFieldChange={handleNestedFieldChange}
         handleNestedImageUpload={handleNestedImageUpload}
-        missionImageRef={missionImageRef}
       />
       <VisionSection
         vision={pageData.vision}
         handleNestedFieldChange={handleNestedFieldChange}
         handleNestedImageUpload={handleNestedImageUpload}
-        visionImageRef={visionImageRef}
       />
       <div>
         <div className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center">
@@ -440,13 +442,6 @@ function Aboutpage() {
                     />
                   </svg>
                 </button>
-                <input
-                  type="file"
-                  ref={storyImageRefs[`story_${key}`]}
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleStoryImageUpload(`story_${key}`, e.target.files[0])}
-                />
               </div>
             ))}
         </ScrollStoryList>
@@ -463,47 +458,21 @@ function Aboutpage() {
             Thêm thành viên
           </button>
         </div>
-        <ScrollMemberList>
+        <ScrollMemberList key={Object.keys(pageData.members).length}>
           {Object.entries(pageData.members)
-            .map(([key, member]) => [key.slice(6), member])
+            .map(([key, member]) => [key.slice(7), member])
             .sort((a, b) => a[0] - b[0])
             .map(([key, member]) => (
-              <div key={`member_${key}`} className="relative">
-                <ScrollMemberListItem
-                  id={`member_${key}`}
-                  imageUrl={member.imageUrl}
-                  name={member.name}
-                  role={member.role}
-                  onChange={handleMemberChange}
-                  onImageUpload={handleMemberImageUpload}
-                />
-                <button
-                  className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-                  onClick={() => deleteMember(`member_${key}`)}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-                <input
-                  type="file"
-                  ref={memberImageRefs[`member_${key}`]}
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleMemberImageUpload(`member_${key}`, e.target.files[0])}
-                />
-              </div>
+              <ScrollMemberListItem
+                key={`member_${key}`}
+                id={`member_${key}`}
+                imageUrl={member.imageUrl}
+                name={member.name}
+                role={member.role}
+                onChange={handleMemberChange}
+                onImageUpload={handleMemberImageUpload}
+                onDelete={deleteMember} // Pass deleteMember as onDelete
+              />
             ))}
         </ScrollMemberList>
       </div>
@@ -534,20 +503,6 @@ function Aboutpage() {
                   description={activity.description}
                   onChange={handleActivityChange}
                   onImageUpload={handleActivityImageUpload}
-                />
-                <input
-                  type="file"
-                  ref={activityImageRefs[`activity_${key}`]?.imageUrl1}
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleActivityImageUpload(`activity_${key}`, "imageUrl1", e.target.files[0])}
-                />
-                <input
-                  type="file"
-                  ref={activityImageRefs[`activity_${key}`]?.imageUrl2}
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleActivityImageUpload(`activity_${key}`, "imageUrl2", e.target.files[0])}
                 />
               </div>
             ))}

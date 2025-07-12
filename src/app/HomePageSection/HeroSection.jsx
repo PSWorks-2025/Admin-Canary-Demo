@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { ImageInput } from "../../components/Inputs/ImageInput";
 
 const HeroSection = ({ backgroundImage, setBackgroundImage, color, setColor }) => {
   const fileInputRef = useRef(null);
@@ -14,10 +15,6 @@ const HeroSection = ({ backgroundImage, setBackgroundImage, color, setColor }) =
     }
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current.click();
-  };
-
   return (
     <div
       className="w-full h-178 bg-cover bg-center relative"
@@ -26,25 +23,20 @@ const HeroSection = ({ backgroundImage, setBackgroundImage, color, setColor }) =
         height: "calc(100vh - 5rem)",
       }}
     >
-      <input
-        type="file"
+      <ImageInput
         ref={fileInputRef}
-        accept="image/*"
-        className="hidden"
-        onChange={handleImageUpload}
+        handleImageUpload={handleImageUpload}
+        // triggerFileInput={fileInputRef.current}
+        section="hero"
+        top="top-4"
+        right="right-4"
       />
-      <button
-        onClick={triggerFileInput}
-        className="absolute top-4 right-4 py-2 px-4 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title z-10"
-      >
-        Upload Image
-      </button>
-      <input
+      {/* <input
         type="color"
         id="colorPicker"
         value={color}
         onChange={(e) => setColor(e.target.value)}
-      />
+      /> */}
     </div>
   );
 };

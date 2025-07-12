@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./styles.css";
+import { ImageInput } from "../Inputs/ImageInput";
+import { TextInput } from "../Inputs/TextInput";
 
 function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -44,37 +46,18 @@ function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageI
                 })`,
               }}
             >
-              <input
+              <TextInput
                 className="w-full text-base font-medium text-white outline-none bg-transparent"
                 value={event.title}
                 onChange={(e) => handleFieldChange(index, "title", e.target.value)}
                 placeholder="Nhập tiêu đề sự kiện"
               />
-              <button
-                className="absolute top-2 left-2 p-2 bg-blue-500 text-white rounded-full cursor-pointer z-10"
-                onClick={() => imageInputRefs[index].current.click()}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-                  />
-                </svg>
-              </button>
-              <input
-                type="file"
-                ref={imageInputRefs[index]}
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleImageUpload(index, e.target.files[0])}
+
+              <ImageInput
+                handleImageUpload={(file) => handleImageUpload(index, file.target.files[0])}
+                top="top-2"
+                left="left-2"
+                section={`event_${index}`}
               />
             </div>
           ))}

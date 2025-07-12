@@ -1,6 +1,7 @@
 import React from "react";
-
-function ProjectOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs }) {
+import { ImageInput } from "../Inputs/ImageInput";
+import { TextInput } from "../Inputs/TextInput";
+function ProjectOverview({ pageData, handleFieldChange, handleImageUpload }) {
   return (
     <section className="px-8 py-8">
       <input
@@ -21,44 +22,25 @@ function ProjectOverview({ pageData, handleFieldChange, handleImageUpload, image
                     index === 2 ? "absolute scale-105 z-10 -top-[60%] left-1/2" : index===4 ?"absolute -top-55":""
                   }`}
                 />
-                <button
-                  className={`absolute ${index==2 ? "-top-[60%] left-1/2" : index==4 ? "-top-53" : "top-2 left-2"} p-2 bg-blue-500 text-white rounded-full cursor-pointer z-[11]`}
-                  onClick={() => imageInputRefs[index].current.click()}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-                    />
-                  </svg>
-                </button>
-                <input
-                  type="file"
-                  ref={imageInputRefs[index]}
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleImageUpload(index, e.target.files[0])}
+                <ImageInput
+                  handleImageUpload={(file) => handleImageUpload(index, file.target.files[0])}
+                  top={index === 2 ? "-top-[60%]" : index === 4 ? "-top-55" : "top-2"}
+                  left={index === 2 ? "left-1/2" : "left-2"}
+                  section={`project_${index}`}
                 />
               </div>
             ))}
           </div>
         </div>
         <div className="w-2/5 ml-10">
-          <input
+          <TextInput
             className="w-full max-w-[400px] text-xl font-semibold text-black outline-none mx-auto mb-2"
             value={pageData.title}
             onChange={(e) => handleFieldChange("title", e.target.value)}
             placeholder="Nhập tiêu đề dự án"
           />
-          <textarea
+          <TextInput
+            type="textarea"
             className="w-full max-w-[400px] text-base text-[#333333] mb-2 outline-none bg-transparent resize-none"
             value={pageData.description}
             onChange={(e) => handleFieldChange("description", e.target.value)}

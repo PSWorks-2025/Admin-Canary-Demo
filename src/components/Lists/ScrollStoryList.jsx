@@ -1,10 +1,11 @@
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
 import { useState, useRef } from "react";
+import { ImageInput } from "../Inputs/ImageInput";
+import { TextInput } from "../Inputs/TextInput";
 import PropTypes from "prop-types";
 
 export function ScrollStoryListItem({ id, imageUrl, title, description, onChange, onImageUpload }) {
-  const fileInputRef = useRef(null);
 
   return (
     <div className="w-88 mr-8 h-full">
@@ -13,46 +14,29 @@ export function ScrollStoryListItem({ id, imageUrl, title, description, onChange
           className="w-full h-60 bg-cover bg-center rounded-sm"
           style={{ backgroundImage: `url("${imageUrl}")` }}
         ></div>
-        <button
-          className="absolute top-2 left-2 p-2 bg-secondary text-secondary-title rounded-full cursor-pointer z-10"
-          onClick={() => fileInputRef.current.click()}
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              stroke-width="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-            />
-          </svg>
-        </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => onImageUpload(id, e.target.files[0])}
+        <ImageInput
+          handleImageUpload={(e) => onImageUpload(id, e.target.files[0])}
+          section="story"
+          top="top-2"
+          left="left-2"
+          // right="right-2"
         />
+  
       </div>
-      <input
+      <TextInput
         className="w-full font-bold text-2xl pt-5 text-primary-title outline-none"
         value={title}
         onChange={(e) => onChange(id, "title", e.target.value)}
         placeholder="Nhập tiêu đề câu chuyện"
       />
-      <textarea
+      <TextInput
+        type="textarea"
         className="w-full text-base/5 py-5 text-primary-paragraph outline-none resize-none"
         value={description}
         onChange={(e) => onChange(id, "description", e.target.value)}
         placeholder="Nhập mô tả câu chuyện"
         rows="4"
-      ></textarea>
+      ></TextInput>
       
       <button className="text-secondary font-semibold block mt-2">
         Đọc thêm

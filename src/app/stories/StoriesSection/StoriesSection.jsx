@@ -1,5 +1,6 @@
 import React from "react";
-
+import { ImageInput } from "../../../components/Inputs/ImageInput";
+import { TextInput } from "../../../components/Inputs/TextInput";
 const StoriesSection = ({
   heading,
   stories,
@@ -8,11 +9,10 @@ const StoriesSection = ({
   handleStoryImageUpload,
   addStory,
   deleteStory,
-  storyImageRefs,
 }) => {
   return (
     <div className="px-4">
-      <input
+      <TextInput
         className="mt-5 text-center font-bold md:text-2xl text-xl ml-5 sm:ml-0 w-full max-w-[600px] mx-auto outline-none bg-transparent"
         value={heading}
         onChange={(e) => handleFieldChange("heading", e.target.value)}
@@ -29,31 +29,11 @@ const StoriesSection = ({
                 alt="Câu chuyện"
                 className="w-full h-full object-cover"
               />
-              <button
-                className="absolute top-2 left-2 p-2 bg-[#e6ebf5] text-white rounded-full cursor-pointer z-10"
-                onClick={() => storyImageRefs[index].current.click()}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-                  />
-                </svg>
-              </button>
-              <input
-                type="file"
-                ref={storyImageRefs[index]}
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleStoryImageUpload(index, e.target.files[0])}
+              <ImageInput
+                handleImageUpload={(file) => handleStoryImageUpload(index, file.target.files[0])}
+                section={`story-${index}`}
+                top="top-2"
+                left="left-2"
               />
               <button
                 className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
@@ -76,13 +56,14 @@ const StoriesSection = ({
               </button>
             </div>
             <div className="text-content text-center max-w-[300px]">
-              <input
+              <TextInput
                 className="text-lg font-semibold text-black outline-none bg-transparent w-full text-center"
                 value={story.title}
                 onChange={(e) => handleStoryFieldChange(index, "title", e.target.value)}
                 placeholder="Nhập tiêu đề câu chuyện"
               />
-              <textarea
+              <TextInput
+                type="textarea"
                 className="text-sm px-3 text-black outline-none bg-transparent resize-none w-full"
                 value={story.description}
                 onChange={(e) => handleStoryFieldChange(index, "description", e.target.value)}
@@ -117,32 +98,13 @@ const StoriesSection = ({
                 alt="Câu chuyện"
                 className="w-full h-full object-cover"
               />
-              <button
-                className="absolute top-2 left-2 p-2 bg-[#e6ebf5] text-white rounded-full cursor-pointer z-10"
-                onClick={() => storyImageRefs[index].current.click()}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-                  />
-                </svg>
-              </button>
-              <input
-                type="file"
-                ref={storyImageRefs[index]}
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleStoryImageUpload(index, e.target.files[0])}
+              <ImageInput
+                handleImageUpload={(file) => handleStoryImageUpload(index, file.target.files[0])}
+                section={`story-${index}`}
+                top="top-2"
+                left="left-2"
               />
+             
               <button
                 className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
                 onClick={() => deleteStory(index)}
@@ -164,13 +126,14 @@ const StoriesSection = ({
               </button>
             </div>
             <div className="text-content max-w-md">
-              <input
+              <TextInput
                 className="text-lg font-semibold text-black outline-none bg-transparent w-full"
                 value={story.title}
                 onChange={(e) => handleStoryFieldChange(index, "title", e.target.value)}
                 placeholder="Nhập tiêu đề câu chuyện"
               />
-              <textarea
+              <TextInput
+                type="textarea"
                 className="text-base text-black outline-none bg-transparent resize-none w-full"
                 value={story.description}
                 onChange={(e) => handleStoryFieldChange(index, "description", e.target.value)}

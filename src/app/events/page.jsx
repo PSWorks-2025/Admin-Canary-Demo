@@ -232,20 +232,17 @@ function Events() {
         backgroundImage={pageData.backgroundImage}
         handleFieldChange={handleFieldChange}
         handleImageUpload={handleImageUpload}
-        imageInputRef={imageInputRef}
       />
       <div className="projects">
         <ProjectOverview
           pageData={pageData.projectOverview}
           handleFieldChange={handleProjectFieldChange}
           handleImageUpload={handleProjectImageUpload}
-          imageInputRefs={projectImageInputRefs}
         />
         <DonateOverview
           pageData={pageData.donateOverview}
           handleFieldChange={handleDonateFieldChange}
           handleImageUpload={handleDonateImageUpload}
-          imageInputRefs={donateImageInputRefs}
         />
         <ProjectLayout
           projects={pageData.projects}
