@@ -1,7 +1,7 @@
 import React from "react";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
-function ProjectOverview({ pageData, handleFieldChange, handleImageUpload }) {
+function ProjectOverview({ pageData, handleFieldChange, handleImageUpload,buttonColor }) {
   return (
     <section className="px-8 py-8">
       <input
@@ -49,7 +49,8 @@ function ProjectOverview({ pageData, handleFieldChange, handleImageUpload }) {
           />
           <br></br>
           <button
-            className="text-white font-medium px-3 py-2 rounded-full bg-[#4160DF] hover:opacity-50 transition-opacity duration-200"
+            className="text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
+            style={{backgroundColor:buttonColor}}
           >
             Tìm hiểu thêm
           </button>

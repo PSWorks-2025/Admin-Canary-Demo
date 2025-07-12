@@ -9,6 +9,7 @@ const StoriesSection = ({
   handleStoryImageUpload,
   addStory,
   deleteStory,
+  buttonColor
 }) => {
   return (
     <div className="px-4">
@@ -71,7 +72,8 @@ const StoriesSection = ({
                 rows="4"
               />
               <button
-                className="text-white font-medium px-3 py-2 rounded-full bg-[#4160DF] hover:opacity-50 transition-opacity duration-200 mt-2"
+                className="text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200 mt-2"
+                style={{backgroundColor:buttonColor}}
               >
                 Đọc thêm
               </button>
@@ -141,7 +143,8 @@ const StoriesSection = ({
                 rows="4"
               />
               <button
-                className="text-white font-medium px-3 py-2 rounded-full bg-[#4160DF] hover:opacity-50 transition-opacity duration-200 mt-2"
+                className="text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200 mt-2"
+                style={{backgroundColor:buttonColor}}
               >
                 Đọc thêm
               </button>

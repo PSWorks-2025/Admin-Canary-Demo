@@ -12,7 +12,7 @@ const HeroSection = ({ title, description, backgroundImage, handleFieldChange, h
     >
       <ImageInput
         handleImageUpload={e => handleImageUpload(e.target.files[0])}
-        top="top-24"
+        top="top-23"
         right="right-2"
         section={"hero"}
       />

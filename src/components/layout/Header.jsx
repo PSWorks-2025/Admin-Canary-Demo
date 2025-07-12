@@ -1,8 +1,11 @@
 import PropTypes from 'prop-types';
 import { useState, useRef } from 'react';
 import logo from '/images/logo.png';
+import { ImageInput } from '../Inputs/ImageInput';
+import { TextInput } from '../Inputs/TextInput';
+import ColorInput from '../Inputs/ColorInput';
 
-function Header({ page }) {
+function Header({ page, setPrimaryBackgroundColor,secondaryBackgroundColor, setSecondaryBackgroundColor, tertiaryBackgroundColor, setTertiaryBackgroundColor }) {
   const [headerData, setHeaderData] = useState({
     backgroundColor: "#ffffff", // Default background color (primary)
     logoUrl: logo,
@@ -45,47 +48,50 @@ function Header({ page }) {
   return (
     <div
       className="w-full h-20 shadow-md shadow-gray-200 text-primary-paragraph"
-      style={{ backgroundColor: headerData.backgroundColor }}
+      style={{ backgroundColor: secondaryBackgroundColor }}
     >
       <div className="relative w-full h-full">
         <div
           className="absolute left-5 sm:left-10 md:left-20 lg:left-36 w-20 h-20 bg-cover bg-center"
           style={{ backgroundImage: `url("${headerData.logoUrl}")` }}
         >
-          <button
-            className="absolute top-0 left-0 pb-1.5 pl-1 pr-1 bg-secondary text-secondary-title rounded-full cursor-pointer z-10"
-            onClick={() => fileInputRef.current.click()}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4 4m0 0l-4 4m4-4H7"
-              />
-            </svg>
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleLogoUpload(e.target.files[0])}
+          <ImageInput
+            handleImageUpload={(e) => handleLogoUpload(e.target.files[0])}
+            section={"logo"}
+            top="-top-0.5"
           />
         </div>
-        <div className="absolute top-2 right-2">
-          <input
-            type="color"
-            value={headerData.backgroundColor}
-            onChange={(e) => handleBackgroundColorChange(e.target.value)}
-            className="w-8 h-8 rounded-full cursor-pointer"
-          />
+        <div className="absolute top-7 right-2 flex items-center justify-center space-x-2">
+          <label className="text-sm">
+            Background color:
+            <ColorInput
+              type="color"
+              value={headerData.backgroundColor}
+              onChange={(e) => {
+                handleBackgroundColorChange(e.target.value);
+                setPrimaryBackgroundColor(e.target.value);
+              }}
+              className="ml-1 w-6 h-6"
+            />
+          </label>
+          <label className="text-sm">
+            Header and button:
+            <ColorInput
+              type="color"
+              value={secondaryBackgroundColor}
+              onChange={(e) => setSecondaryBackgroundColor(e.target.value)}
+              className="ml-1 w-6 h-6"
+            />
+          </label>
+          <label className="text-sm">
+            Footer:
+            <ColorInput
+              type="color"
+              value={tertiaryBackgroundColor}
+              onChange={(e) => setTertiaryBackgroundColor(e.target.value)}
+              className="ml-1 w-6 h-6"
+            />
+          </label>
         </div>
         <div className="flex justify-between items-center h-full px-4">
           <div className="hidden md:block flex-grow">
@@ -146,6 +152,10 @@ function Header({ page }) {
 
 Header.propTypes = {
   page: PropTypes.string,
+  setPrimaryBackgroundColor: PropTypes.func,
+  secondaryBackgroundColor: PropTypes.string,
+  setSecondaryBackgroundColor: PropTypes.func,
+  setTertiaryBackgroundColor: PropTypes.func,
 };
 
 export default Header;

@@ -3,7 +3,7 @@ import React from "react";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 
-function DonateOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs }) {
+function DonateOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs,buttonColor }) {
   return (
     <section className="px-8 py-8">
       <input
@@ -34,7 +34,8 @@ function DonateOverview({ pageData, handleFieldChange, handleImageUpload, imageI
 
           </div>
           <button
-            className="mt-2 text-white font-medium px-3 py-2 rounded-full bg-[#4160DF] hover:opacity-50 transition-opacity duration-200"
+            className="mt-2 text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
+            style={{backgroundColor:buttonColor}}
           >
             Mua ngay
           </button>
@@ -59,7 +60,8 @@ function DonateOverview({ pageData, handleFieldChange, handleImageUpload, imageI
             />
           </div>
           <button
-            className="mt-2 text-white font-medium px-3 py-2 rounded-full bg-[#4160DF] hover:opacity-50 transition-opacity duration-200"
+            className="mt-2 text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
+            style={{backgroundColor:buttonColor}}
           >
             Ủng hộ
           </button>

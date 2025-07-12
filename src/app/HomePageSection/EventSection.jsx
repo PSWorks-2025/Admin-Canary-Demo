@@ -1,6 +1,6 @@
 import React,{ useRef } from "react";
 import { ImageInput } from "../../components/Inputs/ImageInput";
-const EventsSection = ({ events, setEvents, firstSection, setFirstSection }) => {
+const EventsSection = ({ events, setEvents, firstSection, setFirstSection,buttonColor }) => {
   const eventImageRefs = useRef(
     Object.keys(events).reduce((acc, key) => {
       acc[key] = React.createRef();
@@ -90,7 +90,8 @@ const EventsSection = ({ events, setEvents, firstSection, setFirstSection }) => 
                   />
                   <br />
                   <button
-                    className="py-2 px-5 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title mt-2"
+                    className={`py-2 px-5 rounded-full cursor-pointer font-semibold text-secondary-title mt-2`}
+                    style={{ backgroundColor: buttonColor }}
                   >
                     Tìm hiểu thêm
                   </button>

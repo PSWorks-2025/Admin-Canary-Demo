@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState,useContext } from "react";
 import HeroSection from "./StoriesSection/HeroSection";
 import StoriesSection from "./StoriesSection/StoriesSection";
 import "./styles.css";
+import { ColorContext } from "../../layout";
 
 function Story() {
+  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor } = useContext(ColorContext);
   const [pageData, setPageData] = useState({
     heroTitle: "Tên câu chuyện",
     heroDescription:
@@ -92,13 +94,14 @@ function Story() {
   };
 
   return (
-    <>
+    <div style={{ backgroundColor: primaryBackgroundColor }}>
       <HeroSection
         heroTitle={pageData.heroTitle}
         heroDescription={pageData.heroDescription}
         heroImage={pageData.heroImage}
         handleFieldChange={handleFieldChange}
         handleImageUpload={handleImageUpload}
+        buttonColor={secondaryBackgroundColor}
       />
       <StoriesSection
         heading={pageData.heading}
@@ -108,8 +111,9 @@ function Story() {
         handleStoryImageUpload={handleStoryImageUpload}
         addStory={addStory}
         deleteStory={deleteStory}
+        buttonColor={secondaryBackgroundColor}
       />
-    </>
+    </div>
   );
 }
 

@@ -32,6 +32,7 @@ export function ActivityHistoryListItem({
   description,
   onChange,
   onImageUpload,
+  buttonColor
 }) {
   // const image1Ref = useRef(null);
   // const image2Ref = useRef(null);
@@ -82,11 +83,11 @@ export function ActivityHistoryListItem({
               />
             </div>
             <div className="flex items-center py-2">
-              <MdCircle className="w-5 h-5 mr-0.5 text-secondary" />
-              <div className="w-72 h-0.75 rounded-full bg-secondary"></div>
-              <BiSolidRightArrow className="w-3.5 h-3.5 -ml-1 text-secondary" />
-              <MdCircle className="w-5 h-5 mx-0.5 text-secondary" />
-              <div className="w-20 h-0.75 rounded-full bg-secondary"></div>
+              <MdCircle className="w-5 h-5 mr-0.5 " style={{color:buttonColor}} />
+              <div className="w-72 h-0.75 rounded-full" style={{backgroundColor:buttonColor}}></div>
+              <BiSolidRightArrow className="w-3.5 h-3.5 -ml-1" style={{color:buttonColor}} />
+              <MdCircle className="w-5 h-5 mx-0.5" style={{color:buttonColor}} />
+              <div className="w-20 h-0.75 rounded-full" style={{backgroundColor:buttonColor}}></div>
             </div>
             <TextInput
               type="textarea"

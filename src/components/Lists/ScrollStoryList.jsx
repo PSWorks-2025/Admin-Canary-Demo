@@ -5,7 +5,7 @@ import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 import PropTypes from "prop-types";
 
-export function ScrollStoryListItem({ id, imageUrl, title, description, onChange, onImageUpload }) {
+export function ScrollStoryListItem({ id, imageUrl, title, description, onChange, onImageUpload,buttonColor }) {
 
   return (
     <div className="w-88 mr-8 h-full">
@@ -38,7 +38,7 @@ export function ScrollStoryListItem({ id, imageUrl, title, description, onChange
         rows="4"
       ></TextInput>
       
-      <button className="text-secondary font-semibold block mt-2">
+      <button className="font-semibold block mt-2" style={{ color: buttonColor }}>
         Đọc thêm
         <IoIosArrowForward className="inline-block mb-0.5 ml-1" />
       </button>

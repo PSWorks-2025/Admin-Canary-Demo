@@ -19,7 +19,7 @@ export const ImageInput = ({ handleImageUpload, section, top, left, right }) => 
       <button
         onClick={triggerFileInput}
         className={`absolute ${top} ${right} ${left} ${
-          section === "hero" ? "py-2 px-4" : "p-2"
+          section === "hero" ? "py-2 px-4" : section==="logo" ? "p-0" : "p-2"
         } rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title z-10`}
       >
         {section === "hero" ? (

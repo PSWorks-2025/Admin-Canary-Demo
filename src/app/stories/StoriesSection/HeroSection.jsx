@@ -1,7 +1,7 @@
 import React from "react";
 import { ImageInput } from "../../../components/Inputs/ImageInput";
 import { TextInput } from "../../../components/Inputs/TextInput";
-const HeroSection = ({ heroTitle, heroDescription, heroImage, handleFieldChange, handleImageUpload }) => {
+const HeroSection = ({ heroTitle, heroDescription, heroImage, handleFieldChange, handleImageUpload,buttonColor }) => {
   return (
     <div
       className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply hero_section"
@@ -14,8 +14,8 @@ const HeroSection = ({ heroTitle, heroDescription, heroImage, handleFieldChange,
       <ImageInput
         handleImageUpload={(file) => handleImageUpload("heroImage", file.target.files[0])}
         section="hero"
-        top="top-2"
-        left="left-2"
+        top="top-23"
+        right={"right-2"}
       />
       <div className="w-1/2 py-4 absolute bottom-30 left-10">
         <TextInput
@@ -34,7 +34,8 @@ const HeroSection = ({ heroTitle, heroDescription, heroImage, handleFieldChange,
         />
         <br />
         <button
-          className="text-white font-medium px-3 py-2 rounded-full bg-[#4160DF] hover:opacity-50 transition-opacity duration-200 w-30"
+          className="text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200 w-30"
+          style={{backgroundColor:buttonColor}}
         >
           Đọc thêm
         </button>

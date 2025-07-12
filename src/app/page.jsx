@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef,useContext } from "react";
 import HeroSection from "./HomePageSection/HeroSection.jsx";
 import StatsSection from "./HomePageSection/StatsSection.jsx";
 import EventsSection from "./HomePageSection/EventSection.jsx";
@@ -10,8 +10,9 @@ import canary4 from "/images/canary4.jpg";
 import canary5 from "/images/canary5.jpg";
 import canary6 from "/images/canary6.jpg";
 import cover1 from "/images/cover_1.jpg";
-
+import { ColorContext } from "../layout.jsx";
 const HomePage = () => {
+  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor } = useContext(ColorContext);
   const [stats, setStats] = useState({
     stat_0: { title: "Số sự kiện", data: "+99" },
     stat_1: { title: "Số người đã giúp đỡ", data: ">999" },
@@ -83,7 +84,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="w-full pb-10" style={{ backgroundColor: color }}>
+    <div className="w-full pb-10" style={{ backgroundColor: primaryBackgroundColor}}>
       <HeroSection
         backgroundImage={backgroundImage}
         setBackgroundImage={setBackgroundImage}
@@ -103,6 +104,7 @@ const HomePage = () => {
         setEvents={setEvents}
         firstSection={firstSection}
         setFirstSection={setFirstSection}
+        buttonColor={secondaryBackgroundColor}
       />
       <div className="w-full">
         <input
@@ -131,6 +133,7 @@ const HomePage = () => {
                 description={story.description}
                 onChange={handleStoryChange}
                 onImageUpload={handleStoryImageUpload}
+                buttonColor={secondaryBackgroundColor}
               />
             ))}
         </ScrollStoryList>

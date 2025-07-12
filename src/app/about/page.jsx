@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useContext } from "react";
 import HeroSection from "./AboutPageSection/HeroSection.jsx";
 import MissionSection from "./AboutPageSection/MissionSection.jsx";
 import VisionSection from "./AboutPageSection/VisionSection.jsx";
@@ -26,8 +26,10 @@ import canary7 from "/images/canary7.jpg";
 import canary8 from "/images/canary8.jpg";
 import canary9 from "/images/canary9.jpg";
 import canary10 from "/images/canary10.jpg";
+import {ColorContext} from "../../layout"
 
 function Aboutpage() {
+  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor } = useContext(ColorContext);
   const [pageData, setPageData] = useState({
     coverImage: cover,
     backgroundColor: "#ffffff",
@@ -377,7 +379,7 @@ const handleMemberImageUpload = (id, file) => {
   };
 
   return (
-    <div className="w-full" style={{ backgroundColor: pageData.backgroundColor }}>
+    <div className="w-full" style={{ backgroundColor: primaryBackgroundColor }}>
       <HeroSection
         coverImage={pageData.coverImage}
         backgroundColor={pageData.backgroundColor}
@@ -422,6 +424,7 @@ const handleMemberImageUpload = (id, file) => {
                   href={story.href}
                   onChange={handleStoryChange}
                   onImageUpload={handleStoryImageUpload}
+                  buttonColor={secondaryBackgroundColor}
                 />
                 <button
                   className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
@@ -503,6 +506,7 @@ const handleMemberImageUpload = (id, file) => {
                   description={activity.description}
                   onChange={handleActivityChange}
                   onImageUpload={handleActivityImageUpload}
+                  buttonColor={tertiaryBackgroundColor}
                 />
               </div>
             ))}

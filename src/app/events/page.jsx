@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef,useContext } from "react";
 import HeroSection from "./EventsSection/HeroSection";
 import DonateOverview from "../../components/DonateOverview/DonateOverview";
 import ProjectOverview from "../../components/projectOverview/ProjectOverview";
@@ -6,8 +6,10 @@ import ProjectLayout from "../../components/ProjectLayout/ProjectLayout";
 import EventsOverview from "../../components/EventsOverview/EventsOverview";
 import "./styles.css";
 import canary5 from "/images/canary5.jpg";
+import { ColorContext } from "../../layout";
 
 function Events() {
+  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor } = useContext(ColorContext);
   const [pageData, setPageData] = useState({
     title: "Tên sự kiện",
     description:
@@ -225,7 +227,7 @@ function Events() {
   };
 
   return (
-    <>
+    <div style={{ backgroundColor: primaryBackgroundColor }}>
       <HeroSection
         title={pageData.title}
         description={pageData.description}
@@ -238,11 +240,13 @@ function Events() {
           pageData={pageData.projectOverview}
           handleFieldChange={handleProjectFieldChange}
           handleImageUpload={handleProjectImageUpload}
+          buttonColor={secondaryBackgroundColor}
         />
         <DonateOverview
           pageData={pageData.donateOverview}
           handleFieldChange={handleDonateFieldChange}
           handleImageUpload={handleDonateImageUpload}
+          buttonColor={secondaryBackgroundColor}
         />
         <ProjectLayout
           projects={pageData.projects}
@@ -258,7 +262,7 @@ function Events() {
           imageInputRefs={eventsImageInputRefs}
         />
       </div>
-    </>
+    </div>
   );
 }
 
