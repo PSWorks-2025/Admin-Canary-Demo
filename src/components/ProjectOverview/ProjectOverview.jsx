@@ -4,7 +4,7 @@ import { TextInput } from "../Inputs/TextInput";
 function ProjectOverview({ pageData, handleFieldChange, handleImageUpload,buttonColor }) {
   return (
     <section className="px-8 py-8">
-      <input
+      <TextInput
         className="w-full text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-6"
         value={pageData.heading}
         onChange={(e) => handleFieldChange("heading", e.target.value)}

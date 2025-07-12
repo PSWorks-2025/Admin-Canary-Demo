@@ -11,6 +11,7 @@ import canary5 from "/images/canary5.jpg";
 import canary6 from "/images/canary6.jpg";
 import cover1 from "/images/cover_1.jpg";
 import { ColorContext } from "../layout.jsx";
+import { TextInput } from "../components/Inputs/TextInput.jsx";
 const HomePage = () => {
   const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor } = useContext(ColorContext);
   const [stats, setStats] = useState({
@@ -99,6 +100,9 @@ const HomePage = () => {
         secondaryColorStat={secondaryColorStat}
         setSecondaryColorStat={setSecondaryColorStat}
       />
+
+      <div className="border-b-black border-b-3"></div>
+
       <EventsSection
         events={events}
         setEvents={setEvents}
@@ -106,8 +110,11 @@ const HomePage = () => {
         setFirstSection={setFirstSection}
         buttonColor={secondaryBackgroundColor}
       />
+
+      <div className="border-b-black border-b-3"></div>
+
       <div className="w-full">
-        <input
+        <TextInput
           className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
           value={secondSection}
           onChange={(e) => setSecondSection(e.target.value)}

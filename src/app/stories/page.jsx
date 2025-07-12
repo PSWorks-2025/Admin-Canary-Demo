@@ -103,6 +103,8 @@ function Story() {
         handleImageUpload={handleImageUpload}
         buttonColor={secondaryBackgroundColor}
       />
+      <div className="border-b-black border-b-3"></div>
+
       <StoriesSection
         heading={pageData.heading}
         stories={pageData.stories}

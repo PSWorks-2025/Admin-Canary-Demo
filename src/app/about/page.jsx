@@ -388,6 +388,9 @@ const handleMemberImageUpload = (id, file) => {
         handleFieldChange={handleFieldChange}
         handleImageUpload={handleImageUpload}
       />
+
+      <div className="border-b-black border-b-3"></div>
+
       <MissionSection
         mission={pageData.mission}
         handleNestedFieldChange={handleNestedFieldChange}
@@ -398,6 +401,9 @@ const handleMemberImageUpload = (id, file) => {
         handleNestedFieldChange={handleNestedFieldChange}
         handleNestedImageUpload={handleNestedImageUpload}
       />
+
+      <div className="border-b-black border-b-3"></div>
+
       <div>
         <div className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center">
           Các câu chuyện ý nghĩa
@@ -449,6 +455,9 @@ const handleMemberImageUpload = (id, file) => {
             ))}
         </ScrollStoryList>
       </div>
+
+      <div className="border-b-black border-b-3"></div>
+
       <div>
         <div className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center">
           Đội ngũ thành viên
@@ -479,6 +488,8 @@ const handleMemberImageUpload = (id, file) => {
             ))}
         </ScrollMemberList>
       </div>
+      <div className="border-b-black border-b-3"></div>
+
       <div>
         <div className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center">
           Lịch sử hoạt động

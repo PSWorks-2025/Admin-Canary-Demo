@@ -235,6 +235,9 @@ function Events() {
         handleFieldChange={handleFieldChange}
         handleImageUpload={handleImageUpload}
       />
+
+      <div className="border-b-black border-b-3"></div>
+      
       <div className="projects">
         <ProjectOverview
           pageData={pageData.projectOverview}
@@ -242,12 +245,18 @@ function Events() {
           handleImageUpload={handleProjectImageUpload}
           buttonColor={secondaryBackgroundColor}
         />
+
+      <div className="border-b-black border-b-3"></div>
+
+
         <DonateOverview
           pageData={pageData.donateOverview}
           handleFieldChange={handleDonateFieldChange}
           handleImageUpload={handleDonateImageUpload}
           buttonColor={secondaryBackgroundColor}
         />
+      <div className="border-b-black border-b-3"></div>
+
         <ProjectLayout
           projects={pageData.projects}
           onChange={handleProjectChange}
@@ -255,6 +264,8 @@ function Events() {
           addProject={addProject}
           deleteProject={deleteProject}
         />
+      <div className="border-b-black border-b-3"></div>
+
         <EventsOverview
           pageData={pageData.eventsOverview}
           handleFieldChange={handleEventsFieldChange}
