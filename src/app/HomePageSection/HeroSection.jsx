@@ -24,7 +24,6 @@ const HeroSection = ({ backgroundImage, setBackgroundImage, color, setColor }) =
       }}
     >
       <ImageInput
-        ref={fileInputRef}
         handleImageUpload={handleImageUpload}
         // triggerFileInput={fileInputRef.current}
         section="hero"

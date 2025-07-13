@@ -1,9 +1,9 @@
 import { MdCircle } from "react-icons/md";
 import { BiSolidRightArrow } from "react-icons/bi";
 import PropTypes from "prop-types";
-import { useRef } from "react";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
+
 export function ActivityHistoryList({ children }) {
   return (
     <div className="w-full">
@@ -20,11 +20,11 @@ export function ActivityHistoryList({ children }) {
 }
 
 ActivityHistoryList.propTypes = {
-  children: PropTypes.array,
+  children: PropTypes.arrayOf(PropTypes.element).isRequired,
 };
 
 export function ActivityHistoryListItem({
-  id,
+  index,
   startDate,
   endDate,
   imageUrl1,
@@ -32,11 +32,8 @@ export function ActivityHistoryListItem({
   description,
   onChange,
   onImageUpload,
-  buttonColor
+  buttonColor,
 }) {
-  // const image1Ref = useRef(null);
-  // const image2Ref = useRef(null);
-
   return (
     <div className="relative">
       <div className="w-full h-84 mt-12 md:mt-8 flex">
@@ -47,7 +44,7 @@ export function ActivityHistoryListItem({
               style={{ backgroundImage: `url("${imageUrl1}")` }}
             >
               <ImageInput
-                handleImageUpload={(file) => onImageUpload(id, "imageUrl1", file.target.files[0])}
+                handleImageUpload={(file) => onImageUpload("image1", file)}
                 section="activity"
                 top="top-2"
                 left="left-2"
@@ -58,7 +55,7 @@ export function ActivityHistoryListItem({
               style={{ backgroundImage: `url("${imageUrl2}")` }}
             >
               <ImageInput
-                handleImageUpload={(file) => onImageUpload(id, "imageUrl2", file.target.files[0])}
+                handleImageUpload={(file) => onImageUpload("image2", file)}
                 section="activity"
                 top="top-2"
                 right="right-2"
@@ -72,28 +69,28 @@ export function ActivityHistoryListItem({
               <TextInput
                 className="w-1/2 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
                 value={startDate}
-                onChange={(e) => onChange(id, "startDate", e.target.value)}
+                onChange={(e) => onChange("started_time", e.target.value)}
                 placeholder="Nhập ngày bắt đầu"
               />
               <TextInput
                 className="w-1/2 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent text-right"
                 value={endDate}
-                onChange={(e) => onChange(id, "endDate", e.target.value)}
+                onChange={(e) => onChange("ended_time", e.target.value)}
                 placeholder="Nhập ngày kết thúc"
               />
             </div>
             <div className="flex items-center py-2">
-              <MdCircle className="w-5 h-5 mr-0.5 " style={{color:buttonColor}} />
-              <div className="w-72 h-0.75 rounded-full" style={{backgroundColor:buttonColor}}></div>
-              <BiSolidRightArrow className="w-3.5 h-3.5 -ml-1" style={{color:buttonColor}} />
-              <MdCircle className="w-5 h-5 mx-0.5" style={{color:buttonColor}} />
-              <div className="w-20 h-0.75 rounded-full" style={{backgroundColor:buttonColor}}></div>
+              <MdCircle className="w-5 h-5 mr-0.5" style={{ color: buttonColor }} />
+              <div className="w-72 h-0.75 rounded-full" style={{ backgroundColor: buttonColor }}></div>
+              <BiSolidRightArrow className="w-3.5 h-3.5 -ml-1" style={{ color: buttonColor }} />
+              <MdCircle className="w-5 h-5 mx-0.5" style={{ color: buttonColor }} />
+              <div className="w-20 h-0.75 rounded-full" style={{ backgroundColor: buttonColor }}></div>
             </div>
             <TextInput
               type="textarea"
               className="w-136 text-base/5 pt-2 text-primary-paragraph outline-none bg-transparent resize-none"
               value={description}
-              onChange={(e) => onChange(id, "description", e.target.value)}
+              onChange={(e) => onChange("text", e.target.value)}
               placeholder="Nhập mô tả hoạt động"
               rows="4"
             />
@@ -101,8 +98,8 @@ export function ActivityHistoryListItem({
         </div>
       </div>
       <button
-        className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-        onClick={() => onChange(id, "delete", null)}
+        className="absolute top-2 left-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+        onClick={() => onChange("delete", null)}
       >
         <svg
           className="w-5 h-5"
@@ -124,7 +121,7 @@ export function ActivityHistoryListItem({
 }
 
 ActivityHistoryListItem.propTypes = {
-  id: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
   startDate: PropTypes.string.isRequired,
   endDate: PropTypes.string.isRequired,
   imageUrl1: PropTypes.string.isRequired,
@@ -132,4 +129,5 @@ ActivityHistoryListItem.propTypes = {
   description: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onImageUpload: PropTypes.func.isRequired,
+  buttonColor: PropTypes.string.isRequired,
 };

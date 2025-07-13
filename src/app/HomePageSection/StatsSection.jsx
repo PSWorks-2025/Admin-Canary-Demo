@@ -42,12 +42,7 @@ const StatsSection = ({
                 }}
               />
               <div className="relative z-10 w-full flex flex-col items-center justify-center">
-                <input
-                  className="w-full font-medium text-sm md:text-xl py-3 md:py-9 text-center outline-none text-white"
-                  value={stat.title}
-                  onChange={(e) => handleStatChange(`stat_${key}`, "title", e.target.value)}
-                  placeholder="Nhập tiêu đề thống kê"
-                />
+                <h3 className="w-full font-medium text-sm md:text-xl py-3 md:py-9 text-center outline-none text-white">{stat.title}</h3>
                 <input
                   className="w-full font-bold text-2xl md:text-6xl text-white text-center outline-none"
                   value={stat.data}

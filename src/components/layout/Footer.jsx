@@ -1,83 +1,124 @@
-import { useState, useRef } from "react";
-import logo from "/images/logo.png";
+import PropTypes from "prop-types";
+import { useState } from "react";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 
-function Footer({ tertiaryBackgroundColor }) {
+function Footer({ tertiaryBackgroundColor, globalData, setGlobalData }) {
+  console.log(globalData);
+  
   const [footerData, setFooterData] = useState({
-    groupName: "CANARY",
+    groupName: globalData?.groupName || "CANARY",
     description:
+      globalData?.description ||
       "Website CANARY - Nền tảng gây quỹ cộng đồng trực tuyến tiện lợi, tin cậy và minh bạch.",
-    hotline: "0333.456.789",
-    email: "kenlee@gmail.com",
+    hotline: globalData?.hotline || "0333.456.789",
+    email: globalData?.email || "kenlee@gmail.com",
     address:
-      "lô A2 Trần Đăng Ninh, P.Hòa Cường Bắc, Q.Hải Châu, Đà Nẵng",
-    logoUrl: logo,
-    backgroundColor: "#1f2937", // Default background color (secondary)
-    socialLinks: [
-      { id: "link_0", name: "Facebook", url: "https://www.facebook.com" },
-      { id: "link_1", name: "Youtube", url: "https://www.youtube.com" },
-      { id: "link_2", name: "Tiktok", url: "https://www.tiktok.com" },
-    ],
+      globalData?.address || "lô A2 Trần Đăng Ninh, P.Hòa Cường Bắc, Q.Hải Châu, Đà Nẵng",
+    logoUrl: globalData?.logo_footer || "https://i.ibb.co/kVQhWyjz/logo.png",
+    backgroundColor: "#1f2937",
+    social_media: globalData?.social_media
+      ? Object.entries(globalData.social_media).map(([name, url], index) => ({
+          id: `link_${index}`,
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          url,
+        }))
+      : [
+          { id: "link_0", name: "Facebook", url: "https://www.facebook.com" },
+          { id: "link_1", name: "YouTube", url: "https://www.youtube.com" },
+          { id: "link_2", name: "TikTok", url: "https://www.tiktok.com" },
+        ],
   });
-
-  const fileInputRef = useRef(null);
 
   const handleFieldChange = (field, value) => {
     setFooterData((prevData) => ({
       ...prevData,
       [field]: value,
     }));
+    setGlobalData((prevGlobalData) => ({
+      ...prevGlobalData,
+      [field]: value,
+    }));
   };
 
-  const handleLogoUpload = (file) => {
+  const handleLogoUpload = async (file) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
+        const logoUrl = e.target.result;
         setFooterData((prevData) => ({
           ...prevData,
-          logoUrl: e.target.result,
+          logoUrl,
+        }));
+        setGlobalData((prevGlobalData) => ({
+          ...prevGlobalData,
+          logo_footer: logoUrl,
         }));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSocialLinkChange = (id, field, value) => {
+  const handleSocialLinkChange = async (id, field, value) => {
     setFooterData((prevData) => ({
       ...prevData,
-      socialLinks: prevData.socialLinks.map((link) =>
+      social_media: prevData.social_media.map((link) =>
         link.id === id ? { ...link, [field]: value } : link
       ),
+    }));
+    setGlobalData((prevGlobalData) => ({
+      ...prevGlobalData,
+      social_media: footerData.social_media.reduce((acc, link) => ({
+        ...acc,
+        [link.name.toLowerCase()]: link.url,
+      }), {}),
     }));
   };
 
   const addSocialLink = () => {
-    const newId = `link_${footerData.socialLinks.length}`;
+    const newId = `link_${footerData.social_media.length}`;
     setFooterData((prevData) => ({
       ...prevData,
-      socialLinks: [
-        ...prevData.socialLinks,
+      social_media: [
+        ...prevData.social_media,
         { id: newId, name: "", url: "" },
       ],
     }));
-  };
-
-  const deleteSocialLink = (id) => {
-    setFooterData((prevData) => ({
-      ...prevData,
-      socialLinks: prevData.socialLinks.filter((link) => link.id !== id),
+    setGlobalData((prevGlobalData) => ({
+      ...prevGlobalData,
+      social_media: [
+        ...footerData.social_media,
+        { id: newId, name: "", url: "" },
+      ].reduce((acc, link) => ({
+        ...acc,
+        [link.name.toLowerCase()]: link.url,
+      }), {}),
     }));
   };
 
+  const deleteSocialLink = async (id) => {
+    setFooterData((prevData) => ({
+      ...prevData,
+      social_media: prevData.social_media.filter((link) => link.id !== id),
+    }));
+    setGlobalData((prevGlobalData) => ({
+      ...prevGlobalData,
+      social_media: footerData.social_media
+        .filter((link) => link.id !== id)
+        .reduce((acc, link) => ({
+          ...acc,
+          [link.name.toLowerCase()]: link.url,
+        }), {}),
+    }));
+  };
+  
+
   return (
     <div
-      className="w-full px-30 py-8 text-secondary-paragraph"
+      className="w-full px-10 py-8 text-secondary-paragraph"
       style={{ backgroundColor: tertiaryBackgroundColor }}
     >
-      <div className="w-full flex justify-center mb-4">
-       
-      </div>
+      <div className="w-full flex justify-center mb-4"></div>
       <div className="w-full flex">
         <div className="w-1/2 px-10">
           <div className="h-16 flex items-center relative">
@@ -87,11 +128,14 @@ function Footer({ tertiaryBackgroundColor }) {
             ></div>
             <ImageInput
               handleImageUpload={(e) => handleLogoUpload(e.target.files[0])}
-              section={"logo"}
+              section="logo"
               top="-top-0.5"
             />
-            
-            <TextInput className="ml-4 font-bold outline-none" value={footerData.groupName} onChange={e=>handleFieldChange("groupName",e.target.value)} />
+            <TextInput
+              className="ml-4 font-bold outline-none"
+              value={footerData.groupName}
+              onChange={(e) => handleFieldChange("groupName", e.target.value)}
+            />
           </div>
           <TextInput
             type="textarea"
@@ -100,7 +144,7 @@ function Footer({ tertiaryBackgroundColor }) {
             onChange={(e) => handleFieldChange("description", e.target.value)}
             placeholder="Nhập mô tả"
             rows="3"
-          ></TextInput>
+          />
           <TextInput
             className="w-full text-base text-secondary-paragraph outline-none bg-transparent"
             value={footerData.hotline}
@@ -122,8 +166,17 @@ function Footer({ tertiaryBackgroundColor }) {
         </div>
         <div className="w-1/2 px-10 [&>a]:block [&>a]:hover:text-secondary-hover [&>a]:transition">
           <div className="h-16 flex items-center font-bold">Truyền thông</div>
-          {footerData.socialLinks.map((link) => (
+          {footerData.social_media.map((link) => (
             <div key={link.id} className="flex gap-2 mb-2 items-center">
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-secondary-paragraph hover:text-secondary-hover"
+                aria-label={link.name}
+              >
+                <i className={`fab fa-${link.name.toLowerCase()}`} />
+              </a>
               <TextInput
                 className="text-base text-secondary-paragraph outline-none bg-transparent"
                 value={link.name}
@@ -168,5 +221,19 @@ function Footer({ tertiaryBackgroundColor }) {
     </div>
   );
 }
+
+Footer.propTypes = {
+  tertiaryBackgroundColor: PropTypes.string,
+  globalData: PropTypes.shape({
+    groupName: PropTypes.string,
+    description: PropTypes.string,
+    hotline: PropTypes.string,
+    email: PropTypes.string,
+    address: PropTypes.string,
+    logo: PropTypes.string,
+    social_media: PropTypes.object,
+  }),
+  setGlobalData: PropTypes.func,
+};
 
 export default Footer;

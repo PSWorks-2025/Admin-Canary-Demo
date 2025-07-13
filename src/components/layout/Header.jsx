@@ -1,16 +1,36 @@
 import PropTypes from 'prop-types';
-import { useState, useRef } from 'react';
-import logo from '/images/logo.png';
+import { useState } from 'react';
 import { ImageInput } from '../Inputs/ImageInput';
 import { TextInput } from '../Inputs/TextInput';
 import ColorInput from '../Inputs/ColorInput';
 
-function Header({ page, setPrimaryBackgroundColor,secondaryBackgroundColor, setSecondaryBackgroundColor, tertiaryBackgroundColor, setTertiaryBackgroundColor }) {
+function Header({
+  page,
+  setPrimaryBackgroundColor,
+  secondaryBackgroundColor,
+  setSecondaryBackgroundColor,
+  tertiaryBackgroundColor,
+  setTertiaryBackgroundColor,
+  globalData,
+  setGlobalData,
+}) {
   const [headerData, setHeaderData] = useState({
-    backgroundColor: "#ffffff", // Default background color (primary)
-    logoUrl: logo,
+    backgroundColor: globalData?.primaryBackgroundColor || "#ffffff",
+    logoUrl: globalData?.logo || 'https://i.ibb.co/kVQhWyjz/logo.png',
+    social_media: globalData?.social_media
+      ? Object.entries(globalData.social_media).map(([name, url], index) => ({
+          id: `link_${index}`,
+          name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
+          url,
+        }))
+      : [
+          { id: "link_0", name: "Facebook", url: "https://www.facebook.com" },
+          { id: "link_1", name: "YouTube", url: "https://www.youtube.com" },
+          { id: "link_2", name: "TikTok", url: "https://www.tiktok.com" },
+        ],
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const pages = [
     'home.Trang chủ',
     'about.Về Canary',
@@ -19,19 +39,23 @@ function Header({ page, setPrimaryBackgroundColor,secondaryBackgroundColor, setS
     // 'donate.Ủng hộ',
   ];
   const baseName = '/Canary-Charity-Club/';
-  const fileInputRef = useRef(null);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleLogoUpload = (file) => {
+  const handleLogoUpload = async (file) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
+        const logoUrl = e.target.result;
         setHeaderData((prevData) => ({
           ...prevData,
-          logoUrl: e.target.result,
+          logoUrl,
+        }));
+        setGlobalData((prevGlobalData) => ({
+          ...prevGlobalData,
+          logo: logoUrl,
         }));
       };
       reader.readAsDataURL(file);
@@ -42,6 +66,11 @@ function Header({ page, setPrimaryBackgroundColor,secondaryBackgroundColor, setS
     setHeaderData((prevData) => ({
       ...prevData,
       backgroundColor: value,
+    }));
+    setPrimaryBackgroundColor(value);
+    setGlobalData((prevGlobalData) => ({
+      ...prevGlobalData,
+      primaryBackgroundColor: value,
     }));
   };
 
@@ -57,20 +86,19 @@ function Header({ page, setPrimaryBackgroundColor,secondaryBackgroundColor, setS
         >
           <ImageInput
             handleImageUpload={(e) => handleLogoUpload(e.target.files[0])}
-            section={"logo"}
+            section="logo"
             top="-top-0.5"
           />
         </div>
         <div className="absolute top-7 right-2 flex items-center justify-center space-x-2">
+          <div className="flex space-x-2">
+          </div>
           <label className="text-sm">
             Background color:
             <ColorInput
               type="color"
               value={headerData.backgroundColor}
-              onChange={(e) => {
-                handleBackgroundColorChange(e.target.value);
-                setPrimaryBackgroundColor(e.target.value);
-              }}
+              onChange={(e) => handleBackgroundColorChange(e.target.value)}
               className="ml-1 w-6 h-6"
             />
           </label>
@@ -142,6 +170,9 @@ function Header({ page, setPrimaryBackgroundColor,secondaryBackgroundColor, setS
                     </a>
                   </li>
                 ))}
+              <li className="w-full text-center border-t border-gray-300">
+            
+              </li>
             </ul>
           </div>
         )}
@@ -155,7 +186,14 @@ Header.propTypes = {
   setPrimaryBackgroundColor: PropTypes.func,
   secondaryBackgroundColor: PropTypes.string,
   setSecondaryBackgroundColor: PropTypes.func,
+  tertiaryBackgroundColor: PropTypes.string,
   setTertiaryBackgroundColor: PropTypes.func,
+  globalData: PropTypes.shape({
+    logo: PropTypes.string,
+    primaryBackgroundColor: PropTypes.string,
+    social_media: PropTypes.object,
+  }),
+  setGlobalData: PropTypes.func,
 };
 
 export default Header;

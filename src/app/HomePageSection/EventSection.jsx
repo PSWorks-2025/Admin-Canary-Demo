@@ -1,5 +1,6 @@
 import React,{ useRef } from "react";
 import { ImageInput } from "../../components/Inputs/ImageInput";
+import { TextInput } from "../../components/Inputs/TextInput";
 const EventsSection = ({ events, setEvents, firstSection, setFirstSection,buttonColor }) => {
   const eventImageRefs = useRef(
     Object.keys(events).reduce((acc, key) => {
@@ -66,22 +67,21 @@ const EventsSection = ({ events, setEvents, firstSection, setFirstSection,button
                     style={{ backgroundImage: `url("${event.imageUrl}")` }}
                   >
                     <ImageInput
-                      ref={eventImageRefs[eventKey]}
                       handleImageUpload={(e) => handleEventImageUpload(eventKey, e.target.files[0])}
-                      // triggerFileInput={eventImageRefs[eventKey].current}
                       section="event"
                       top="top-2"
                     />
                   </div>
                 </div>
                 <div className="w-1/2 h-full px-4">
-                  <input
+                  <TextInput
                     className="w-full font-bold text-2xl text-primary-title outline-none"
                     value={event.title}
                     onChange={(e) => handleEventChange(eventKey, "title", e.target.value)}
                     placeholder="Nhập tiêu đề sự kiện"
                   />
-                  <textarea
+                  <TextInput
+                    type="textarea"
                     className="w-136 text-base/5 py-6 text-primary-paragraph outline-none resize-none"
                     value={event.description}
                     onChange={(e) => handleEventChange(eventKey, "description", e.target.value)}
