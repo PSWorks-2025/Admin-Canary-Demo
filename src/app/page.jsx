@@ -13,7 +13,6 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 const HomePage = () => {
   const { primaryBackgroundColor, secondaryBackgroundColor, mainData, setMainData } = useContext(ColorContext);
 
-  // State for stat colors
   const [primaryColorStat, setPrimaryColorStat] = useState(mainData.org_stats.primaryColor || "#ffffff");
   const [secondaryColorStat, setSecondaryColorStat] = useState(mainData.org_stats.secondaryColor || "#000000");
 
@@ -48,21 +47,45 @@ const HomePage = () => {
   };
 
   const handleEventsChange = async (key, field, value) => {
-    if ((field === "title" || field === "description") && !value.trim()) return;
-    updateMainData({
-      event_overviews: {
-        ...mainData.event_overviews,
-        [key]: {
-          ...mainData.event_overviews[key],
-          [field === "description" ? "abstract" : field]: value,
-          thumbnail: {
-            ...mainData.event_overviews[key].thumbnail,
-            title: field === "title" ? value : mainData.event_overviews[key].title,
+    console.log("handleEventsChange:", { key, field, value }); // Debug
+    if (field === "delete") {
+      updateMainData({
+        event_overviews: {
+          ...Object.keys(mainData.event_overviews)
+            .filter((k) => k !== key)
+            .reduce((acc, k) => ({ ...acc, [k]: mainData.event_overviews[k] }), {}),
+        },
+      });
+    } else if (field === "newEvent") {
+      updateMainData({
+        event_overviews: {
+          ...mainData.event_overviews,
+          [key]: {
+            title: "",
+            abstract: "",
+            thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
+            started_time: new Date(),
           },
         },
-      },
-    });
-  };
+      });
+    } else if ((field === "title" || field === "description") && !value.trim()) {
+      return;
+    } else {
+      updateMainData({
+        event_overviews: {
+          ...mainData.event_overviews,
+          [key]: {
+            ...mainData.event_overviews[key],
+            [field === "description" ? "abstract" : field]: value,
+            thumbnail: {
+              ...mainData.event_overviews[key].thumbnail,
+              title: field === "title" ? value : mainData.event_overviews[key].title,
+            },
+          },
+        },
+      });
+    }
+  }
 
   const handleEventsImageUpload = async (key, file) => {
     if (file instanceof File || file instanceof Blob) {
@@ -74,9 +97,14 @@ const HomePage = () => {
           event_overviews: {
             ...mainData.event_overviews,
             [key]: {
-              ...mainData.event_overviews[key],
+              ...mainData.event_overviews[key] || {
+                title: "",
+                abstract: "",
+                thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
+                started_time: new Date(),
+              },
               thumbnail: {
-                ...mainData.event_overviews[key].thumbnail,
+                ...mainData.event_overviews[key]?.thumbnail || { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
                 src: downloadUrl,
               },
             },
@@ -100,7 +128,7 @@ const HomePage = () => {
           [field === "description" ? "abstract" : field]: value,
           thumbnail: {
             ...mainData.story_overviews[key].thumbnail,
-            title: field === "title" ? value : mainData.story_overviews[key].title,
+            title: field === "title" ? value : mainData.event_overviews[key]?.title || "",
           },
         },
       },
@@ -141,7 +169,7 @@ const HomePage = () => {
         [newKey]: {
           title: "",
           abstract: "",
-          thumbnail: { src: "", alt: "", caption: "" },
+          thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
           posted_time: new Date(),
         },
       },
