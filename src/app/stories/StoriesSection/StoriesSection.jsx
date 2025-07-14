@@ -37,7 +37,7 @@ const StoriesSection = ({
                 left="left-2"
               />
               <button
-                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+                className="absolute top-2 -right-2/2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
                 onClick={() => deleteStory(index)}
               >
                 <svg

@@ -1,27 +1,28 @@
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
+import React from "react";
 
-export function ScrollMemberListItem({ id, imageUrl, name, role, onChange, onImageUpload, onDelete }) {
-  
+export function ScrollMemberListItem({ index, imageUrl, name, role, onChange, onImageUpload, onDelete }) {
   return (
-    <div className="w-64 mr-8 h-full relative">
+    <div className="w-64 mr-8 h-full relative flex-shrink-0">
       <div className="relative">
         <div
           className="w-full h-64 bg-cover bg-center rounded-sm"
           style={{ backgroundImage: `url("${imageUrl}")` }}
         ></div>
         <ImageInput
-          handleImageUpload={(file) => onImageUpload(id, file.target.files[0])}
+          handleImageUpload={(e) => onImageUpload(e.target.files[0])}
           top="top-2"
           left="left-2"
         />
         <button
           className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-          onClick={() => onDelete(id)}
+          onClick={onDelete}
+          aria-label={`Delete member ${name || "unknown"}`}
         >
           <svg
             className="w-5 h-5"
@@ -42,13 +43,13 @@ export function ScrollMemberListItem({ id, imageUrl, name, role, onChange, onIma
       <TextInput
         className="w-full font-bold text-lg pt-2 text-primary-title text-center outline-none bg-transparent"
         value={name}
-        onChange={(e) => onChange(id, "name", e.target.value)}
+        onChange={(e) => onChange("name", e.target.value)}
         placeholder="Nhập tên thành viên"
       />
       <TextInput
         className="w-full text-base/5 text-primary-paragraph text-center outline-none bg-transparent"
         value={role}
-        onChange={(e) => onChange(id, "role", e.target.value)}
+        onChange={(e) => onChange("role", e.target.value)}
         placeholder="Nhập chức vụ"
       />
     </div>
@@ -56,49 +57,85 @@ export function ScrollMemberListItem({ id, imageUrl, name, role, onChange, onIma
 }
 
 ScrollMemberListItem.propTypes = {
-  id: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
   imageUrl: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   role: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onImageUpload: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired, // Add onDelete to PropTypes
+  onDelete: PropTypes.func.isRequired,
 };
 
 export function ScrollMemberList({ children }) {
-  const numberOfPages = Math.ceil(children.length / 4);
   const [page, setPage] = useState(0);
+  const containerRef = useRef(null);
+  const [itemsPerPage, setItemsPerPage] = useState(4);
+
+  // Dynamically calculate items per page based on screen width
+  useEffect(() => {
+    const updateItemsPerPage = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setItemsPerPage(1); // Mobile: 1 item per page
+      } else if (width < 1024) {
+        setItemsPerPage(2); // Tablet: 2 items per page
+      } else {
+        setItemsPerPage(4); // Desktop: 4 items per page
+      }
+    };
+
+    updateItemsPerPage();
+    window.addEventListener("resize", updateItemsPerPage);
+    return () => window.removeEventListener("resize", updateItemsPerPage);
+  }, []);
+
+  const numberOfPages = Math.ceil(React.Children.count(children) / itemsPerPage);
+
+  const handlePrev = () => setPage((prev) => Math.max(prev - 1, 0));
+  const handleNext = () => setPage((prev) => Math.min(prev + 1, numberOfPages - 1));
 
   return (
     <div className="w-full pt-12 flex justify-center">
-      <div className="w-280 h-88 relative">
+      <div className="w-full max-w-7xl relative px-6">
         <button
-          onClick={() => setPage(Math.max(page - 1, 0))}
-          className="w-11 h-11 absolute -left-6 z-10 top-27 rounded-full bg-primary-darken flex justify-center items-center cursor-pointer"
+          onClick={handlePrev}
+          className={`w-11 h-11 absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-primary-darken flex justify-center items-center cursor-pointer ${
+            page === 0 ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={page === 0}
+          aria-label="Previous members"
         >
           <IoIosArrowBack className="w-5 h-5" />
         </button>
         <button
-          onClick={() => setPage(Math.min(page + 1, numberOfPages - 1))}
-          className="w-11 h-11 absolute -right-6 top-27 z-10 rounded-full bg-primary-darken flex justify-center items-center cursor-pointer"
+          onClick={handleNext}
+          className={`w-11 h-11 absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-primary-darken flex justify-center items-center cursor-pointer ${
+            page >= numberOfPages - 1 ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={page >= numberOfPages - 1}
+          aria-label="Next members"
         >
           <IoIosArrowForward className="w-5 h-5" />
         </button>
-        <div className="w-full h-full overflow-hidden">
+        <div className="w-full overflow-hidden" ref={containerRef}>
           <div
-            className="w-100000 h-full flex transition-all duration-750"
-            style={{ marginLeft: `calc(${-288 * page} * var(--spacing))` }}
+            className="flex transition-transform duration-500"
+            style={{ transform: `translateX(-${page * (100 / itemsPerPage)}%)` }}
           >
-            {children}
+            {React.Children.map(children, (child, index) =>
+              React.cloneElement(child, { index })
+            )}
           </div>
         </div>
-        <div className="absolute bottom-0 w-full flex justify-center">
-          {Array.from(Array(numberOfPages).keys()).map((index) => (
+        <div className="flex justify-center mt-4">
+          {Array.from({ length: numberOfPages }, (_, index) => (
             <MdCircle
               key={`dot_${index}`}
-              className={`w-2.5 h-2.5 mx-0.5
-                ${page === index ? "text-secondary" : "text-primary-darken-2"}
-              `}
+              className={`w-2.5 h-2.5 mx-0.5 cursor-pointer ${
+                page === index ? "text-secondary" : "text-primary-darken-2"
+              }`}
+              onClick={() => setPage(index)}
+              aria-label={`Go to page ${index + 1}`}
             />
           ))}
         </div>
@@ -108,5 +145,5 @@ export function ScrollMemberList({ children }) {
 }
 
 ScrollMemberList.propTypes = {
-  children: PropTypes.array,
+  children: PropTypes.node,
 };
