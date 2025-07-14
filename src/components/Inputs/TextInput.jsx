@@ -3,14 +3,14 @@ export const TextInput = ({ value, onChange, placeholder, className,type="input"
         <>
         {type === "input" ? (
             <input
-            className={`${className} border-1`}
+            className={`${className}`}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
           />
         ):(
             <textarea
-            className={`${className} border-1`}
+            className={`${className}`}
             value={value}
             onChange={onChange}
             placeholder={placeholder}

@@ -70,13 +70,13 @@ export function ActivityHistoryListItem({
                 className="w-1/2 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
                 value={startDate}
                 onChange={(e) => onChange("started_time", e.target.value)}
-                placeholder="Nhập ngày bắt đầu"
+                placeholder="Start date"
               />
               <TextInput
                 className="w-1/2 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent text-right"
                 value={endDate}
                 onChange={(e) => onChange("ended_time", e.target.value)}
-                placeholder="Nhập ngày kết thúc"
+                placeholder="End date"
               />
             </div>
             <div className="flex items-center py-2">
@@ -98,7 +98,7 @@ export function ActivityHistoryListItem({
         </div>
       </div>
       <button
-        className="absolute top-2 left-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+        className="absolute top-2 -right-2/2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
         onClick={() => onChange("delete", null)}
       >
         <svg

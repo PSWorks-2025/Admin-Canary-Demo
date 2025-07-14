@@ -14,7 +14,7 @@ function Story() {
     setMainData((prevMainData) => {
       const newMainData = { ...prevMainData, ...updates };
       try {
-        const docRef = doc(db, "Main pages", "components");
+        const docRef = doc(db, "Main pages", "components ");
         updateDoc(docRef, newMainData);
       } catch (error) {
         console.error("Error updating mainData:", error);
