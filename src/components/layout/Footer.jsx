@@ -135,6 +135,7 @@ function Footer({ tertiaryBackgroundColor, globalData, setGlobalData }) {
               className="ml-4 font-bold outline-none"
               value={footerData.groupName}
               onChange={(e) => handleFieldChange("groupName", e.target.value)}
+              placeholder={"Nhập tên nhóm"}
             />
           </div>
           <TextInput
