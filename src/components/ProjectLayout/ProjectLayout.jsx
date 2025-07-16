@@ -1,8 +1,24 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import PropTypes from "prop-types";
+import { Timestamp } from "firebase/firestore"; // Added import
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
+
 function ProjectLayout({ projects, onChange, onImageUpload, addProject }) {
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  const debouncedOnChange = debounce(onChange, 500);
+
+  const handleChange = (id, field, value) => {
+    debouncedOnChange(id, field, value);
+  };
+
   return (
     <section className="flex flex-col items-center">
       <h2 className="text-2xl font-bold mb-4">
@@ -25,8 +41,11 @@ function ProjectLayout({ projects, onChange, onImageUpload, addProject }) {
               key={`project_${key}`}
               id={`project_${key}`}
               title={project.title}
-              imageUrl={project.imageUrl}
-              onChange={onChange}
+              imageUrl={project.thumbnail?.src || ""}
+              started_time={project.started_time instanceof Timestamp 
+                ? project.started_time.toDate().toISOString().split("T")[0] 
+                : ""}
+              onChange={handleChange}
               onImageUpload={onImageUpload}
             />
           ))}
@@ -42,9 +61,25 @@ ProjectLayout.propTypes = {
   addProject: PropTypes.func.isRequired,
 };
 
-export default ProjectLayout;
+function ProjectListItem({ id, title, imageUrl, started_time, onChange, onImageUpload }) {
+  const [localTitle, setLocalTitle] = useState(title);
+  const [localStartedTime, setLocalStartedTime] = useState(started_time);
 
-function ProjectListItem({ id, title, imageUrl, onChange, onImageUpload }) {
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  const debouncedOnChange = debounce(onChange, 500);
+
+  const handleChange = (field, value) => {
+    if (field === "title") setLocalTitle(value);
+    else if (field === "started_time") setLocalStartedTime(value);
+    debouncedOnChange(id, field, value);
+  };
 
   return (
     <div className="relative h-96 rounded-lg overflow-hidden shadow-md">
@@ -84,9 +119,16 @@ function ProjectListItem({ id, title, imageUrl, onChange, onImageUpload }) {
         </button>
         <TextInput
           className="absolute bottom-0 left-0 p-4 w-full text-white font-semibold outline-none bg-transparent z-10"
-          value={title}
-          onChange={(e) => onChange(id, "title", e.target.value)}
+          value={localTitle}
+          onChange={(e) => handleChange("title", e.target.value)}
           placeholder="Nhập tiêu đề dự án"
+        />
+        <TextInput
+          type="date"
+          className="absolute bottom-10 left-0 p-4 w-full text-white outline-none bg-transparent z-10"
+          value={localStartedTime}
+          onChange={(e) => handleChange("started_time", e.target.value)}
+          placeholder="Chọn ngày bắt đầu"
         />
       </div>
     </div>
@@ -97,6 +139,9 @@ ProjectListItem.propTypes = {
   id: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   imageUrl: PropTypes.string.isRequired,
+  started_time: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onImageUpload: PropTypes.func.isRequired,
 };
+
+export default ProjectLayout;

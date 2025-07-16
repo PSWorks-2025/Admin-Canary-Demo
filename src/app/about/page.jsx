@@ -1,8 +1,9 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import PropTypes from "prop-types";
-import HeroSection from "./AboutPageSection/HeroSection.jsx";
-import MissionSection from "./AboutPageSection/MissionSection.jsx";
-import VisionSection from "./AboutPageSection/VisionSection.jsx";
+import { Timestamp } from "firebase/firestore";
+import HeroSection from "../../components/AboutPageSection/HeroSection";
+import MissionSection from "../../components/AboutPageSection/MissionSection";
+import VisionSection from "../../components/AboutPageSection/VisionSection/index.jsx";
 import {
   ScrollMemberList,
   ScrollMemberListItem,
@@ -19,22 +20,62 @@ import { db, storage } from "../../service/firebaseConfig.jsx";
 function Aboutpage() {
   const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor, mainData, setMainData } = useContext(ColorContext);
 
-  const updateMainData = async (updates) => {
-    setMainData((prevMainData) => {
-      const newMainData = { ...prevMainData, ...updates };
-      try {
-        const docRef = doc(db, "Main pages", "components ");
-        updateDoc(docRef, newMainData);
-      } catch (error) {
-        console.error("Error updating mainData:", error);
+  // Normalize activity_history to ensure Timestamps
+  useEffect(() => {
+    if (mainData.activity_history.some(activity => 
+      (activity.started_time && !(activity.started_time instanceof Timestamp)) ||
+      (activity.ended_time && !(activity.ended_time instanceof Timestamp))
+    )) {
+      const normalizedHistory = mainData.activity_history.map(activity => ({
+        ...activity,
+        started_time: activity.started_time instanceof Date 
+          ? Timestamp.fromDate(activity.started_time) 
+          : activity.started_time || null,
+        ended_time: activity.ended_time instanceof Date 
+          ? Timestamp.fromDate(activity.ended_time) 
+          : activity.ended_time || null,
+      }));
+      updateMainData({ activity_history: normalizedHistory });
+    }
+    console.log("mainData.activity_history:", mainData.activity_history);
+  }, [mainData.activity_history]);
+
+  // Deep merge utility to ensure nested updates
+  const deepMerge = (target, source) => {
+    const output = { ...target };
+    for (const key in source) {
+      if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key]) && !(source[key] instanceof Timestamp) && !(source[key] instanceof Date)) {
+        output[key] = deepMerge(target[key] || {}, source[key]);
+      } else {
+        output[key] = source[key];
       }
-      return newMainData;
-    });
+    }
+    return output;
+  };
+
+  const updateMainData = async (updates) => {
+    try {
+      // Optimistic update: update local state first
+      setMainData((prev) => {
+        const newMainData = deepMerge(prev, updates);
+        console.log("setMainData called with:", newMainData);
+        return newMainData;
+      });
+      // Update Firestore
+      const docRef = doc(db, "Main pages", "components ");
+      const mergedData = deepMerge(mainData, updates);
+      await updateDoc(docRef, mergedData);
+      console.log("Firestore updated successfully:", mergedData);
+    } catch (error) {
+      console.error("Error updating mainData:", error);
+      // Revert state on error
+      setMainData(mainData);
+    }
   };
 
   const handleFieldChange = async (field, value) => {
-    if (!value.trim() && field !== "backgroundColor") return;
-    updateMainData({
+    console.log("handleFieldChange:", { field, value });
+    await updateMainData({
       hero_sections: {
         ...mainData.hero_sections,
         about: { ...mainData.hero_sections.about, [field]: value },
@@ -48,7 +89,7 @@ function Aboutpage() {
         const storageRef = ref(storage, `about/hero_sections/about/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateMainData({
           hero_sections: {
             ...mainData.hero_sections,
             about: { ...mainData.hero_sections.about, [field]: downloadUrl },
@@ -63,8 +104,8 @@ function Aboutpage() {
   };
 
   const handleNestedFieldChange = async (section, field, value) => {
-    if (!value.trim()) return;
-    updateMainData({
+    console.log("handleNestedFieldChange:", { section, field, value });
+    await updateMainData({
       statements: {
         ...mainData.statements,
         [section]: { ...mainData.statements[section], [field]: value },
@@ -78,7 +119,7 @@ function Aboutpage() {
         const storageRef = ref(storage, `about/statements/${section}/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateMainData({
           statements: {
             ...mainData.statements,
             [section]: { ...mainData.statements[section], [field]: downloadUrl },
@@ -93,8 +134,8 @@ function Aboutpage() {
   };
 
   const handleMemberChange = async (index, field, value) => {
-    if (!value.trim()) return;
-    updateMainData({
+    console.log("handleMemberChange:", { index, field, value });
+    await updateMainData({
       members: mainData.members.map((member, i) =>
         i === index ? { ...member, [field]: value } : member
       ),
@@ -107,7 +148,7 @@ function Aboutpage() {
         const storageRef = ref(storage, `about/members/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateMainData({
           members: mainData.members.map((member, i) =>
             i === index ? { ...member, image: downloadUrl } : member
           ),
@@ -121,33 +162,39 @@ function Aboutpage() {
   };
 
   const addMember = async () => {
-    updateMainData({
+    await updateMainData({
       members: [...mainData.members, { name: "", role: "", image: "" }],
     });
   };
 
   const deleteMember = async (index) => {
-    updateMainData({
+    await updateMainData({
       members: mainData.members.filter((_, i) => i !== index),
     });
   };
 
   const handleActivityChange = async (index, field, value) => {
+    console.log("handleActivityChange:", { index, field, value });
     if (field === "delete") {
-      deleteActivity(index);
-    } else if (!value.trim() && field !== "started_time" && field !== "ended_time") {
-      return;
+      await deleteActivity(index);
     } else {
-      updateMainData({
+      const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
+      const dateValue =
+        (field === "started_time" || field === "ended_time") && value
+          ? isValidDate(value)
+            ? Timestamp.fromDate(new Date(value))
+            : null
+          : value;
+      await updateMainData({
         activity_history: mainData.activity_history.map((activity, i) =>
           i === index
-            ? {
-                ...activity,
-                [field]: field === "started_time" || field === "ended_time" ? new Date(value) : value,
-              }
+            ? { ...activity, [field]: dateValue }
             : activity
         ),
       });
+      if ((field === "started_time" || field === "ended_time") && value && !isValidDate(value)) {
+        console.warn(`Invalid date format for ${field}: ${value}`);
+      }
     }
   };
 
@@ -157,7 +204,7 @@ function Aboutpage() {
         const storageRef = ref(storage, `about/activity_history/${field}/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateMainData({
           activity_history: mainData.activity_history.map((activity, i) =>
             i === index ? { ...activity, [field]: downloadUrl } : activity
           ),
@@ -171,12 +218,12 @@ function Aboutpage() {
   };
 
   const addActivity = async () => {
-    updateMainData({
+    await updateMainData({
       activity_history: [
         ...mainData.activity_history,
         {
-          started_time: new Date(),
-          ended_time: new Date(),
+          started_time: null,
+          ended_time: null,
           text: "",
           image1: "",
           image2: "",
@@ -186,7 +233,7 @@ function Aboutpage() {
   };
 
   const deleteActivity = async (index) => {
-    updateMainData({
+    await updateMainData({
       activity_history: mainData.activity_history.filter((_, i) => i !== index),
     });
   };
@@ -279,8 +326,16 @@ function Aboutpage() {
             <div key={`activity_${index}`} className="relative w-full max-w-[20rem] mx-auto">
               <ActivityHistoryListItem
                 index={index}
-                startDate={activity.started_time?.toDate ? activity.started_time.toDate().toISOString().split("T")[0] : ""}
-                endDate={activity.ended_time?.toDate ? activity.ended_time.toDate().toISOString().split("T")[0] : ""}
+                startDate={
+                  activity.started_time && activity.started_time.toDate && !isNaN(activity.started_time.toDate().getTime())
+                    ? activity.started_time.toDate().toISOString().split("T")[0]
+                    : ""
+                }
+                endDate={
+                  activity.ended_time && activity.ended_time.toDate && !isNaN(activity.ended_time.toDate().getTime())
+                    ? activity.ended_time.toDate().toISOString().split("T")[0]
+                    : ""
+                }
                 imageUrl1={activity.image1}
                 imageUrl2={activity.image2}
                 description={activity.text}

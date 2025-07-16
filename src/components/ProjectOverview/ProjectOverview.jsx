@@ -1,13 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
-function ProjectOverview({ pageData, handleFieldChange, handleImageUpload,buttonColor }) {
+
+function ProjectOverview({ pageData, handleFieldChange, handleImageUpload, buttonColor }) {
+  const [localHeading, setLocalHeading] = useState(pageData.heading);
+  const [localTitle, setLocalTitle] = useState(pageData.title);
+  const [localDescription, setLocalDescription] = useState(pageData.description);
+
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  const debouncedHandleFieldChange = debounce(handleFieldChange, 500);
+
+  const handleChange = (field, value) => {
+    if (field === "heading") setLocalHeading(value);
+    else if (field === "title") setLocalTitle(value);
+    else setLocalDescription(value);
+    debouncedHandleFieldChange(field, value);
+  };
+
   return (
     <section className="px-8 py-8">
       <TextInput
         className="w-full text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-6"
-        value={pageData.heading}
-        onChange={(e) => handleFieldChange("heading", e.target.value)}
+        value={localHeading}
+        onChange={(e) => handleChange("heading", e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
       <div className="flex flex-row justify-center gap-10">
@@ -19,7 +41,7 @@ function ProjectOverview({ pageData, handleFieldChange, handleImageUpload,button
                   src={image || "https://via.placeholder.com/150"}
                   alt={`Image ${index + 1}`}
                   className={`w-full h-[200px] object-cover rounded-xl shadow-md ${
-                    index === 2 ? "absolute scale-105 z-10 -top-[60%] left-1/2" : index===4 ?"absolute -top-55":""
+                    index === 2 ? "absolute scale-105 z-10 -top-[60%] left-1/2" : index === 4 ? "absolute -top-55" : ""
                   }`}
                 />
                 <ImageInput
@@ -35,22 +57,22 @@ function ProjectOverview({ pageData, handleFieldChange, handleImageUpload,button
         <div className="w-2/5 ml-10">
           <TextInput
             className="w-full max-w-[400px] text-xl font-semibold text-black outline-none mx-auto mb-2"
-            value={pageData.title}
-            onChange={(e) => handleFieldChange("title", e.target.value)}
+            value={localTitle}
+            onChange={(e) => handleChange("title", e.target.value)}
             placeholder="Nhập tiêu đề dự án"
           />
           <TextInput
             type="textarea"
             className="w-full max-w-[400px] text-base text-[#333333] mb-2 outline-none bg-transparent resize-none"
-            value={pageData.description}
-            onChange={(e) => handleFieldChange("description", e.target.value)}
+            value={localDescription}
+            onChange={(e) => handleChange("description", e.target.value)}
             placeholder="Nhập mô tả dự án"
             rows="5"
           />
-          <br></br>
+          <br />
           <button
             className="text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
-            style={{backgroundColor:buttonColor}}
+            style={{ backgroundColor: buttonColor }}
           >
             Tìm hiểu thêm
           </button>

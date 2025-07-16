@@ -36,7 +36,7 @@ function Header({
     'about.Về Canary',
     'events.Sự kiện',
     'stories.Câu chuyện',
-    // 'donate.Ủng hộ',
+    'donate.Ủng hộ',
   ];
   const baseName = '/Canary-Charity-Club/';
 

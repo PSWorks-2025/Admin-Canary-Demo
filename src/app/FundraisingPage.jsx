@@ -54,11 +54,11 @@ const FundraisingPage = ({
       <DonorList donors={donors} />
 
       {/* Transactions Table */}
-      <TransactionsTable
+      {/* <TransactionsTable
         totalCollected={totalCollected}
         totalSpent={totalSpent}
         transactions={transactions}
-      />
+      /> */}
     </div>
   );
 };

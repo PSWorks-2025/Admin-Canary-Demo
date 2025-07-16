@@ -5,6 +5,32 @@ import { TextInput } from "../Inputs/TextInput";
 
 function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [localHeading, setLocalHeading] = useState(pageData.heading);
+  const [localTitles, setLocalTitles] = useState(pageData.events.map(event => event.title));
+
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  const debouncedHandleFieldChange = debounce(handleFieldChange, 500);
+
+  const handleChange = (index, field, value) => {
+    if (field === "heading") {
+      setLocalHeading(value);
+      debouncedHandleFieldChange(field, value);
+    } else {
+      setLocalTitles(prev => {
+        const newTitles = [...prev];
+        newTitles[index] = value;
+        return newTitles;
+      });
+      debouncedHandleFieldChange(index, field, value);
+    }
+  };
 
   const nextImage = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % pageData.events.length);
@@ -22,10 +48,10 @@ function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageI
 
   return (
     <section className="px-8 py-8">
-      <input
+      <TextInput
         className="w-full text-2xl font-bold text-black outline-none bg-transparent text-center mb-4"
-        value={pageData.heading}
-        onChange={(e) => handleFieldChange("heading", e.target.value)}
+        value={localHeading}
+        onChange={(e) => handleChange("heading", e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
       <div className="flex items-center justify-between w-2/3 mx-auto mb-10">
@@ -48,11 +74,10 @@ function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageI
             >
               <TextInput
                 className="w-full text-base font-medium text-white outline-none bg-transparent"
-                value={event.title}
-                onChange={(e) => handleFieldChange(index, "title", e.target.value)}
+                value={localTitles[index] || ""}
+                onChange={(e) => handleChange(index, "title", e.target.value)}
                 placeholder="Nhập tiêu đề sự kiện"
               />
-
               <ImageInput
                 handleImageUpload={(file) => handleImageUpload(index, file.target.files[0])}
                 top="top-2"
@@ -73,4 +98,4 @@ function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageI
   );
 }
 
-export default EventsOverview;  
+export default EventsOverview;

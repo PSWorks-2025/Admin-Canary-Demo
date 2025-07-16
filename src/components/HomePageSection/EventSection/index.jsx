@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
-import { ImageInput } from "../../components/Inputs/ImageInput";
-import { TextInput } from "../../components/Inputs/TextInput";
+import { ImageInput } from "../../Inputs/ImageInput";
+import { TextInput } from "../../Inputs/TextInput";
 
 const EventsSection = ({ events, setEvents, firstSection, setFirstSection, buttonColor, onImageUpload }) => {
   const eventImageRefs = useRef({});

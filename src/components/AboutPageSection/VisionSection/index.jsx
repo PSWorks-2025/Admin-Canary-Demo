@@ -1,6 +1,6 @@
 import { useRef } from "react";
-import { ImageInput } from "../../../components/Inputs/ImageInput";
-import { TextInput } from "../../../components/Inputs/TextInput";
+import { ImageInput } from "../../Inputs/ImageInput";
+import { TextInput } from "../../Inputs/TextInput";
 const VisionSection = ({ vision, handleNestedFieldChange, handleNestedImageUpload}) => {
   return (
     <div className="w-full pt-20 flex flex-row-reverse">

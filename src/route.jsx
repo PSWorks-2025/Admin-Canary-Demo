@@ -66,6 +66,14 @@ createRoot(root).render(
           </Layout>
         }
       />
+
+      <Route
+      path='/donate'
+      element={
+        <Layout page={"donate"}>
+          <FundraisingPage campaignTitle={mockData.campaignTitle} campaignDescription={mockData.campaignDescription} imageUrl={mockData.imageUrl} fundraiserName={mockData.fundraiserName} amountRaised={mockData.amountRaised} goalAmount={mockData.goalAmount} qrCodeUrl={mockData.qrCodeUrl} donors={mockData.donors} totalCollected={mockData.totalCollected} totalSpent={mockData.totalSpent} transactions={mockData.transactions}  />
+        </Layout>
+      }/>
     </Routes>
   </HashRouter>
 );

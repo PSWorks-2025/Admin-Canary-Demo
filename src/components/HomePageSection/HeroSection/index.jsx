@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { ImageInput } from "../../components/Inputs/ImageInput";
+import { ImageInput } from "../../Inputs/ImageInput";
 
 const HeroSection = ({ backgroundImage, setBackgroundImage, color, setColor }) => {
   const fileInputRef = useRef(null);

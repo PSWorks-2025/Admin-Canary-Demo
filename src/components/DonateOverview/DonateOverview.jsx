@@ -1,15 +1,35 @@
-import React from "react";
-// import "./styles.css";
+import React, { useState } from "react";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 
-function DonateOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs,buttonColor }) {
+function DonateOverview({ pageData, handleFieldChange, handleImageUpload, buttonColor }) {
+  const [localHeading, setLocalHeading] = useState(pageData.heading);
+  const [localTitle1, setLocalTitle1] = useState(pageData.title1);
+  const [localTitle2, setLocalTitle2] = useState(pageData.title2);
+
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  const debouncedHandleFieldChange = debounce(handleFieldChange, 500);
+
+  const handleChange = (field, value) => {
+    if (field === "heading") setLocalHeading(value);
+    else if (field === "title1") setLocalTitle1(value);
+    else setLocalTitle2(value);
+    debouncedHandleFieldChange(field, value);
+  };
+
   return (
     <section className="px-8 py-8">
       <TextInput
         className="w-full text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-6"
-        value={pageData.heading}
-        onChange={(e) => handleFieldChange("heading", e.target.value)}
+        value={localHeading}
+        onChange={(e) => handleChange("heading", e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
       <div className="flex flex-row justify-center items-center gap-10 text-center">
@@ -20,22 +40,20 @@ function DonateOverview({ pageData, handleFieldChange, handleImageUpload, imageI
           >
             <TextInput
               className="text-base font-semibold text-white outline-none bg-transparent"
-              value={pageData.title1}
-              onChange={(e) => handleFieldChange("title1", e.target.value)}
+              value={localTitle1}
+              onChange={(e) => handleChange("title1", e.target.value)}
               placeholder="Nhập tiêu đề"
             />
-
             <ImageInput
               handleImageUpload={(file) => handleImageUpload(0, file.target.files[0])}
               top="top-2"
               left="left-2"
               section="donate_0"
             />
-
           </div>
           <button
             className="mt-2 text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
-            style={{backgroundColor:buttonColor}}
+            style={{ backgroundColor: buttonColor }}
           >
             Mua ngay
           </button>
@@ -47,11 +65,10 @@ function DonateOverview({ pageData, handleFieldChange, handleImageUpload, imageI
           >
             <TextInput
               className="text-base font-semibold text-white outline-none bg-transparent"
-              value={pageData.title2}
-              onChange={(e) => handleFieldChange("title2", e.target.value)}
+              value={localTitle2}
+              onChange={(e) => handleChange("title2", e.target.value)}
               placeholder="Nhập tiêu đề"
             />
-
             <ImageInput
               handleImageUpload={(file) => handleImageUpload(1, file.target.files[0])}
               top="top-2"
@@ -61,7 +78,7 @@ function DonateOverview({ pageData, handleFieldChange, handleImageUpload, imageI
           </div>
           <button
             className="mt-2 text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
-            style={{backgroundColor:buttonColor}}
+            style={{ backgroundColor: buttonColor }}
           >
             Ủng hộ
           </button>

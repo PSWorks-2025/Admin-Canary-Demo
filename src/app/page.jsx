@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
-import { useState, useContext } from "react";
-import HeroSection from "./HomePageSection/HeroSection.jsx";
-import StatsSection from "./HomePageSection/StatsSection.jsx";
-import EventsSection from "./HomePageSection/EventSection.jsx";
+import { useState, useContext, useEffect } from "react";
+import HeroSection from "../components/HomePageSection/HeroSection";
+import StatsSection from "../components/HomePageSection/StatsSection";
+import EventsSection from "../components/HomePageSection/EventSection";
 import { ScrollStoryList, ScrollStoryListItem } from "../components/Lists/ScrollStoryList.jsx";
 import { ColorContext } from "../layout.jsx";
 import { TextInput } from "../components/Inputs/TextInput.jsx";
@@ -15,41 +15,61 @@ const HomePage = () => {
 
   const [primaryColorStat, setPrimaryColorStat] = useState(mainData.org_stats.primaryColor || "#ffffff");
   const [secondaryColorStat, setSecondaryColorStat] = useState(mainData.org_stats.secondaryColor || "#000000");
+  const [storiesTitle, setStoriesTitle] = useState(mainData.hero_sections.stories.title || "");
+
+  useEffect(() => {
+    console.log("mainData.org_stats:", mainData.org_stats);
+    console.log("stats array:", [
+      { title: "Số sự kiện", data: String(mainData.org_stats.num_events ?? "") },
+      { title: "Số người đã giúp đỡ", data: String(mainData.org_stats.num_people_helped ?? "") },
+      { title: "Số tiền quyên góp", data: String(mainData.org_stats.total_money_donated ?? "") },
+      { title: "Số dự án đã làm", data: String(mainData.org_stats.num_projects ?? "") },
+    ]);
+  }, [mainData.org_stats]);
 
   const updateMainData = async (updates) => {
-    setMainData((prevMainData) => {
-      const newMainData = { ...prevMainData, ...updates };
-      try {
-        const docRef = doc(db, "Main pages", "components ");
-        updateDoc(docRef, newMainData);
-      } catch (error) {
-        console.error("Error updating mainData:", error);
-      }
-      return newMainData;
-    });
+    try {
+      const newMainData = { ...mainData, ...updates };
+      setMainData(newMainData);
+      const docRef = doc(db, "Main pages", "components");
+      await updateDoc(docRef, newMainData);
+      console.log("Firestore updated successfully:", newMainData.org_stats);
+    } catch (error) {
+      console.error("Error updating mainData:", error);
+    }
   };
 
   const handleStatsChange = async (key, value) => {
-    if (!value.trim()) return;
-    const numericValue = Number(value.replace(/\D/g, "")) || 0;
+    console.log("handleStatsChange:", { key, value, type: typeof value });
+    let numericValue;
+    if (value === undefined || value === null || value === "") {
+      numericValue = "";
+    } else {
+      numericValue = Number(String(value).replace(/\D/g, "")) || 0;
+    }
     const fieldMap = {
       stat_0: "num_events",
       stat_1: "num_people_helped",
       stat_2: "total_money_donated",
       stat_3: "num_projects",
     };
-    updateMainData({
+    const field = fieldMap[key];
+    if (!field) {
+      console.error("Invalid stats key:", key);
+      return;
+    }
+    await updateMainData({
       org_stats: {
         ...mainData.org_stats,
-        [fieldMap[key]]: numericValue,
+        [field]: numericValue,
       },
     });
   };
 
   const handleEventsChange = async (key, field, value) => {
-    console.log("handleEventsChange:", { key, field, value }); // Debug
+    console.log("handleEventsChange:", { key, field, value });
     if (field === "delete") {
-      updateMainData({
+      await updateMainData({
         event_overviews: {
           ...Object.keys(mainData.event_overviews)
             .filter((k) => k !== key)
@@ -57,7 +77,7 @@ const HomePage = () => {
         },
       });
     } else if (field === "newEvent") {
-      updateMainData({
+      await updateMainData({
         event_overviews: {
           ...mainData.event_overviews,
           [key]: {
@@ -68,10 +88,8 @@ const HomePage = () => {
           },
         },
       });
-    } else if ((field === "title" || field === "description") && !value.trim()) {
-      return;
     } else {
-      updateMainData({
+      await updateMainData({
         event_overviews: {
           ...mainData.event_overviews,
           [key]: {
@@ -85,7 +103,7 @@ const HomePage = () => {
         },
       });
     }
-  }
+  };
 
   const handleEventsImageUpload = async (key, file) => {
     if (file instanceof File || file instanceof Blob) {
@@ -93,7 +111,7 @@ const HomePage = () => {
         const storageRef = ref(storage, `events/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateMainData({
           event_overviews: {
             ...mainData.event_overviews,
             [key]: {
@@ -119,8 +137,7 @@ const HomePage = () => {
   };
 
   const handleStoryChange = async (key, field, value) => {
-    if ((field === "title" || field === "description") && !value.trim()) return;
-    updateMainData({
+    await updateMainData({
       story_overviews: {
         ...mainData.story_overviews,
         [key]: {
@@ -128,7 +145,7 @@ const HomePage = () => {
           [field === "description" ? "abstract" : field]: value,
           thumbnail: {
             ...mainData.story_overviews[key].thumbnail,
-            title: field === "title" ? value : mainData.event_overviews[key]?.title || "",
+            title: field === "title" ? value : mainData.story_overviews[key]?.title || "",
           },
         },
       },
@@ -141,7 +158,7 @@ const HomePage = () => {
         const storageRef = ref(storage, `stories/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateMainData({
           story_overviews: {
             ...mainData.story_overviews,
             [key]: {
@@ -163,7 +180,7 @@ const HomePage = () => {
 
   const addStory = async () => {
     const newKey = `Câu Chuyện_${Object.keys(mainData.story_overviews).length}_${new Date().toISOString()}`;
-    updateMainData({
+    await updateMainData({
       story_overviews: {
         ...mainData.story_overviews,
         [newKey]: {
@@ -182,7 +199,7 @@ const HomePage = () => {
         const storageRef = ref(storage, `hero/home/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateMainData({
           hero_sections: {
             ...mainData.hero_sections,
             home: { ...mainData.hero_sections.home, image: downloadUrl },
@@ -198,21 +215,20 @@ const HomePage = () => {
 
   const handlePrimaryColorStatChange = async (value) => {
     setPrimaryColorStat(value);
-    updateMainData({
+    await updateMainData({
       org_stats: { ...mainData.org_stats, primaryColor: value },
     });
   };
 
   const handleSecondaryColorStatChange = async (value) => {
     setSecondaryColorStat(value);
-    updateMainData({
+    await updateMainData({
       org_stats: { ...mainData.org_stats, secondaryColor: value },
     });
   };
 
   const handleFirstSectionChange = async (value) => {
-    if (!value.trim()) return;
-    updateMainData({
+    await updateMainData({
       hero_sections: {
         ...mainData.hero_sections,
         events: { ...mainData.hero_sections.events, title: value },
@@ -220,22 +236,30 @@ const HomePage = () => {
     });
   };
 
-  const handleSecondSectionChange = async (value) => {
-    if (!value.trim()) return;
-    updateMainData({
-      hero_sections: {
-        ...mainData.hero_sections,
-        stories: { ...mainData.hero_sections.stories, title: value },
-      },
-    });
+  const handleSecondSectionChange = (value) => {
+    console.log("handleSecondSectionChange:", { value });
+    setStoriesTitle(value);
   };
 
-  // Structure stats with fixed titles, only data editable
+  const handleStoriesTitleBlur = async () => {
+    console.log("handleStoriesTitleBlur:", { storiesTitle });
+    try {
+      await updateMainData({
+        hero_sections: {
+          ...mainData.hero_sections,
+          stories: { ...mainData.hero_sections.stories, title: storiesTitle },
+        },
+      });
+    } catch (error) {
+      console.error("Error updating stories title in Firebase:", error);
+    }
+  };
+
   const stats = [
-    { title: "Số sự kiện", data: String(mainData.org_stats.num_events) },
-    { title: "Số người đã giúp đỡ", data: String(mainData.org_stats.num_people_helped) },
-    { title: "Số tiền quyên góp", data: String(mainData.org_stats.total_money_donated) },
-    { title: "Số dự án đã làm", data: String(mainData.org_stats.num_projects) },
+    { title: "Số sự kiện", data: String(mainData.org_stats.num_events ?? "") },
+    { title: "Số người đã giúp đỡ", data: String(mainData.org_stats.num_people_helped ?? "") },
+    { title: "Số tiền quyên góp", data: String(mainData.org_stats.total_money_donated ?? "") },
+    { title: "Số dự án đã làm", data: String(mainData.org_stats.num_projects ?? "") },
   ];
 
   return (
@@ -265,8 +289,9 @@ const HomePage = () => {
       <div className="w-full">
         <TextInput
           className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
-          value={mainData.hero_sections.stories.title}
+          value={storiesTitle}
           onChange={(e) => handleSecondSectionChange(e.target.value)}
+          onBlur={handleStoriesTitleBlur}
         />
         <div className="w-full flex justify-center mb-8">
           <button

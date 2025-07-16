@@ -34,6 +34,8 @@ export function ActivityHistoryListItem({
   onImageUpload,
   buttonColor,
 }) {
+  console.log("ActivityHistoryListItem startDate:", startDate, "endDate:", endDate);
+
   return (
     <div className="relative">
       <div className="w-full h-84 mt-12 md:mt-8 flex">
@@ -67,14 +69,16 @@ export function ActivityHistoryListItem({
           <div className="w-136 h-full">
             <div className="w-83 flex justify-between text-[1.6rem] font-bold text-primary-title">
               <TextInput
-                className="w-1/2 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
-                value={startDate}
+                className="w-50 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
+                value={startDate || ""}
+                type="date"
                 onChange={(e) => onChange("started_time", e.target.value)}
                 placeholder="Start date"
               />
               <TextInput
-                className="w-1/2 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent text-right"
-                value={endDate}
+                className="w-50 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
+                value={endDate || ""}
+                type="date"
                 onChange={(e) => onChange("ended_time", e.target.value)}
                 placeholder="End date"
               />
@@ -122,8 +126,8 @@ export function ActivityHistoryListItem({
 
 ActivityHistoryListItem.propTypes = {
   index: PropTypes.number.isRequired,
-  startDate: PropTypes.string.isRequired,
-  endDate: PropTypes.string.isRequired,
+  startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
   imageUrl1: PropTypes.string.isRequired,
   imageUrl2: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,

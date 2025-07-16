@@ -1,5 +1,6 @@
-import React, { useRef, useContext } from "react";
-import HeroSection from "./EventsSection/HeroSection";
+import React, { useRef, useContext, useEffect, useCallback } from "react";
+import { Timestamp } from "firebase/firestore";
+import HeroSection from "../../components/EventsSection/HeroSection/index.jsx";
 import DonateOverview from "../../components/DonateOverview/DonateOverview";
 import ProjectOverview from "../../components/projectOverview/ProjectOverview";
 import ProjectLayout from "../../components/ProjectLayout/ProjectLayout";
@@ -10,25 +11,73 @@ import { db, storage } from "../../service/firebaseConfig.jsx";
 import { doc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
+// Debounce utility
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
+
 function Events() {
   const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor, mainData, setMainData } = useContext(ColorContext);
 
-  const updateMainData = async (updates) => {
-    setMainData((prevMainData) => {
-      const newMainData = { ...prevMainData, ...updates };
-      try {
-        const docRef = doc(db, "Main pages", "components ");
-        updateDoc(docRef, newMainData);
-      } catch (error) {
-        console.error("Error updating mainData:", error);
+  // Normalize project_overviews to ensure Timestamps
+  useEffect(() => {
+    if (mainData.project_overviews && Object.values(mainData.project_overviews).some(project => 
+      project.started_time && !(project.started_time instanceof Timestamp)
+    )) {
+      const normalizedProjects = Object.entries(mainData.project_overviews).reduce((acc, [key, project]) => ({
+        ...acc,
+        [key]: {
+          ...project,
+          started_time: project.started_time instanceof Date 
+            ? Timestamp.fromDate(project.started_time) 
+            : project.started_time || null,
+        },
+      }), {});
+      updateData({ project_overviews: normalizedProjects });
+    }
+    console.log("mainData.project_overviews:", mainData.project_overviews);
+  }, [mainData.project_overviews]);
+
+  // Merge utility for nested objects
+  const mergeNested = useCallback((target, source) => {
+    const output = { ...target };
+    for (const key in source) {
+      if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key]) && !(source[key] instanceof Timestamp) && !(source[key] instanceof Date)) {
+        output[key] = mergeNested(target[key] || {}, source[key]);
+      } else {
+        output[key] = source[key];
       }
-      return newMainData;
-    });
+    }
+    return output;
+  }, []);
+
+  const updateData = async (updates) => {
+    try {
+      let updatedData;
+      setMainData((prev) => {
+        updatedData = mergeNested(prev, updates);
+        console.log("setMainData called with:", updatedData);
+        return updatedData;
+      });
+      const docRef = doc(db, "Main pages", "components");
+      await updateDoc(docRef, updatedData);
+      console.log("Firestore updated successfully:", updatedData);
+    } catch (error) {
+      console.error("Error updating Firestore:", error);
+      setMainData(mainData);
+    }
   };
 
-  const handleFieldChange = async (field, value) => {
-    if (!value.trim()) return;
-    updateMainData({
+  // Debounced updateData
+  const debouncedUpdateData = useCallback(debounce(updateData, 500), [mainData, setMainData]);
+
+  const updateHeroField = async (field, value) => {
+    console.log("updateHeroField:", { field, value });
+    await debouncedUpdateData({
       hero_sections: {
         ...mainData.hero_sections,
         events: { ...mainData.hero_sections.events, [field]: value },
@@ -36,13 +85,13 @@ function Events() {
     });
   };
 
-  const handleImageUpload = async (file) => {
+  const uploadHeroImage = async (file) => {
     if (file instanceof File || file instanceof Blob) {
       try {
         const storageRef = ref(storage, `hero/events/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateData({
           hero_sections: {
             ...mainData.hero_sections,
             events: { ...mainData.hero_sections.events, image: downloadUrl },
@@ -56,38 +105,38 @@ function Events() {
     }
   };
 
-  const handleProjectFieldChange = async (field, value) => {
-    if (!value.trim()) return;
+  const updateProjectField = async (field, value) => {
+    console.log("updateProjectField:", { field, value });
     const projectKey = Object.keys(mainData.project_overviews)[0] || `Dự Án_0_${new Date().toISOString()}`;
-    updateMainData({
+    await debouncedUpdateData({
       project_overviews: {
         ...mainData.project_overviews,
         [projectKey]: {
-          ...mainData.project_overviews[projectKey],
-          [field === "description" ? "abstract" : field]: value,
+          ...mainData.project_overviews[projectKey] || { title: "", abstract: "", thumbnail: { src: "", alt: "", caption: "" }, started_time: null },
+          [field === "description" ? "abstract" : field]: field === "started_time" && value ? Timestamp.fromDate(new Date(value)) : value,
           thumbnail: {
-            ...mainData.project_overviews[projectKey]?.thumbnail,
-            title: field === "title" ? value : mainData.project_overviews[projectKey]?.title,
+            ...mainData.project_overviews[projectKey]?.thumbnail || { src: "", alt: "", caption: "" },
+            title: field === "title" ? value : mainData.project_overviews[projectKey]?.title || "",
           },
         },
       },
     });
   };
 
-  const handleProjectImageUpload = async (index, file) => {
+  const uploadProjectImage = async (index, file) => {
     if (file instanceof File || file instanceof Blob) {
       try {
         const storageRef = ref(storage, `projects/overview/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
         const projectKey = Object.keys(mainData.project_overviews)[0] || `Dự Án_0_${new Date().toISOString()}`;
-        updateMainData({
+        await updateData({
           project_overviews: {
             ...mainData.project_overviews,
             [projectKey]: {
-              ...mainData.project_overviews[projectKey],
+              ...mainData.project_overviews[projectKey] || { title: "", abstract: "", thumbnail: { src: "", alt: "", caption: "" }, started_time: null },
               thumbnail: {
-                ...mainData.project_overviews[projectKey]?.thumbnail,
+                ...mainData.project_overviews[projectKey]?.thumbnail || { src: "", alt: "", caption: "" },
                 src: downloadUrl,
               },
             },
@@ -101,9 +150,9 @@ function Events() {
     }
   };
 
-  const handleDonateFieldChange = async (field, value) => {
-    if (!value.trim()) return;
-    updateMainData({
+  const updateDonateField = async (field, value) => {
+    console.log("updateDonateField:", { field, value });
+    await debouncedUpdateData({
       hero_sections: {
         ...mainData.hero_sections,
         donate: { ...mainData.hero_sections.donate, [field]: value },
@@ -111,13 +160,13 @@ function Events() {
     });
   };
 
-  const handleDonateImageUpload = async (index, file) => {
+  const uploadDonateImage = async (index, file) => {
     if (file instanceof File || file instanceof Blob) {
       try {
         const storageRef = ref(storage, `hero/donate/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateData({
           hero_sections: {
             ...mainData.hero_sections,
             donate: { ...mainData.hero_sections.donate, image: downloadUrl },
@@ -131,26 +180,26 @@ function Events() {
     }
   };
 
-  const handleEventsFieldChange = async (index, field, value) => {
-    if (!value.trim()) return;
+  const updateEventsField = async (index, field, value) => {
+    console.log("updateEventsField:", { index, field, value });
     const eventKeys = Object.keys(mainData.event_overviews);
     const eventKey = eventKeys[index] || `Sự Kiện_${index}_${new Date().toISOString()}`;
-    updateMainData({
+    await debouncedUpdateData({
       event_overviews: {
         ...mainData.event_overviews,
         [eventKey]: {
-          ...mainData.event_overviews[eventKey],
+          ...mainData.event_overviews[eventKey] || { title: "", abstract: "", thumbnail: { src: "", alt: "", caption: "" } },
           [field === "title" ? "title" : "abstract"]: value,
           thumbnail: {
-            ...mainData.event_overviews[eventKey]?.thumbnail,
-            title: field === "title" ? value : mainData.event_overviews[eventKey]?.title,
+            ...mainData.event_overviews[eventKey]?.thumbnail || { src: "", alt: "", caption: "" },
+            title: field === "title" ? value : mainData.event_overviews[eventKey]?.title || "",
           },
         },
       },
     });
   };
 
-  const handleEventsImageUpload = async (index, file) => {
+  const uploadEventsImage = async (index, file) => {
     if (file instanceof File || file instanceof Blob) {
       try {
         const storageRef = ref(storage, `events/${file.name}`);
@@ -158,13 +207,13 @@ function Events() {
         const downloadUrl = await getDownloadURL(storageRef);
         const eventKeys = Object.keys(mainData.event_overviews);
         const eventKey = eventKeys[index] || `Sự Kiện_${index}_${new Date().toISOString()}`;
-        updateMainData({
+        await updateData({
           event_overviews: {
             ...mainData.event_overviews,
             [eventKey]: {
-              ...mainData.event_overviews[eventKey],
+              ...mainData.event_overviews[eventKey] || { title: "", abstract: "", thumbnail: { src: "", alt: "", caption: "" } },
               thumbnail: {
-                ...mainData.event_overviews[eventKey]?.thumbnail,
+                ...mainData.event_overviews[eventKey]?.thumbnail || { src: "", alt: "", caption: "" },
                 src: downloadUrl,
               },
             },
@@ -178,27 +227,27 @@ function Events() {
     }
   };
 
-  const handleProjectChange = async (id, field, value) => {
+  const updateProjectData = async (id, field, value) => {
+    console.log("updateProjectData:", { id, field, value });
     if (field === "delete") {
-      updateMainData({
+      await updateData({
         project_overviews: {
           ...Object.keys(mainData.project_overviews)
             .filter((key) => key !== id)
             .reduce((acc, key) => ({ ...acc, [key]: mainData.project_overviews[key] }), {}),
         },
       });
-    } else if (!value.trim()) {
-      return;
     } else {
-      updateMainData({
+      await debouncedUpdateData({
         project_overviews: {
           ...mainData.project_overviews,
           [id]: {
-            ...mainData.project_overviews[id],
-            [field === "title" ? "title" : "abstract"]: value,
+            ...mainData.project_overviews[id] || { title: "", abstract: "", thumbnail: { src: "", alt: "", caption: "" }, started_time: null },
+            [field === "title" ? "title" : field === "description" ? "abstract" : field]: 
+              field === "started_time" && value ? Timestamp.fromDate(new Date(value)) : value,
             thumbnail: {
-              ...mainData.project_overviews[id]?.thumbnail,
-              title: field === "title" ? value : mainData.project_overviews[id]?.title,
+              ...mainData.project_overviews[id]?.thumbnail || { src: "", alt: "", caption: "" },
+              title: field === "title" ? value : mainData.project_overviews[id]?.title || "",
             },
           },
         },
@@ -206,19 +255,19 @@ function Events() {
     }
   };
 
-  const handleProjectLayoutImageUpload = async (id, file) => {
+  const uploadProjectLayoutImage = async (id, file) => {
     if (file instanceof File || file instanceof Blob) {
       try {
         const storageRef = ref(storage, `projects/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        updateMainData({
+        await updateData({
           project_overviews: {
             ...mainData.project_overviews,
             [id]: {
-              ...mainData.project_overviews[id],
+              ...mainData.project_overviews[id] || { title: "", abstract: "", thumbnail: { src: "", alt: "", caption: "" }, started_time: null },
               thumbnail: {
-                ...mainData.project_overviews[id]?.thumbnail,
+                ...mainData.project_overviews[id]?.thumbnail || { src: "", alt: "", caption: "" },
                 src: downloadUrl,
               },
             },
@@ -232,23 +281,23 @@ function Events() {
     }
   };
 
-  const addProject = async () => {
+  const createProject = async () => {
     const newId = `Dự Án_${Object.keys(mainData.project_overviews).length}_${new Date().toISOString()}`;
-    updateMainData({
+    await updateData({
       project_overviews: {
         ...mainData.project_overviews,
         [newId]: {
           title: "",
           abstract: "",
           thumbnail: { src: "", alt: "", caption: "" },
-          started_time: new Date(),
+          started_time: null,
         },
       },
     });
   };
 
-  const deleteProject = async (id) => {
-    updateMainData({
+  const removeProject = async (id) => {
+    await updateData({
       project_overviews: {
         ...Object.keys(mainData.project_overviews)
           .filter((key) => key !== id)
@@ -257,19 +306,23 @@ function Events() {
     });
   };
 
-  // Use first project for ProjectOverview
-  const projectOverview = Object.entries(mainData.project_overviews)[0]
+  // Use first project for ProjectOverview with safe access
+  const projectOverview = Object.keys(mainData.project_overviews).length > 0
     ? {
         heading: "Tổng quan dự án",
-        title: mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].title,
-        description: mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].abstract,
-        images: [mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].thumbnail.src, "", "", "", ""],
+        title: mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].title || "",
+        description: mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].abstract || "",
+        images: [mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].thumbnail?.src || "", "", "", "", ""],
+        started_time: mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].started_time instanceof Timestamp
+          ? mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].started_time.toDate().toISOString().split("T")[0]
+          : "",
       }
     : {
         heading: "Tổng quan dự án",
         title: "",
         description: "",
         images: ["", "", "", "", ""],
+        started_time: "",
       };
 
   // Use hero_sections.donate for DonateOverview
@@ -277,15 +330,15 @@ function Events() {
     heading: "Hãy đồng hành cùng chúng mình",
     title1: mainData.hero_sections.donate.title1 || "Đặt mua bánh chưng",
     title2: mainData.hero_sections.donate.title2 || "Ủng hộ hiện kim",
-    images: [mainData.hero_sections.donate.image, ""],
+    images: [mainData.hero_sections.donate.image || "", ""],
   };
 
   // Use event_overviews for EventsOverview
   const eventsOverview = {
     heading: "Tổng kết các sự kiện đã qua",
-    events: Object.entries(mainData.event_overviews).map(([key, event], index) => ({
-      title: event.title,
-      imageUrl: event.thumbnail.src,
+    events: Object.entries(mainData.event_overviews).map(([key, event]) => ({
+      title: event.title || "",
+      imageUrl: event.thumbnail?.src || "",
     })),
   };
 
@@ -297,40 +350,40 @@ function Events() {
   return (
     <div style={{ backgroundColor: primaryBackgroundColor }}>
       <HeroSection
-        title={mainData.hero_sections.events.title}
-        description={mainData.hero_sections.events.description}
-        backgroundImage={mainData.hero_sections.events.image}
-        handleFieldChange={handleFieldChange}
-        handleImageUpload={handleImageUpload}
+        title={mainData.hero_sections.events.title || ""}
+        description={mainData.hero_sections.events.description || ""}
+        backgroundImage={mainData.hero_sections.events.image || ""}
+        handleFieldChange={updateHeroField}
+        handleImageUpload={uploadHeroImage}
       />
       <div className="border-b-black border-b-3"></div>
       <div className="projects">
         <ProjectOverview
           pageData={projectOverview}
-          handleFieldChange={handleProjectFieldChange}
-          handleImageUpload={handleProjectImageUpload}
+          handleFieldChange={updateProjectField}
+          handleImageUpload={uploadProjectImage}
           buttonColor={secondaryBackgroundColor}
         />
         <div className="border-b-black border-b-3"></div>
         <DonateOverview
           pageData={donateOverview}
-          handleFieldChange={handleDonateFieldChange}
-          handleImageUpload={handleDonateImageUpload}
+          handleFieldChange={updateDonateField}
+          handleImageUpload={uploadDonateImage}
           buttonColor={secondaryBackgroundColor}
         />
         <div className="border-b-black border-b-3"></div>
         <ProjectLayout
           projects={mainData.project_overviews}
-          onChange={handleProjectChange}
-          onImageUpload={handleProjectLayoutImageUpload}
-          addProject={addProject}
-          deleteProject={deleteProject}
+          onChange={updateProjectData}
+          onImageUpload={uploadProjectLayoutImage}
+          addProject={createProject}
+          deleteProject={removeProject}
         />
         <div className="border-b-black border-b-3"></div>
         <EventsOverview
           pageData={eventsOverview}
-          handleFieldChange={handleEventsFieldChange}
-          handleImageUpload={handleEventsImageUpload}
+          handleFieldChange={updateEventsField}
+          handleImageUpload={uploadEventsImage}
           imageInputRefs={eventsImageInputRefs}
         />
       </div>
