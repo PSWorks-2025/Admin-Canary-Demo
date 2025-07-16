@@ -2,49 +2,98 @@ import React, { useRef, useEffect } from "react";
 import { ImageInput } from "../../Inputs/ImageInput";
 import { TextInput } from "../../Inputs/TextInput";
 
-const EventsSection = ({ events, setEvents, firstSection, setFirstSection, buttonColor, onImageUpload }) => {
+const EventsSection = ({
+  data,
+  setData,
+  sectionTitle,
+  setSectionTitle,
+  enqueueImageUpload,
+  buttonColor,
+}) => {
   const eventImageRefs = useRef({});
 
   useEffect(() => {
-    Object.keys(events).forEach((key) => {
+    Object.keys(data).forEach((key) => {
       if (!eventImageRefs.current[key]) {
         eventImageRefs.current[key] = React.createRef();
       }
     });
     Object.keys(eventImageRefs.current).forEach((key) => {
-      if (!events[key]) {
+      if (!data[key]) {
         delete eventImageRefs.current[key];
       }
     });
-  }, [events]);
+  }, [data]);
 
   const handleEventChange = (key, field, value) => {
-    setEvents(key, field, value);
+    setData((prev) => {
+      const updated = { ...prev };
+      updated[key] = {
+        ...updated[key],
+        [field === "description" ? "abstract" : field]: value,
+        thumbnail: {
+          ...updated[key].thumbnail,
+          title: field === "title" ? value : updated[key].title,
+        },
+      };
+      return updated;
+    });
   };
 
   const handleEventImageUpload = (key, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      onImageUpload(key, file);
-    } else {
-      console.error(`Invalid file for event ${key}:`, file);
-    }
+    if (!(file instanceof File)) return;
+    const tempUrl = URL.createObjectURL(file);
+
+    setData((prev) => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        thumbnail: {
+          ...prev[key].thumbnail,
+          src: tempUrl,
+        },
+      },
+    }));
+
+    enqueueImageUpload({
+      section: "events",
+      key,
+      file,
+      path: "events",
+    });
   };
 
   const addEvent = () => {
-    const newKey = `Sự Kiện_${Object.keys(events).length}_${new Date().toISOString()}`;
-    setEvents(newKey, "newEvent", "");
+    const newKey = `Sự Kiện_${Object.keys(data).length}_${new Date().toISOString()}`;
+    setData((prev) => ({
+      ...prev,
+      [newKey]: {
+        title: "",
+        abstract: "",
+        thumbnail: {
+          src: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+          alt: "",
+          caption: "",
+        },
+        started_time: new Date(),
+      },
+    }));
   };
 
   const deleteEvent = (key) => {
-    setEvents(key, "delete", null);
+    setData((prev) => {
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
   };
 
   return (
     <div className="w-full">
       <TextInput
         className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
-        value={firstSection}
-        onChange={(e) => setFirstSection(e.target.value)}
+        value={sectionTitle}
+        onChange={(e) => setSectionTitle(e.target.value)}
         placeholder="Nhập tiêu đề mục sự kiện"
       />
       <div className="w-full flex justify-center mb-8">
@@ -55,8 +104,9 @@ const EventsSection = ({ events, setEvents, firstSection, setFirstSection, butto
           Thêm sự kiện
         </button>
       </div>
+
       <div className="w-full">
-        {Object.entries(events)
+        {Object.entries(data)
           .map(([key, event]) => ({
             key,
             title: event.title,
@@ -73,7 +123,9 @@ const EventsSection = ({ events, setEvents, firstSection, setFirstSection, butto
                   style={{ backgroundImage: `url("${imageUrl}")` }}
                 >
                   <ImageInput
-                    handleImageUpload={(e) => handleEventImageUpload(key, e.target.files[0])}
+                    handleImageUpload={(e) =>
+                      handleEventImageUpload(key, e.target.files[0])
+                    }
                     section="event"
                     top="top-2"
                     ref={eventImageRefs.current[key]}
@@ -91,7 +143,9 @@ const EventsSection = ({ events, setEvents, firstSection, setFirstSection, butto
                   type="textarea"
                   className="w-136 text-base/5 py-6 text-primary-paragraph outline-none resize-none"
                   value={description}
-                  onChange={(e) => handleEventChange(key, "description", e.target.value)}
+                  onChange={(e) =>
+                    handleEventChange(key, "description", e.target.value)
+                  }
                   placeholder="Nhập mô tả sự kiện"
                   rows="5"
                 />

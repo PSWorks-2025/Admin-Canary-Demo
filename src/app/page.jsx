@@ -1,330 +1,244 @@
-import PropTypes from "prop-types";
-import { useState, useContext, useEffect } from "react";
-import HeroSection from "../components/HomePageSection/HeroSection";
-import StatsSection from "../components/HomePageSection/StatsSection";
-import EventsSection from "../components/HomePageSection/EventSection";
-import { ScrollStoryList, ScrollStoryListItem } from "../components/Lists/ScrollStoryList.jsx";
-import { ColorContext } from "../layout.jsx";
-import { TextInput } from "../components/Inputs/TextInput.jsx";
-import { db, storage } from "../service/firebaseConfig.jsx";
-import { doc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import PropTypes from 'prop-types';
+import { useState, useContext } from 'react';
+import HeroSection from '../components/HomePageSection/HeroSection';
+import StatsSection from '../components/HomePageSection/StatsSection';
+import EventsSection from '../components/HomePageSection/EventSection';
+import {
+  ScrollStoryList,
+  ScrollStoryListItem,
+} from '../components/Lists/ScrollStoryList.jsx';
+import { ColorContext } from '../layout.jsx';
+import { TextInput } from '../components/Inputs/TextInput.jsx';
+import { db } from '../service/firebaseConfig.jsx';
+import { doc, updateDoc } from 'firebase/firestore';
+import { uploadImageToStorage } from '../service/firebaseWrite.jsx';
+import SaveFloatingButton from '../globalComponent/SaveButton/index.jsx';
+import StorySection from '../components/HomePageSection/StorySection/index.jsx';
 
 const HomePage = () => {
-  const { primaryBackgroundColor, secondaryBackgroundColor, mainData, setMainData } = useContext(ColorContext);
+  const {
+    primaryBackgroundColor,
+    secondaryBackgroundColor,
+    mainData,
+    setMainData,
+  } = useContext(ColorContext);
 
-  const [primaryColorStat, setPrimaryColorStat] = useState(mainData.org_stats.primaryColor || "#ffffff");
-  const [secondaryColorStat, setSecondaryColorStat] = useState(mainData.org_stats.secondaryColor || "#000000");
-  const [storiesTitle, setStoriesTitle] = useState(mainData.hero_sections.stories.title || "");
+  const [heroSections, setHeroSections] = useState(mainData.hero_sections);
+  const [orgStats, setOrgStats] = useState(mainData.org_stats);
+  const [eventOverviews, setEventOverviews] = useState(
+    mainData.event_overviews
+  );
+  const [storyOverviews, setStoryOverviews] = useState(
+    mainData.story_overviews
+  );
+  const [storiesTitle, setStoriesTitle] = useState(
+    mainData.hero_sections.stories.title || ''
+  );
 
-  useEffect(() => {
-    console.log("mainData.org_stats:", mainData.org_stats);
-    console.log("stats array:", [
-      { title: "Số sự kiện", data: String(mainData.org_stats.num_events ?? "") },
-      { title: "Số người đã giúp đỡ", data: String(mainData.org_stats.num_people_helped ?? "") },
-      { title: "Số tiền quyên góp", data: String(mainData.org_stats.total_money_donated ?? "") },
-      { title: "Số dự án đã làm", data: String(mainData.org_stats.num_projects ?? "") },
-    ]);
-  }, [mainData.org_stats]);
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
+  const [imageUploadQueue, setImageUploadQueue] = useState([]);
 
-  const updateMainData = async (updates) => {
-    try {
-      const newMainData = { ...mainData, ...updates };
-      setMainData(newMainData);
-      const docRef = doc(db, "Main pages", "components");
-      await updateDoc(docRef, newMainData);
-      console.log("Firestore updated successfully:", newMainData.org_stats);
-    } catch (error) {
-      console.error("Error updating mainData:", error);
-    }
-  };
+  const enqueueImageUpload = ({ section, key, file, path }) => {
+    const tempUrl = URL.createObjectURL(file);
 
-  const handleStatsChange = async (key, value) => {
-    console.log("handleStatsChange:", { key, value, type: typeof value });
-    let numericValue;
-    if (value === undefined || value === null || value === "") {
-      numericValue = "";
-    } else {
-      numericValue = Number(String(value).replace(/\D/g, "")) || 0;
-    }
-    const fieldMap = {
-      stat_0: "num_events",
-      stat_1: "num_people_helped",
-      stat_2: "total_money_donated",
-      stat_3: "num_projects",
-    };
-    const field = fieldMap[key];
-    if (!field) {
-      console.error("Invalid stats key:", key);
-      return;
-    }
-    await updateMainData({
-      org_stats: {
-        ...mainData.org_stats,
-        [field]: numericValue,
-      },
-    });
-  };
-
-  const handleEventsChange = async (key, field, value) => {
-    console.log("handleEventsChange:", { key, field, value });
-    if (field === "delete") {
-      await updateMainData({
-        event_overviews: {
-          ...Object.keys(mainData.event_overviews)
-            .filter((k) => k !== key)
-            .reduce((acc, k) => ({ ...acc, [k]: mainData.event_overviews[k] }), {}),
-        },
-      });
-    } else if (field === "newEvent") {
-      await updateMainData({
-        event_overviews: {
-          ...mainData.event_overviews,
-          [key]: {
-            title: "",
-            abstract: "",
-            thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
-            started_time: new Date(),
-          },
-        },
-      });
-    } else {
-      await updateMainData({
-        event_overviews: {
-          ...mainData.event_overviews,
-          [key]: {
-            ...mainData.event_overviews[key],
-            [field === "description" ? "abstract" : field]: value,
-            thumbnail: {
-              ...mainData.event_overviews[key].thumbnail,
-              title: field === "title" ? value : mainData.event_overviews[key].title,
-            },
-          },
-        },
-      });
-    }
-  };
-
-  const handleEventsImageUpload = async (key, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      try {
-        const storageRef = ref(storage, `events/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(storageRef);
-        await updateMainData({
-          event_overviews: {
-            ...mainData.event_overviews,
-            [key]: {
-              ...mainData.event_overviews[key] || {
-                title: "",
-                abstract: "",
-                thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
-                started_time: new Date(),
-              },
-              thumbnail: {
-                ...mainData.event_overviews[key]?.thumbnail || { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
-                src: downloadUrl,
-              },
-            },
-          },
-        });
-      } catch (error) {
-        console.error(`Error uploading event image for ${key}:`, error);
-      }
-    } else {
-      console.error(`Invalid file for event ${key}:`, file);
-    }
-  };
-
-  const handleStoryChange = async (key, field, value) => {
-    await updateMainData({
-      story_overviews: {
-        ...mainData.story_overviews,
+    if (section === 'hero') {
+      setHeroSections((prev) => ({
+        ...prev,
+        home: { ...prev.home, image: tempUrl },
+      }));
+    } else if (section === 'events') {
+      setEventOverviews((prev) => ({
+        ...prev,
         [key]: {
-          ...mainData.story_overviews[key],
-          [field === "description" ? "abstract" : field]: value,
+          ...prev[key],
+          thumbnail: { ...prev[key].thumbnail, src: tempUrl },
+        },
+      }));
+    } else if (section === 'stories') {
+      setStoryOverviews((prev) => ({
+        ...prev,
+        [key]: {
+          ...prev[key],
+          thumbnail: { ...prev[key].thumbnail, src: tempUrl },
+        },
+      }));
+    }
+
+    setImageUploadQueue((prev) => [...prev, { section, key, file, path }]);
+    setHasPendingChanges(true);
+  };
+
+  const handleStatsChange = (key, value) => {
+    const num =
+      value === '' ? '' : Number(String(value).replace(/\D/g, '')) || 0;
+    const map = {
+      stat_0: 'num_events',
+      stat_1: 'num_people_helped',
+      stat_2: 'total_money_donated',
+      stat_3: 'num_projects',
+    };
+    const field = map[key];
+    if (!field) return;
+    setOrgStats((prev) => ({ ...prev, [field]: num }));
+    setHasPendingChanges(true);
+  };
+
+  const handleFirstSectionChange = (value) => {
+    setHeroSections((prev) => ({
+      ...prev,
+      events: { ...prev.events, title: value },
+    }));
+    setHasPendingChanges(true);
+  };
+
+  const handleEventsChange = (key, field, value) => {
+    setEventOverviews((prev) => {
+      const updated = { ...prev };
+      if (field === 'delete') {
+        delete updated[key];
+      } else if (field === 'newEvent') {
+        updated[key] = {
+          title: '',
+          abstract: '',
           thumbnail: {
-            ...mainData.story_overviews[key].thumbnail,
-            title: field === "title" ? value : mainData.story_overviews[key]?.title || "",
+            src: 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+            alt: '',
+            caption: '',
           },
-        },
-      },
-    });
-  };
-
-  const handleStoryImageUpload = async (key, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      try {
-        const storageRef = ref(storage, `stories/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(storageRef);
-        await updateMainData({
-          story_overviews: {
-            ...mainData.story_overviews,
-            [key]: {
-              ...mainData.story_overviews[key],
-              thumbnail: {
-                ...mainData.story_overviews[key].thumbnail,
-                src: downloadUrl,
-              },
-            },
+          started_time: new Date(),
+        };
+      } else {
+        updated[key] = {
+          ...updated[key],
+          [field === 'description' ? 'abstract' : field]: value,
+          thumbnail: {
+            ...updated[key].thumbnail,
+            title: field === 'title' ? value : updated[key].title,
           },
-        });
-      } catch (error) {
-        console.error(`Error uploading story image for ${key}:`, error);
+        };
       }
-    } else {
-      console.error(`Invalid file for story ${key}:`, file);
-    }
-  };
-
-  const addStory = async () => {
-    const newKey = `Câu Chuyện_${Object.keys(mainData.story_overviews).length}_${new Date().toISOString()}`;
-    await updateMainData({
-      story_overviews: {
-        ...mainData.story_overviews,
-        [newKey]: {
-          title: "",
-          abstract: "",
-          thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
-          posted_time: new Date(),
-        },
-      },
+      return updated;
     });
-  };
-
-  const handleBackgroundImageChange = async (file) => {
-    if (file instanceof File || file instanceof Blob) {
-      try {
-        const storageRef = ref(storage, `hero/home/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(storageRef);
-        await updateMainData({
-          hero_sections: {
-            ...mainData.hero_sections,
-            home: { ...mainData.hero_sections.home, image: downloadUrl },
-          },
-        });
-      } catch (error) {
-        console.error("Error uploading background image:", error);
-      }
-    } else {
-      console.error("Invalid file for background image:", file);
-    }
-  };
-
-  const handlePrimaryColorStatChange = async (value) => {
-    setPrimaryColorStat(value);
-    await updateMainData({
-      org_stats: { ...mainData.org_stats, primaryColor: value },
-    });
-  };
-
-  const handleSecondaryColorStatChange = async (value) => {
-    setSecondaryColorStat(value);
-    await updateMainData({
-      org_stats: { ...mainData.org_stats, secondaryColor: value },
-    });
-  };
-
-  const handleFirstSectionChange = async (value) => {
-    await updateMainData({
-      hero_sections: {
-        ...mainData.hero_sections,
-        events: { ...mainData.hero_sections.events, title: value },
-      },
-    });
+    setHasPendingChanges(true);
   };
 
   const handleSecondSectionChange = (value) => {
-    console.log("handleSecondSectionChange:", { value });
     setStoriesTitle(value);
+    setHasPendingChanges(true);
   };
 
-  const handleStoriesTitleBlur = async () => {
-    console.log("handleStoriesTitleBlur:", { storiesTitle });
-    try {
-      await updateMainData({
-        hero_sections: {
-          ...mainData.hero_sections,
-          stories: { ...mainData.hero_sections.stories, title: storiesTitle },
+  const handleStoryChange = (key, field, value) => {
+    setStoryOverviews((prev) => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        [field === 'description' ? 'abstract' : field]: value,
+        thumbnail: {
+          ...prev[key].thumbnail,
+          title: field === 'title' ? value : prev[key]?.title || '',
         },
-      });
-    } catch (error) {
-      console.error("Error updating stories title in Firebase:", error);
+      },
+    }));
+    setHasPendingChanges(true);
+  };
+
+  const addStory = () => {
+    const newKey = `Câu Chuyện_${
+      Object.keys(storyOverviews).length
+    }_${new Date().toISOString()}`;
+    setStoryOverviews((prev) => ({
+      ...prev,
+      [newKey]: {
+        title: '',
+        abstract: '',
+        thumbnail: {
+          src: 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+          alt: '',
+          caption: '',
+        },
+        posted_time: new Date(),
+      },
+    }));
+    setHasPendingChanges(true);
+  };
+
+  const saveUpdates = async () => {
+    try {
+      const updatedHeroSections = { ...heroSections };
+
+      for (const { section, key, file, path } of imageUploadQueue) {
+        const url = await uploadImageToStorage(path, file);
+        if (!url) continue;
+
+        if (section === 'hero') {
+          updatedHeroSections.home.image = url;
+        } else if (section === 'events') {
+          eventOverviews[key].thumbnail.src = url;
+        } else if (section === 'stories') {
+          storyOverviews[key].thumbnail.src = url;
+        }
+      }
+
+      const docRef = doc(db, 'Main pages', 'components');
+      const mergedData = {
+        org_stats: orgStats,
+        hero_sections: {
+          ...updatedHeroSections,
+          stories: { ...updatedHeroSections.stories, title: storiesTitle },
+        },
+        event_overviews: eventOverviews,
+        story_overviews: storyOverviews,
+      };
+      await updateDoc(docRef, mergedData);
+      setMainData(mergedData);
+      setHasPendingChanges(false);
+      setImageUploadQueue([]);
+    } catch (err) {
+      console.error('Save error:', err);
+    } finally {
+      console.log('Finished Saving');
     }
   };
 
-  const stats = [
-    { title: "Số sự kiện", data: String(mainData.org_stats.num_events ?? "") },
-    { title: "Số người đã giúp đỡ", data: String(mainData.org_stats.num_people_helped ?? "") },
-    { title: "Số tiền quyên góp", data: String(mainData.org_stats.total_money_donated ?? "") },
-    { title: "Số dự án đã làm", data: String(mainData.org_stats.num_projects ?? "") },
-  ];
-
   return (
-    <div className="w-full pb-10" style={{ backgroundColor: primaryBackgroundColor }}>
+    <div
+      className="w-full pb-10"
+      style={{ backgroundColor: primaryBackgroundColor }}
+    >
       <HeroSection
-        backgroundImage={mainData.hero_sections.home.image}
-        setBackgroundImage={handleBackgroundImageChange}
+        data={heroSections}
+        setData={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
       />
+
       <StatsSection
-        stats={stats}
-        setStats={handleStatsChange}
-        primaryColorStat={primaryColorStat}
-        setPrimaryColorStat={handlePrimaryColorStatChange}
-        secondaryColorStat={secondaryColorStat}
-        setSecondaryColorStat={handleSecondaryColorStatChange}
+        data={orgStats}
+        setData={setOrgStats}
+        setHasPendingChanges={setHasPendingChanges}
       />
+
       <div className="border-b-black border-b-3"></div>
       <EventsSection
-        events={mainData.event_overviews}
-        setEvents={handleEventsChange}
-        firstSection={mainData.hero_sections.events.title}
-        setFirstSection={handleFirstSectionChange}
+        data={eventOverviews}
+        setData={setEventOverviews}
+        sectionTitle={heroSections.events.title}
+        setSectionTitle={handleFirstSectionChange}
+        enqueueImageUpload={enqueueImageUpload}
         buttonColor={secondaryBackgroundColor}
-        onImageUpload={handleEventsImageUpload}
       />
       <div className="border-b-black border-b-3"></div>
+
       <div className="w-full">
-        <TextInput
-          className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
-          value={storiesTitle}
-          onChange={(e) => handleSecondSectionChange(e.target.value)}
-          onBlur={handleStoriesTitleBlur}
+        <StorySection
+          data={storyOverviews}
+          setData={setStoryOverviews}
+          title={storiesTitle}
+          setTitle={setStoriesTitle}
+          enqueueImageUpload={enqueueImageUpload}
+          buttonColor={secondaryBackgroundColor}
         />
-        <div className="w-full flex justify-center mb-8">
-          <button
-            onClick={addStory}
-            className="py-2 px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title"
-          >
-            Thêm câu chuyện
-          </button>
-        </div>
-        <ScrollStoryList>
-          {Object.entries(mainData.story_overviews)
-            .map(([key, story]) => ({
-              id: key,
-              title: story.title,
-              description: story.abstract,
-              imageUrl: story.thumbnail.src,
-              posted_time: story.posted_time,
-            }))
-            .sort((a, b) => new Date(b.posted_time) - new Date(a.posted_time))
-            .map((story) => (
-              <ScrollStoryListItem
-                key={story.id}
-                id={story.id}
-                imageUrl={story.imageUrl}
-                title={story.title}
-                description={story.description}
-                onChange={handleStoryChange}
-                onImageUpload={handleStoryImageUpload}
-                buttonColor={secondaryBackgroundColor}
-              />
-            ))}
-        </ScrollStoryList>
       </div>
+      <SaveFloatingButton visible={true} onSave={saveUpdates} />
     </div>
   );
 };

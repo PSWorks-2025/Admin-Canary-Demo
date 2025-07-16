@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import {getFirestore} from "firebase/firestore"
 import {getStorage} from "firebase/storage"
+
 const firebaseConfig = {
   apiKey: "AIzaSyCH2SEBLRFf_g_aWqiW3Y6Qk---kmWaNPY",
   authDomain: "canary-demo-dc73e.firebaseapp.com",

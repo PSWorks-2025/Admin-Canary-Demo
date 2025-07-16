@@ -62,7 +62,7 @@ function Aboutpage() {
         return newMainData;
       });
       // Update Firestore
-      const docRef = doc(db, "Main pages", "components ");
+      const docRef = doc(db, "Main pages", "components");
       const mergedData = deepMerge(mainData, updates);
       await updateDoc(docRef, mergedData);
       console.log("Firestore updated successfully:", mergedData);
@@ -86,7 +86,7 @@ function Aboutpage() {
   const handleImageUpload = async (field, file) => {
     if (file instanceof File || file instanceof Blob) {
       try {
-        const storageRef = ref(storage, `about/hero_sections/about/${file.name}`);
+        const storageRef = ref(storage, `/hero_sections/about/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
         await updateMainData({
@@ -241,7 +241,7 @@ function Aboutpage() {
   return (
     <div className="w-full max-w-[100vw] overflow-x-hidden" style={{ backgroundColor: primaryBackgroundColor }}>
       <HeroSection
-        coverImage={mainData.hero_sections.about.image}
+        coverImage={mainData.hero_sections.about.coverImage}
         backgroundColor={primaryBackgroundColor}
         title={mainData.hero_sections.about.title}
         description={mainData.hero_sections.about.description}
