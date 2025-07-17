@@ -60,7 +60,7 @@ function Story() {
         console.log("setMainData called with:", updatedData);
         return updatedData;
       });
-      const docRef = doc(db, "Main pages", "components ");
+      const docRef = doc(db, "Main pages", "components");
       await updateDoc(docRef, updatedData);
       console.log("Firestore updated successfully:", updatedData);
     } catch (error) {

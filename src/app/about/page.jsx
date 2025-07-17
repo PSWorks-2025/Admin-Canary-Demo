@@ -62,7 +62,7 @@ function Aboutpage() {
         return newMainData;
       });
       // Update Firestore
-      const docRef = doc(db, "Main pages", "components ");
+      const docRef = doc(db, "Main pages", "components");
       const mergedData = deepMerge(mainData, updates);
       await updateDoc(docRef, mergedData);
       console.log("Firestore updated successfully:", mergedData);

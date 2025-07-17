@@ -7,12 +7,14 @@ import { readData } from "./service/readFirebase.jsx";
 export const ColorContext = createContext();
 
 function Layout({ children, page }) {
-  const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState("#ffffff");
-  const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState("#ffffff");
-  const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState("#4160df");
+  const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState();
+  const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState();
+  const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState();
   const [globalData, setGlobalData] = useState({});
   const [mainData, setMainData] = useState({});
   const [loading, setLoading] = useState(true);
+
+  
 
   useEffect(() => {
     const handleGetData = async () => {
@@ -23,6 +25,8 @@ function Layout({ children, page }) {
           setPrimaryBackgroundColor(res.global.primaryBackgroundColor || "#ffffff");
           setSecondaryBackgroundColor(res.global.secondaryBackgroundColor || "#ffffff");
           setTertiaryBackgroundColor(res.global.tertiaryBackgroundColor || "#4160df");
+          console.log(res.global.backgroundColor);
+
         }
         if (res?.main) {
           setMainData(res.main);
