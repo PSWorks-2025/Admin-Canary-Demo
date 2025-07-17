@@ -1,6 +1,6 @@
-import React, { useRef, useEffect } from "react";
-import { ImageInput } from "../../Inputs/ImageInput";
-import { TextInput } from "../../Inputs/TextInput";
+import React, { useRef, useEffect } from 'react';
+import { ImageInput } from '../../Inputs/ImageInput';
+import { TextInput } from '../../Inputs/TextInput';
 
 const EventsSection = ({
   data,
@@ -30,10 +30,10 @@ const EventsSection = ({
       const updated = { ...prev };
       updated[key] = {
         ...updated[key],
-        [field === "description" ? "abstract" : field]: value,
+        [field === 'description' ? 'abstract' : field]: value,
         thumbnail: {
           ...updated[key].thumbnail,
-          title: field === "title" ? value : updated[key].title,
+          title: field === 'title' ? value : updated[key].title,
         },
       };
       return updated;
@@ -56,24 +56,26 @@ const EventsSection = ({
     }));
 
     enqueueImageUpload({
-      section: "events",
+      section: 'events',
       key,
       file,
-      path: "events",
+      path: 'events',
     });
   };
 
   const addEvent = () => {
-    const newKey = `Sự Kiện_${Object.keys(data).length}_${new Date().toISOString()}`;
+    const newKey = `Sự Kiện_${
+      Object.keys(data).length
+    }_${new Date().toISOString()}`;
     setData((prev) => ({
       ...prev,
       [newKey]: {
-        title: "",
-        abstract: "",
+        title: '',
+        abstract: '',
         thumbnail: {
-          src: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-          alt: "",
-          caption: "",
+          src: '',
+          alt: '',
+          caption: '',
         },
         started_time: new Date(),
       },
@@ -90,12 +92,16 @@ const EventsSection = ({
 
   return (
     <div className="w-full">
-      <TextInput
+      {/* currently dont allow change title of sections */}
+      {/* <TextInput
         className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
         value={sectionTitle}
         onChange={(e) => setSectionTitle(e.target.value)}
         placeholder="Nhập tiêu đề mục sự kiện"
-      />
+      /> */}
+      <div className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none">
+        Các sự kiện nổi bật
+      </div>
       <div className="w-full flex justify-center mb-8">
         <button
           onClick={addEvent}
@@ -136,7 +142,9 @@ const EventsSection = ({
                 <TextInput
                   className="w-full font-bold text-2xl text-primary-title outline-none"
                   value={title}
-                  onChange={(e) => handleEventChange(key, "title", e.target.value)}
+                  onChange={(e) =>
+                    handleEventChange(key, 'title', e.target.value)
+                  }
                   placeholder="Nhập tiêu đề sự kiện"
                 />
                 <TextInput
@@ -144,7 +152,7 @@ const EventsSection = ({
                   className="w-136 text-base/5 py-6 text-primary-paragraph outline-none resize-none"
                   value={description}
                   onChange={(e) =>
-                    handleEventChange(key, "description", e.target.value)
+                    handleEventChange(key, 'description', e.target.value)
                   }
                   placeholder="Nhập mô tả sự kiện"
                   rows="5"

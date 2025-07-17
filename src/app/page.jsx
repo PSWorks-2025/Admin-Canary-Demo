@@ -68,96 +68,10 @@ const HomePage = () => {
     setHasPendingChanges(true);
   };
 
-  const handleStatsChange = (key, value) => {
-    const num =
-      value === '' ? '' : Number(String(value).replace(/\D/g, '')) || 0;
-    const map = {
-      stat_0: 'num_events',
-      stat_1: 'num_people_helped',
-      stat_2: 'total_money_donated',
-      stat_3: 'num_projects',
-    };
-    const field = map[key];
-    if (!field) return;
-    setOrgStats((prev) => ({ ...prev, [field]: num }));
-    setHasPendingChanges(true);
-  };
-
   const handleFirstSectionChange = (value) => {
     setHeroSections((prev) => ({
       ...prev,
       events: { ...prev.events, title: value },
-    }));
-    setHasPendingChanges(true);
-  };
-
-  const handleEventsChange = (key, field, value) => {
-    setEventOverviews((prev) => {
-      const updated = { ...prev };
-      if (field === 'delete') {
-        delete updated[key];
-      } else if (field === 'newEvent') {
-        updated[key] = {
-          title: '',
-          abstract: '',
-          thumbnail: {
-            src: 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
-            alt: '',
-            caption: '',
-          },
-          started_time: new Date(),
-        };
-      } else {
-        updated[key] = {
-          ...updated[key],
-          [field === 'description' ? 'abstract' : field]: value,
-          thumbnail: {
-            ...updated[key].thumbnail,
-            title: field === 'title' ? value : updated[key].title,
-          },
-        };
-      }
-      return updated;
-    });
-    setHasPendingChanges(true);
-  };
-
-  const handleSecondSectionChange = (value) => {
-    setStoriesTitle(value);
-    setHasPendingChanges(true);
-  };
-
-  const handleStoryChange = (key, field, value) => {
-    setStoryOverviews((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        [field === 'description' ? 'abstract' : field]: value,
-        thumbnail: {
-          ...prev[key].thumbnail,
-          title: field === 'title' ? value : prev[key]?.title || '',
-        },
-      },
-    }));
-    setHasPendingChanges(true);
-  };
-
-  const addStory = () => {
-    const newKey = `Câu Chuyện_${
-      Object.keys(storyOverviews).length
-    }_${new Date().toISOString()}`;
-    setStoryOverviews((prev) => ({
-      ...prev,
-      [newKey]: {
-        title: '',
-        abstract: '',
-        thumbnail: {
-          src: 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
-          alt: '',
-          caption: '',
-        },
-        posted_time: new Date(),
-      },
     }));
     setHasPendingChanges(true);
   };
