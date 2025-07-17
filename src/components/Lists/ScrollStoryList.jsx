@@ -10,15 +10,13 @@ export function ScrollStoryListItem({ id, imageUrl, title, description, onChange
   return (
     <div className="w-88 mr-8 h-full">
       <div className="relative">
-        <div
-          className="w-full h-60 bg-cover bg-center rounded-sm"
-          style={{ backgroundImage: `url("${imageUrl}")` }}
-        ></div>
         <ImageInput
           handleImageUpload={(e) => onImageUpload(id, e.target.files[0])}
           section="story"
           top="top-2"
           left="left-2"
+           className="w-full h-60 bg-cover bg-center rounded-sm"
+          style={{ backgroundImage: `url("${imageUrl||'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
           // right="right-2"
         />
   
@@ -62,7 +60,7 @@ export function ScrollStoryList({ children }) {
   const [page, setPage] = useState(0);
 
   return (
-    <div className="w-full pt-12 flex justify-center">
+    <div className="w-full pt-12 flex justify-center" >
       <div className="w-280 h-112 relative">
         <button
           onClick={() => setPage(Math.max(page - 1, 0))}

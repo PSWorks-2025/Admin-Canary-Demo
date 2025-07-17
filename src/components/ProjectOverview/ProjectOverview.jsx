@@ -25,7 +25,7 @@ function ProjectOverview({ pageData, handleFieldChange, handleImageUpload, butto
   };
 
   return (
-    <section className="px-8 py-8">
+    <section style={{borderTopColor:buttonColor,borderTopWidth:2}} className="px-8 py-8">
       <TextInput
         className="w-full text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-6"
         value={localHeading}

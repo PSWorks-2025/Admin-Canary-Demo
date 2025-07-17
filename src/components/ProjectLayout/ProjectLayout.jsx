@@ -4,7 +4,7 @@ import { Timestamp } from "firebase/firestore"; // Added import
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 
-function ProjectLayout({ projects, onChange, onImageUpload, addProject }) {
+function ProjectLayout({ projects, onChange, onImageUpload, addProject,buttonColor }) {
   const debounce = (func, wait) => {
     let timeout;
     return (...args) => {
@@ -20,7 +20,7 @@ function ProjectLayout({ projects, onChange, onImageUpload, addProject }) {
   };
 
   return (
-    <section className="flex flex-col items-center">
+    <section style={{borderTopColor:buttonColor,borderTopWidth:2}} className="py-8 flex flex-col items-center">
       <h2 className="text-2xl font-bold mb-4">
         Dự án & hoạt động nổi bật đã thực hiện
       </h2>

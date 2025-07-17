@@ -276,7 +276,7 @@ const HomePage = () => {
         secondaryColorStat={secondaryColorStat}
         setSecondaryColorStat={handleSecondaryColorStatChange}
       />
-      <div className="border-b-black border-b-3"></div>
+      
       <EventsSection
         events={mainData.event_overviews}
         setEvents={handleEventsChange}
@@ -285,8 +285,8 @@ const HomePage = () => {
         buttonColor={secondaryBackgroundColor}
         onImageUpload={handleEventsImageUpload}
       />
-      <div className="border-b-black border-b-3"></div>
-      <div className="w-full">
+      
+      <div className="w-full py-2" style={{borderTopColor:secondaryBackgroundColor,borderTopWidth:2}} >
         <TextInput
           className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
           value={storiesTitle}

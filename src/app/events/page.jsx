@@ -367,7 +367,7 @@ function Events() {
         handleFieldChange={updateHeroField}
         handleImageUpload={uploadHeroImage}
       />
-      <div className="border-b-black border-b-3"></div>
+      
       <div className="projects">
         <ProjectOverview
           pageData={projectOverview}
@@ -375,27 +375,29 @@ function Events() {
           handleImageUpload={uploadProjectImage}
           buttonColor={secondaryBackgroundColor}
         />
-        <div className="border-b-black border-b-3"></div>
+        
         <DonateOverview
           pageData={donateOverview}
           handleFieldChange={updateDonateField}
           handleImageUpload={uploadDonateImage}
           buttonColor={secondaryBackgroundColor}
         />
-        <div className="border-b-black border-b-3"></div>
+        
         <ProjectLayout
           projects={mainData.project_overviews}
           onChange={updateProjectData}
           onImageUpload={uploadProjectLayoutImage}
           addProject={createProject}
           deleteProject={removeProject}
+          buttonColor={secondaryBackgroundColor}
         />
-        <div className="border-b-black border-b-3"></div>
+        
         <EventsOverview
           pageData={eventsOverview}
           handleFieldChange={updateEventsField}
           handleImageUpload={uploadEventsImage}
           imageInputRefs={eventsImageInputRefs}
+          buttonColor={secondaryBackgroundColor}
         />
       </div>
     </div>

@@ -3,7 +3,7 @@ import "./styles.css";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 
-function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs }) {
+function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs,buttonColor }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [localHeading, setLocalHeading] = useState(pageData.heading);
   const [localTitles, setLocalTitles] = useState(pageData.events.map(event => event.title));
@@ -47,7 +47,7 @@ function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageI
     .concat(pageData.events.slice(0, Math.max(0, currentIndex + 4 - pageData.events.length)));
 
   return (
-    <section className="px-8 py-8">
+    <section style={{borderTopColor:buttonColor,borderTopWidth:2}} className="px-8 py-8">
       <TextInput
         className="w-full text-2xl font-bold text-black outline-none bg-transparent text-center mb-4"
         value={localHeading}

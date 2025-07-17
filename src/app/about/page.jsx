@@ -249,7 +249,7 @@ function Aboutpage() {
         handleFieldChange={handleFieldChange}
         handleImageUpload={handleImageUpload}
       />
-      <div className="border-b-3 border-black mx-4" />
+      <div className="w-full py-2" style={{borderTopColor:secondaryBackgroundColor,borderTopWidth:2}} >
       <MissionSection
         mission={mainData.statements.mission}
         handleNestedFieldChange={handleNestedFieldChange}
@@ -260,9 +260,9 @@ function Aboutpage() {
         handleNestedFieldChange={handleNestedFieldChange}
         handleNestedImageUpload={handleNestedImageUpload}
       />
-      <div className="border-b-3 border-black mx-4" />
-      <div>
-        <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center">
+      </div>
+      <div className="py-2" style={{borderTopColor:secondaryBackgroundColor,borderTopWidth:2}}>
+        <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center" >
           Đội ngũ thành viên
         </div>
         <div className="w-full flex justify-center my-4 md:mb-8">
@@ -308,8 +308,7 @@ function Aboutpage() {
           ))}
         </ScrollMemberList>
       </div>
-      <div className="border-b-3 border-black mx-4" />
-      <div>
+      <div style={{borderTopColor:secondaryBackgroundColor,borderTopWidth:2}}>
         <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center">
           Lịch sử hoạt động
         </div>

@@ -40,7 +40,7 @@ const EventsSection = ({ events, setEvents, firstSection, setFirstSection, butto
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full py-2" style={{borderTopColor:buttonColor,borderTopWidth:2}}>
       <TextInput
         className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
         value={firstSection}
@@ -68,17 +68,15 @@ const EventsSection = ({ events, setEvents, firstSection, setFirstSection, butto
           .map(({ key, title, description, imageUrl }) => (
             <div key={key} className="w-full h-84 mt-12 flex relative">
               <div className="w-1/2 h-full px-4">
-                <div
-                  className="w-136 h-full bg-cover bg-center float-right rounded-lg"
-                  style={{ backgroundImage: `url("${imageUrl}")` }}
-                >
+              
                   <ImageInput
                     handleImageUpload={(e) => handleEventImageUpload(key, e.target.files[0])}
                     section="event"
                     top="top-2"
-                    ref={eventImageRefs.current[key]}
+                    // ref={eventImageRefs.current[key]}
+                           className="w-136 h-full bg-cover bg-center float-right rounded-lg"
+                  style={{ backgroundImage: `url("${imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
                   />
-                </div>
               </div>
               <div className="w-1/2 h-full px-4">
                 <TextInput

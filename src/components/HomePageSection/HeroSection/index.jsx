@@ -17,11 +17,7 @@ const HeroSection = ({ backgroundImage, setBackgroundImage, color, setColor }) =
 
   return (
     <div
-      className="w-full h-178 bg-cover bg-center relative"
-      style={{
-        backgroundImage: `url("${backgroundImage}")`,
-        height: "calc(100vh - 5rem)",
-      }}
+
     >
       <ImageInput
         handleImageUpload={handleImageUpload}
@@ -29,6 +25,11 @@ const HeroSection = ({ backgroundImage, setBackgroundImage, color, setColor }) =
         section="hero"
         top="top-4"
         right="right-4"
+              className="w-full h-178 bg-cover bg-center relative"
+      style={{
+        backgroundImage: `url("${backgroundImage || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`,
+        height: "calc(100vh - 5rem)",
+      }}
       />
       {/* <input
         type="color"
