@@ -27,11 +27,11 @@ const Header = ({
           url: nav.url,
         }))
       : [
-          { id: 'page_0', name: 'Trang chủ', url: '/Canary-Charity-Club#/' },
-          { id: 'page_1', name: 'Về Canary', url: '/Canary-Charity-Club#/about' },
-          { id: 'page_2', name: 'Sự kiện', url: '/Canary-Charity-Club#/events' },
-          { id: 'page_3', name: 'Câu chuyện', url: '/Canary-Charity-Club#/stories' },
-          { id: 'page_4', name: 'Ủng hộ', url: '/Canary-Charity-Club#/donate' },
+          { id: 'page_0', name: 'Trang chủ', url: '/Canary-Charity-Club/' },
+          { id: 'page_1', name: 'Về Canary', url: '/Canary-Charity-Club/#/about' },
+          { id: 'page_2', name: 'Sự kiện', url: '/Canary-Charity-Club/#/events' },
+          { id: 'page_3', name: 'Câu chuyện', url: '/Canary-Charity-Club/#/stories' },
+          { id: 'page_4', name: 'Ủng hộ', url: '/Canary-Charity-Club/#/donate' },
         ],
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -155,16 +155,18 @@ const Header = ({
       style={{ backgroundColor: secondaryBackgroundColor }}
     >
       <div className="relative w-full h-full">
-        <div
+        {/* <div
           className="absolute left-5 sm:left-10 md:left-20 lg:left-36 w-20 h-20 bg-cover bg-center"
           style={{ backgroundImage: `url("${headerData.logoUrl}")` }}
-        >
+        > */}
           <ImageInput
             handleImageUpload={(e) => handleLogoUpload(e.target.files[0])}
+            className={"absolute left-5 sm:left-10 md:left-20 lg:left-36 w-20 h-20 bg-cover bg-center"}
+            style={{backgroundImage:`url("${headerData.logoUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`}}
             section="logo"
             top="-top-0.5"
           />
-        </div>
+        {/* </div> */}
         <div className="absolute top-7 right-2 flex items-center justify-center space-x-2">
           <div className="flex space-x-2">
             <label className="text-sm">
@@ -224,78 +226,7 @@ const Header = ({
             </button>
           </div>
         </div>
-        {isDropdownOpen && (
-          <div className="block md:hidden absolute left-0 right-0 bg-primary">
-            <ul className="flex flex-col items-center">
-              {headerData.navigation.map((nav) => (
-                <li key={nav.id} className="w-full text-center">
-                  <a
-                    href={nav.url}
-                    className={
-                      page === nav.url.split('#/')[1] || (page === 'home' && nav.url === '/Canary-Charity-Club#/')
-                        ? 'text-secondary font-bold hover:text-secondary-hover block py-2'
-                        : 'hover:text-primary-hover block py-2'
-                    }
-                  >
-                    {nav.name}
-                  </a>
-                </li>
-              ))}
-              <li className="w-full text-center border-t border-gray-300 py-2">
-                <button
-                  onClick={addNavLink}
-                  className="py-1 px-3 rounded-full cursor-pointer font-semibold bg-secondary-darken text-secondary-title hover:opacity-80"
-                >
-                  Thêm liên kết
-                </button>
-              </li>
-            </ul>
-          </div>
-        )}
-        <div className="mt-2 px-4">
-          <h3 className="font-bold">Navigation Links</h3>
-          {headerData.navigation.map((nav) => (
-            <div key={nav.id} className="flex gap-2 mb-2 items-center">
-              <TextInput
-                className="text-base text-primary-paragraph outline-none bg-transparent border rounded px-2 py-1"
-                value={nav.name}
-                onChange={(e) => handleNavChange(nav.id, 'name', e.target.value)}
-                placeholder="Tên liên kết"
-              />
-              <TextInput
-                className="text-base text-primary-paragraph outline-none bg-transparent border rounded px-2 py-1"
-                value={nav.url}
-                onChange={(e) => handleNavChange(nav.id, 'url', e.target.value)}
-                placeholder="URL liên kết"
-              />
-              <button
-                onClick={() => deleteNavLink(nav.id)}
-                className="p-1 bg-red-500 text-white rounded-full cursor-pointer hover:bg-red-600"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          ))}
-          <button
-            onClick={addNavLink}
-            className="py-1 px-3 rounded-full cursor-pointer font-semibold bg-secondary-darken text-secondary-title mt-2 hover:opacity-80"
-          >
-            Thêm liên kết
-          </button>
-        </div>
+      
       </div>
     </div>
   );

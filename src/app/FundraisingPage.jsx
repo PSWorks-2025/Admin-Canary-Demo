@@ -324,13 +324,13 @@ const FundraisingPage = () => {
       />
 
       {/* Transactions List */}
-      <TransactionList
+      {/* <TransactionList
         transactions={localData.transactions}
         handleTransactionChange={handleTransactionChange}
         addTransaction={addTransaction}
         deleteTransaction={deleteTransaction}
         buttonColor={secondaryBackgroundColor}
-      />
+      /> */}
     </div>
   );
 };

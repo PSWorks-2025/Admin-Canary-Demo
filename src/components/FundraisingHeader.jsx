@@ -52,17 +52,18 @@ const FundraisingHeader = ({
 
   return (
     <div
-      className="relative w-full h-[400px] bg-cover bg-center bg-blend-multiply"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${imageUrl})`,
-      }}
+      
     >
       <ImageInput
         handleImageUpload={(file) => handleImageUpload("imageUrl", file.target.files[0])}
         section="fundraising-header"
         top="top-2"
         right="right-2"
-      />
+      className="relative w-full h-[400px] bg-cover bg-center bg-blend-multiply"
+style={{
+        backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${imageUrl})`,
+      }}
+      >
       <div className="absolute bottom-4 left-4 right-4">
         <TextInput
           className="text-2xl font-bold text-white outline-none bg-transparent border rounded px-2 py-1"
@@ -96,16 +97,18 @@ const FundraisingHeader = ({
           </div>
         </div>
         <div className="mt-4 flex items-center">
-          <img
+          {/* <img
             src={qrCodeUrl}
             alt="QR Code"
-            className="w-24 h-24 object-cover"
-          />
+          /> */}
           <ImageInput
             handleImageUpload={(file) => handleImageUpload("qrCodeUrl", file.target.files[0])}
             section="qr-code"
             top="top-2"
             left="left-2"
+            className="w-24 h-24 object-cover"
+            style={{backgroundImage:`url("${qrCodeUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`}}
+
           />
           <button
             className="ml-4 text-white font-medium px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200"
@@ -116,6 +119,7 @@ const FundraisingHeader = ({
           </button>
         </div>
       </div>
+      </ImageInput>
     </div>
   );
 };

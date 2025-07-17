@@ -42,21 +42,21 @@ export function ActivityHistoryListItem({
         <div className="w-1/2 h-full px-4">
           <div className="w-136 h-full float-right relative">
             <div
-              className="absolute w-88 h-62 bg-cover bg-center rounded-lg top-0 left-0"
-              style={{ backgroundImage: `url("${imageUrl1}")` }}
             >
               <ImageInput
                 handleImageUpload={(file) => onImageUpload("image1", file)}
+              className="absolute w-88 h-62 bg-cover bg-center rounded-lg top-0 left-0"
+              style={{ backgroundImage: `url("${imageUrl1|| 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
                 section="activity"
                 top="top-2"
                 left="left-2"
               />
             </div>
             <div
-              className="absolute w-88 h-47 bg-cover bg-center rounded-lg bottom-0 right-0"
-              style={{ backgroundImage: `url("${imageUrl2}")` }}
             >
               <ImageInput
+              className="absolute w-88 h-47 bg-cover bg-center rounded-lg bottom-0 right-0"
+              style={{ backgroundImage: `url("${imageUrl2 || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
                 handleImageUpload={(file) => onImageUpload("image2", file)}
                 section="activity"
                 top="top-2"

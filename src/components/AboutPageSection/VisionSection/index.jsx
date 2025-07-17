@@ -6,11 +6,11 @@ const VisionSection = ({ vision, handleNestedFieldChange, handleNestedImageUploa
     <div className="w-full pt-20 flex flex-row-reverse">
       <div className="w-1/2 px-4 relative">
         <div
-          className="w-162 h-102 -ml-26 bg-cover bg-center rounded-lg"
-          style={{ backgroundImage: `url("${vision.imageUrl}")` }}
         />
         <ImageInput
           handleImageUpload={(file) => handleNestedImageUpload("vision", "imageUrl", file.target.files[0])}
+          className="w-162 h-102 -ml-26 bg-cover bg-center rounded-lg"
+          style={{ backgroundImage: `url("${vision.imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
           section="vision"
           top="top-2"
           left="left-2"

@@ -159,12 +159,13 @@ const Footer = ({ tertiaryBackgroundColor, globalData, setGlobalData }) => {
       <div className="w-full flex">
         <div className="w-1/2 px-10">
           <div className="h-16 flex items-center relative">
-            <div
-              className="h-11 bg-primary rounded-full w-11 bg-cover bg-center"
+            {/* <div
               style={{ backgroundImage: `url("${footerData.logoUrl}")` }}
-            ></div>
+            ></div> */}
             <ImageInput
               handleImageUpload={(e) => handleLogoUpload(e.target.files[0])}
+              className="h-11 bg-primary rounded-full w-11 bg-cover bg-center"
+              style={{backgroundImage:`url("${footerData.logoUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`}}
               section="logo"
               top="-top-0.5"
             />
