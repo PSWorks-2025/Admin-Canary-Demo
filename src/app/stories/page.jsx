@@ -194,7 +194,7 @@ function Story() {
         handleImageUpload={uploadHeroImage}
         buttonColor={secondaryBackgroundColor}
       />
-      <div className="border-b-black border-b-3"></div>
+      
       <StoriesSection
         pageData={storiesData}
         handleFieldChange={updateHeroField}

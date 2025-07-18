@@ -27,20 +27,21 @@ const HeroSection = ({ heroTitle, heroDescription, heroImage, handleFieldChange,
 
   return (
     <div
-      className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply hero_section"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${
-          heroImage || "https://via.placeholder.com/1200x600"
-        })`,
-        height: "calc(100vh - 5rem)",
-      }}
+   
     >
       <ImageInput
         handleImageUpload={(file) => handleImageUpload("image", file.target.files[0])}
         section="hero"
         top="top-23"
         right="right-2"
-      />
+           className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply hero_section"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${
+          heroImage || "https://via.placeholder.com/1200x600"
+        })`,
+        height: "calc(100vh - 5rem)",
+      }}
+      >
       <div className="w-1/2 py-4 absolute bottom-30 left-10">
         <TextInput
           className="w-full text-[2.5rem] font-semibold text-white outline-none bg-transparent"
@@ -64,6 +65,7 @@ const HeroSection = ({ heroTitle, heroDescription, heroImage, handleFieldChange,
           Đọc thêm
         </button>
       </div>
+      </ImageInput>
     </div>
   );
 };

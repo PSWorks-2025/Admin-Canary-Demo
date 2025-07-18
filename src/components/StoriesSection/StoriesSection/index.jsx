@@ -60,16 +60,13 @@ const StoriesSection = ({
         {pageData.stories.map((story, index) => (
           <div key={story.id} className="flex flex-col items-center mb-6">
             <div className="relative w-full max-w-[300px] h-[300px] overflow-hidden rounded-lg mb-4">
-              <img
-                src={story.imageUrl || "https://via.placeholder.com/300x300"}
-                alt="Câu chuyện"
-                className="w-full h-full object-cover"
-              />
               <ImageInput
                 handleImageUpload={(file) => handleStoryImageUpload(story.id, file.target.files[0])}
                 section={`story-${story.id}`}
                 top="top-2"
                 left="left-2"
+                className="w-full h-full object-cover"
+               style={{backgroundImage:`url("${story.imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`}}
               />
               <button
                 className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
@@ -131,16 +128,19 @@ const StoriesSection = ({
         {pageData.stories.map((story, index) => (
           <div key={story.id} className="flex flex-row justify-center items-start mt-10">
             <div className="image-container w-36 h-36 overflow-hidden rounded-lg mr-4 relative">
-              <img
+              {/* <img
                 src={story.imageUrl || "https://via.placeholder.com/144x144"}
                 alt="Câu chuyện"
                 className="w-full h-full object-cover"
-              />
+              /> */}
               <ImageInput
                 handleImageUpload={(file) => handleStoryImageUpload(story.id, file.target.files[0])}
                 section={`story-${story.id}`}
                 top="top-2"
                 left="left-2"
+               style={{backgroundImage:`url("${story.imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`}}
+                className="w-full h-full object-cover bg-center"
+                
               />
               <button
                 className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"

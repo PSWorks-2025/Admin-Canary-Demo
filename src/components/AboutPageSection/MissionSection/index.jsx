@@ -5,14 +5,12 @@ const MissionSection = ({ mission, handleNestedFieldChange, handleNestedImageUpl
   return (
     <div className="w-full pt-20 flex">
       <div className="w-1/2 px-4 relative">
-        <div
-          className="w-162 h-102 -mr-26 bg-cover bg-center float-right rounded-lg"
-          style={{ backgroundImage: `url("${mission.imageUrl}")` }}
-        />
         <ImageInput
           handleImageUpload={(file) => handleNestedImageUpload("mission", "imageUrl", file.target.files[0])}
           section="mission"
           top="top-2"
+          className="w-162 h-102 -mr-26 bg-cover bg-center float-right rounded-lg"
+          style={{ backgroundImage: `url("${mission.imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
           left="left-1/2"
         />
       </div>

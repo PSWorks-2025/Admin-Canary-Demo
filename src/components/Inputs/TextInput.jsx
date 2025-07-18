@@ -16,11 +16,11 @@ export const TextInput = ({ value, onChange, placeholder, className, type = "inp
         ></path>
       </svg>
 
-      {type === "input" || type==="date" ? (
+      {type !== "textarea" ? (
         <input
           className={`pl-8 ${className}`} 
           value={value}
-          type={type=="input" ? "text" : "date"}
+          type={type=="input" ? "text" : type}
           onChange={onChange}
           placeholder={placeholder}
         />

@@ -27,19 +27,20 @@ const HeroSection = ({ title, description, backgroundImage, handleFieldChange, h
 
   return (
     <div
-      className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply hero_section"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${backgroundImage})`,
-        height: "calc(100vh - 5rem)",
-      }}
+  
     >
       <ImageInput
         handleImageUpload={(e) => handleImageUpload(e.target.files[0])}
         top="top-23"
         right="right-2"
         section="hero"
-      />
-      <div className="w-1/2 absolute left-10">
+            className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply hero_section"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${backgroundImage|| 'https://blog.photobucket.com/hubfs/upload_pics_online.png'})`,
+        height: "calc(100vh - 5rem)",
+      }}
+      >
+             <div className="w-1/2 absolute left-10">
         <TextInput
           className="w-full text-[2.5rem] font-semibold text-white outline-none bg-transparent"
           value={localTitle}
@@ -55,6 +56,8 @@ const HeroSection = ({ title, description, backgroundImage, handleFieldChange, h
           rows="4"
         />
       </div>
+      </ImageInput>
+ 
     </div>
   );
 };

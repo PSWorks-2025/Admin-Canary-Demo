@@ -4,7 +4,7 @@ import { Timestamp } from "firebase/firestore"; // Added import
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 
-function ProjectLayout({ projects, onChange, onImageUpload, addProject }) {
+function ProjectLayout({ projects, onChange, onImageUpload, addProject,buttonColor }) {
   const debounce = (func, wait) => {
     let timeout;
     return (...args) => {
@@ -20,7 +20,7 @@ function ProjectLayout({ projects, onChange, onImageUpload, addProject }) {
   };
 
   return (
-    <section className="flex flex-col items-center">
+    <section style={{borderTopColor:buttonColor,borderTopWidth:2}} className="py-8 flex flex-col items-center">
       <h2 className="text-2xl font-bold mb-4">
         Dự án & hoạt động nổi bật đã thực hiện
       </h2>
@@ -84,20 +84,22 @@ function ProjectListItem({ id, title, imageUrl, started_time, onChange, onImageU
   return (
     <div className="relative h-96 rounded-lg overflow-hidden shadow-md">
       <div className="relative w-full h-full">
-        {imageUrl && (
+        {/* {imageUrl && (
           <img
             src={imageUrl}
             alt={title || "Project image"}
-            className="w-full h-full object-contain"
           />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60"></div>
-        <ImageInput
+        )} */}
+           <ImageInput
           handleImageUpload={(file) => onImageUpload(id, file.target.files[0])}
           top="top-2"
           left="left-2"
           section="project"
+            className="w-full h-full object-contain bg-cover bg-center"
+          style={{backgroundImage:`url("${imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`}}
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60"></div>
+     
         <button
           className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
           onClick={() => onChange(id, "delete", null)}

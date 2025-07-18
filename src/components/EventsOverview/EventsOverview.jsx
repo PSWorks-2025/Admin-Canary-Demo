@@ -3,7 +3,7 @@ import "./styles.css";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 
-function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs }) {
+function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageInputRefs,buttonColor }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [localHeading, setLocalHeading] = useState(pageData.heading);
   const [localTitles, setLocalTitles] = useState(pageData.events.map(event => event.title));
@@ -47,7 +47,7 @@ function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageI
     .concat(pageData.events.slice(0, Math.max(0, currentIndex + 4 - pageData.events.length)));
 
   return (
-    <section className="px-8 py-8">
+    <section style={{borderTopColor:buttonColor,borderTopWidth:2}} className="px-8 py-8">
       <TextInput
         className="w-full text-2xl font-bold text-black outline-none bg-transparent text-center mb-4"
         value={localHeading}
@@ -63,28 +63,27 @@ function EventsOverview({ pageData, handleFieldChange, handleImageUpload, imageI
         </button>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 h-64 overflow-hidden w-full">
           {displayedEvents.map((event, index) => (
-            <div
-              key={index}
-              className="relative bg-cover bg-center h-64 rounded-lg overflow-hidden shadow-md flex p-2 text-white items-end"
-              style={{
-                backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${
-                  event.imageUrl || "https://via.placeholder.com/300x256"
-                })`,
-              }}
-            >
-              <TextInput
-                className="w-full text-base font-medium text-white outline-none bg-transparent"
-                value={localTitles[index] || ""}
-                onChange={(e) => handleChange(index, "title", e.target.value)}
-                placeholder="Nhập tiêu đề sự kiện"
-              />
+            
+           
               <ImageInput
                 handleImageUpload={(file) => handleImageUpload(index, file.target.files[0])}
                 top="top-2"
                 left="left-2"
                 section={`event_${index}`}
+              className="relative bg-cover bg-center h-64 rounded-lg overflow-hidden shadow-md flex p-2 text-white items-end"
+ style={{
+                backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${
+                  event.imageUrl || "https://via.placeholder.com/300x256"
+                })`
+              }}
+              >
+                   <TextInput
+                className="w-full text-base font-medium text-white outline-none bg-transparent"
+                value={localTitles[index] || ""}
+                onChange={(e) => handleChange(index, "title", e.target.value)}
+                placeholder="Nhập tiêu đề sự kiện"
               />
-            </div>
+              </ImageInput>
           ))}
         </div>
         <button

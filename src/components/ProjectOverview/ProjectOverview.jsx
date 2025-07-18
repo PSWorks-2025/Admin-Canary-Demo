@@ -25,7 +25,7 @@ function ProjectOverview({ pageData, handleFieldChange, handleImageUpload, butto
   };
 
   return (
-    <section className="px-8 py-8">
+    <section style={{borderTopColor:buttonColor,borderTopWidth:2}} className="px-8 py-8">
       <TextInput
         className="w-full text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-6"
         value={localHeading}
@@ -37,18 +37,15 @@ function ProjectOverview({ pageData, handleFieldChange, handleImageUpload, butto
           <div className="grid grid-cols-2 gap-5 relative w-[600px] max-w-full">
             {pageData.images.map((image, index) => (
               <div key={index} className="relative w-full h-full">
-                <img
-                  src={image || "https://via.placeholder.com/150"}
-                  alt={`Image ${index + 1}`}
-                  className={`w-full h-[200px] object-cover rounded-xl shadow-md ${
-                    index === 2 ? "absolute scale-105 z-10 -top-[60%] left-1/2" : index === 4 ? "absolute -top-55" : ""
-                  }`}
-                />
                 <ImageInput
                   handleImageUpload={(file) => handleImageUpload(index, file.target.files[0])}
                   top={index === 2 ? "-top-[60%]" : index === 4 ? "-top-55" : "top-2"}
                   left={index === 2 ? "left-1/2" : "left-2"}
                   section={`project_${index}`}
+                     className={`w-full h-[200px] bg-center object-cover rounded-xl shadow-md ${
+                    index === 2 ? "absolute scale-105 z-10 -top-[60%] left-1/2" : index === 4 ? "absolute -top-55" : ""
+                  }`}
+                  style={{backgroundImage:`url("${image || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`}}
                 />
               </div>
             ))}

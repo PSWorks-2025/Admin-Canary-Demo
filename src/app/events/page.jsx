@@ -129,7 +129,9 @@ function Events() {
         const storageRef = ref(storage, `projects/overview/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
-        const projectKey = Object.keys(mainData.project_overviews)[0] || `Dự Án_0_${new Date().toISOString()}`;
+        const projectKey = Object.keys(mainData.project_overviews)[index] || `Dự Án_0_${new Date().toISOString()}`;
+        console.log(projectKey);
+        
         await updateData({
           project_overviews: {
             ...mainData.project_overviews,
@@ -166,10 +168,17 @@ function Events() {
         const storageRef = ref(storage, `hero/donate/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
+
+        const currentImages = Array.isArray(mainData.hero_sections.donate.images)
+          ? [...mainData.hero_sections.donate.images]
+          : ["", ""];
+
+        currentImages[index] = downloadUrl;
+
         await updateData({
           hero_sections: {
             ...mainData.hero_sections,
-            donate: { ...mainData.hero_sections.donate, image: downloadUrl },
+            donate: { ...mainData.hero_sections.donate, images: currentImages },
           },
         });
       } catch (error) {
@@ -312,7 +321,9 @@ function Events() {
         heading: "Tổng quan dự án",
         title: mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].title || "",
         description: mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].abstract || "",
-        images: [mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].thumbnail?.src || "", "", "", "", ""],
+        images: Object.keys(mainData.project_overviews).map(
+          key => mainData.project_overviews[key].thumbnail?.src || "",
+        ),
         started_time: mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].started_time instanceof Timestamp
           ? mainData.project_overviews[Object.keys(mainData.project_overviews)[0]].started_time.toDate().toISOString().split("T")[0]
           : "",
@@ -321,16 +332,16 @@ function Events() {
         heading: "Tổng quan dự án",
         title: "",
         description: "",
-        images: ["", "", "", "", ""],
+        images: [],
         started_time: "",
       };
-
+  
   // Use hero_sections.donate for DonateOverview
   const donateOverview = {
     heading: "Hãy đồng hành cùng chúng mình",
     title1: mainData.hero_sections.donate.title1 || "Đặt mua bánh chưng",
     title2: mainData.hero_sections.donate.title2 || "Ủng hộ hiện kim",
-    images: [mainData.hero_sections.donate.image || "", ""],
+    images: [...mainData.hero_sections.donate.images],
   };
 
   // Use event_overviews for EventsOverview
@@ -356,7 +367,7 @@ function Events() {
         handleFieldChange={updateHeroField}
         handleImageUpload={uploadHeroImage}
       />
-      <div className="border-b-black border-b-3"></div>
+      
       <div className="projects">
         <ProjectOverview
           pageData={projectOverview}
@@ -364,27 +375,29 @@ function Events() {
           handleImageUpload={uploadProjectImage}
           buttonColor={secondaryBackgroundColor}
         />
-        <div className="border-b-black border-b-3"></div>
+        
         <DonateOverview
           pageData={donateOverview}
           handleFieldChange={updateDonateField}
           handleImageUpload={uploadDonateImage}
           buttonColor={secondaryBackgroundColor}
         />
-        <div className="border-b-black border-b-3"></div>
+        
         <ProjectLayout
           projects={mainData.project_overviews}
           onChange={updateProjectData}
           onImageUpload={uploadProjectLayoutImage}
           addProject={createProject}
           deleteProject={removeProject}
+          buttonColor={secondaryBackgroundColor}
         />
-        <div className="border-b-black border-b-3"></div>
+        
         <EventsOverview
           pageData={eventsOverview}
           handleFieldChange={updateEventsField}
           handleImageUpload={uploadEventsImage}
           imageInputRefs={eventsImageInputRefs}
+          buttonColor={secondaryBackgroundColor}
         />
       </div>
     </div>

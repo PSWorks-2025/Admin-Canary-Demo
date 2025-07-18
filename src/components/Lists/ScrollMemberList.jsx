@@ -10,14 +10,13 @@ export function ScrollMemberListItem({ index, imageUrl, name, role, onChange, on
   return (
     <div className="w-64 mr-8 h-full relative flex-shrink-0">
       <div className="relative">
-        <div
-          className="w-full h-64 bg-cover bg-center rounded-sm"
-          style={{ backgroundImage: `url("${imageUrl}")` }}
-        ></div>
+        
         <ImageInput
           handleImageUpload={(e) => onImageUpload(e.target.files[0])}
           top="top-2"
           left="left-2"
+          style={{ backgroundImage: `url("${imageUrl|| 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
+          className="w-full h-64 bg-cover bg-center rounded-sm"
         />
         <button
           className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
@@ -69,18 +68,18 @@ ScrollMemberListItem.propTypes = {
 export function ScrollMemberList({ children }) {
   const [page, setPage] = useState(0);
   const containerRef = useRef(null);
-  const [itemsPerPage, setItemsPerPage] = useState(4);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   // Dynamically calculate items per page based on screen width
   useEffect(() => {
     const updateItemsPerPage = () => {
       const width = window.innerWidth;
       if (width < 640) {
-        setItemsPerPage(1); // Mobile: 1 item per page
+        setItemsPerPage(2); // Mobile: 2 item per page
       } else if (width < 1024) {
-        setItemsPerPage(2); // Tablet: 2 items per page
+        setItemsPerPage(3); // Tablet: 3 items per page
       } else {
-        setItemsPerPage(4); // Desktop: 4 items per page
+        setItemsPerPage(5); // Desktop: 5 items per page
       }
     };
 
@@ -95,7 +94,7 @@ export function ScrollMemberList({ children }) {
   const handleNext = () => setPage((prev) => Math.min(prev + 1, numberOfPages - 1));
 
   return (
-    <div className="w-full pt-12 flex justify-center">
+    <div className="w-full pt-12 flex  justify-center">
       <div className="w-full max-w-7xl relative px-6">
         <button
           onClick={handlePrev}
