@@ -1,21 +1,28 @@
 import PropTypes from 'prop-types';
+import { useContext } from 'react';
+import { useLocation } from 'react-router-dom';
+
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import { GlobalProvider } from './GlobalData';
 import LoadingScreen from './components/screens/LoadingScreen';
-import { useContext } from 'react';
-import GlobalContext from './GlobalData';
 
-function Layout({ children, page }) {
+import GlobalContext from './GlobalData';
+import { GlobalProvider } from './GlobalData';
+
+const Layout = ({ children }) => {
   return (
     <GlobalProvider>
-      <GlobalConsumerContent page={page}>{children}</GlobalConsumerContent>
+      <LayoutContent>{children}</LayoutContent>
     </GlobalProvider>
   );
-}
+};
 
-const GlobalConsumerContent = ({ children, page }) => {
+const LayoutContent = ({ children }) => {
   const { loading, ...globalProps } = useContext(GlobalContext);
+  const location = useLocation();
+
+  // Derive `page` from pathname
+  const page = location.pathname === '/' ? 'home' : location.pathname.slice(1);
 
   if (loading) {
     return <LoadingScreen />;
@@ -32,7 +39,10 @@ const GlobalConsumerContent = ({ children, page }) => {
 
 Layout.propTypes = {
   children: PropTypes.node,
-  page: PropTypes.string,
+};
+
+LayoutContent.propTypes = {
+  children: PropTypes.node,
 };
 
 export default Layout;
