@@ -1,22 +1,15 @@
 import ColorInput from '../../../../Inputs/ColorInput';
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 const MainColorPicker = ({
-  globalData,
+  primaryBackgroundColor,
+  secondaryBackgroundColor,
+  tertiaryBackgroundColor,
   setPrimaryBackgroundColor,
   setSecondaryBackgroundColor,
   setTertiaryBackgroundColor,
-  debouncedUpdateGlobalData,
-  secondaryBackgroundColor,
-  tertiaryBackgroundColor
 }) => {
-  const [bg, setBg] = useState(globalData?.primaryBackgroundColor || '#ffffff');
-
-  useEffect(() => {
-    setPrimaryBackgroundColor(bg);
-    debouncedUpdateGlobalData({ primaryBackgroundColor: bg });
-  }, [bg]);
 
   return (
     <div className="absolute top-7 right-2 flex items-center justify-center space-x-2">
@@ -24,8 +17,8 @@ const MainColorPicker = ({
         Background color:
         <ColorInput
           type="color"
-          value={bg}
-          onChange={(e) => setBg(e.target.value)}
+          value={primaryBackgroundColor}
+          onChange={(e) => setPrimaryBackgroundColor(e.target.value)}
           className="ml-1 w-6 h-6"
         />
       </label>
@@ -34,10 +27,7 @@ const MainColorPicker = ({
         <ColorInput
           type="color"
           value={secondaryBackgroundColor}
-          onChange={(e) => {
-            setSecondaryBackgroundColor(e.target.value);
-            debouncedUpdateGlobalData({ secondaryBackgroundColor: e.target.value });
-          }}
+          onChange={(e) => setSecondaryBackgroundColor(e.target.value)}
           className="ml-1 w-6 h-6"
         />
       </label>
@@ -46,10 +36,7 @@ const MainColorPicker = ({
         <ColorInput
           type="color"
           value={tertiaryBackgroundColor}
-          onChange={(e) => {
-            setTertiaryBackgroundColor(e.target.value);
-            debouncedUpdateGlobalData({ tertiaryBackgroundColor: e.target.value });
-          }}
+          onChange={(e) => setTertiaryBackgroundColor(e.target.value)}
           className="ml-1 w-6 h-6"
         />
       </label>
@@ -59,12 +46,12 @@ const MainColorPicker = ({
 
 MainColorPicker.propTypes = {
   globalData: PropTypes.object,
+  primaryBackgroundColor: PropTypes.string,
+  secondaryBackgroundColor: PropTypes.string,
+  tertiaryBackgroundColor: PropTypes.string,
   setPrimaryBackgroundColor: PropTypes.func,
   setSecondaryBackgroundColor: PropTypes.func,
   setTertiaryBackgroundColor: PropTypes.func,
-  debouncedUpdateGlobalData: PropTypes.func,
-  secondaryBackgroundColor: PropTypes.string,
-  tertiaryBackgroundColor: PropTypes.string,
 };
 
 export default MainColorPicker;

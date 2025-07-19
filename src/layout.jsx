@@ -8,6 +8,7 @@ import LoadingScreen from './components/screens/LoadingScreen';
 
 import GlobalContext from './GlobalData';
 import { GlobalProvider } from './GlobalData';
+import SaveFloatingButton from './globalComponent/SaveButton';
 
 const Layout = ({ children }) => {
   return (
@@ -18,7 +19,7 @@ const Layout = ({ children }) => {
 };
 
 const LayoutContent = ({ children }) => {
-  const { loading, ...globalProps } = useContext(GlobalContext);
+  const { loading, handleGlobalSave, ...globalProps } = useContext(GlobalContext);
   const location = useLocation();
 
   // Derive `page` from pathname
@@ -33,6 +34,7 @@ const LayoutContent = ({ children }) => {
       <Header page={page} {...globalProps} />
       {children}
       <Footer {...globalProps} />
+      <SaveFloatingButton visible onSave={handleGlobalSave} />
     </>
   );
 };

@@ -12,9 +12,6 @@ export const readData = async () => {
     const globalData = docSnap.exists() ? docSnap.data() : {};
     const mainData = mainSnap.exists() ? mainSnap.data() : {};
 
-    console.log(mainData);
-    
-
     return {
       global: globalData,
       main: mainData,

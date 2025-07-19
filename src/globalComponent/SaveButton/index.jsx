@@ -17,7 +17,7 @@ const SaveFloatingButton = ({ visible, onSave }) => {
             onClick={onSave}
             className="text-white font-semibold px-4 py-2 cursor-pointer"
           >
-            Lưu thay đổi
+            Lưu thay đổi (header và footer)
           </button>
         )}
         <button

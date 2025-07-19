@@ -1,32 +1,31 @@
-import { useCallback } from "react";
 import { TextInput } from "../../../../Inputs/TextInput";
 import PropTypes from "prop-types";
 
-const FooterContactInfo = ({ data, setData }) => {
-  const handleFieldChange = useCallback((field, value) => {
-    setData((prevData) => ({
-      ...prevData,
+const FooterContactInfo = ({ contactInfoData, setContactInfoData }) => {
+  const handleFieldChange = (field, value) => {
+    setContactInfoData((prev) => ({
+      ...prev,
       [field]: value,
     }));
-  }, [setData]);
+  };
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-2">
       <TextInput
         className="w-full text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
-        value={data.hotline}
+        value={contactInfoData.hotline}
         onChange={(e) => handleFieldChange("hotline", e.target.value)}
         placeholder="Nhập số hotline"
       />
       <TextInput
         className="w-full text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
-        value={data.email}
+        value={contactInfoData.email}
         onChange={(e) => handleFieldChange("email", e.target.value)}
         placeholder="Nhập email"
       />
       <TextInput
         className="w-full text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
-        value={data.address}
+        value={contactInfoData.address}
         onChange={(e) => handleFieldChange("address", e.target.value)}
         placeholder="Nhập địa chỉ"
       />
@@ -35,12 +34,12 @@ const FooterContactInfo = ({ data, setData }) => {
 };
 
 FooterContactInfo.propTypes = {
-  data: PropTypes.shape({
+  contactInfoData: PropTypes.shape({
     hotline: PropTypes.string,
     email: PropTypes.string,
     address: PropTypes.string,
-  }),
-  setData: PropTypes.func.isRequired,
+  }).isRequired,
+  setContactInfoData: PropTypes.func.isRequired,
 };
 
 export default FooterContactInfo;

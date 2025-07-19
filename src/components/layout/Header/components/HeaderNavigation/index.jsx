@@ -5,10 +5,6 @@ import { TextInput } from '../../../../Inputs/TextInput';
 const HeaderNavigation = ({
   page,
   globalData,
-  updateGlobalData,
-  debouncedUpdateGlobalData,
-  isDropdownOpen,
-  toggleDropdown,
 }) => {
   const [navigation, setNavigation] = useState(
     globalData?.navigation
@@ -41,7 +37,10 @@ const HeaderNavigation = ({
           },
         ]
   );
-
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
   // const handleNavChange = useCallback((id, field, value) => {
   //   const updated = navigation.map((nav) => (nav.id === id ? { ...nav, [field]: value } : nav));
   //   setNavigation(updated);

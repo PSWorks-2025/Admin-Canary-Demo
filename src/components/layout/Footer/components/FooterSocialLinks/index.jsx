@@ -2,31 +2,19 @@ import { useCallback, useEffect, useState } from "react";
 import { TextInput } from "../../../../Inputs/TextInput";
 import PropTypes from "prop-types";
 
-// Debounce utility
-const debounce = (func, wait) => {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-};
-
-const FooterSocialLinks = ({ data, setData, updateGlobalData }) => {
+const FooterSocialLinks = ({ socialLinksData, setSocialLinksData }) => {
   const [socialLinks, setSocialLinks] = useState([]);
 
-  // Convert object to internal array format on mount or when data changes
   useEffect(() => {
-    const formatted = data
-      ? Object.entries(data).map(([name, url], index) => ({
+    const formatted = socialLinksData
+      ? Object.entries(socialLinksData).map(([name, url], index) => ({
           id: `link_${index}`,
           name: name.charAt(0).toUpperCase() + name.slice(1),
           url,
         }))
       : [];
     setSocialLinks(formatted);
-  }, [data]);
-
-  const debouncedUpdateGlobalData = useCallback(debounce(updateGlobalData, 1500), [updateGlobalData]);
+  }, [socialLinksData]);
 
   const handleSocialLinkChange = useCallback((id, field, value) => {
     setSocialLinks((prevLinks) => {
@@ -34,46 +22,38 @@ const FooterSocialLinks = ({ data, setData, updateGlobalData }) => {
         link.id === id ? { ...link, [field]: value } : link
       );
 
-      const updatedObject = newSocialLinks.reduce((acc, link) => ({
-        ...acc,
-        [link.name.toLowerCase()]: link.url,
-      }), {});
+      const updatedObject = newSocialLinks.reduce((acc, link) => {
+        if (link.name.trim()) {
+          acc[link.name.toLowerCase()] = link.url;
+        }
+        return acc;
+      }, {});
 
-      setData(updatedObject);
-      debouncedUpdateGlobalData({ social_media: updatedObject });
-
+      setSocialLinksData(updatedObject);
       return newSocialLinks;
     });
-  }, [debouncedUpdateGlobalData, setData]);
+  }, [setSocialLinksData]);
 
   const addSocialLink = useCallback(() => {
     const newId = `link_${socialLinks.length}`;
     const newLink = { id: newId, name: "", url: "" };
     const updatedLinks = [...socialLinks, newLink];
 
-    const updatedObject = {
-      ...updatedLinks.reduce((acc, link) => ({
-        ...acc,
-        [link.name.toLowerCase()]: link.url,
-      }), {}),
-    };
-
     setSocialLinks(updatedLinks);
-    setData(updatedObject);
-    updateGlobalData({ social_media: updatedObject });
-  }, [socialLinks, setData, updateGlobalData]);
+  }, [socialLinks]);
 
   const deleteSocialLink = useCallback((id) => {
     const newSocialLinks = socialLinks.filter((link) => link.id !== id);
-    const updatedObject = newSocialLinks.reduce((acc, link) => ({
-      ...acc,
-      [link.name.toLowerCase()]: link.url,
-    }), {});
+    const updatedObject = newSocialLinks.reduce((acc, link) => {
+      if (link.name.trim()) {
+        acc[link.name.toLowerCase()] = link.url;
+      }
+      return acc;
+    }, {});
 
     setSocialLinks(newSocialLinks);
-    setData(updatedObject);
-    updateGlobalData({ social_media: updatedObject });
-  }, [socialLinks, setData, updateGlobalData]);
+    setSocialLinksData(updatedObject);
+  }, [socialLinks, setSocialLinksData]);
 
   return (
     <div className="w-full [&>a]:block [&>a]:hover:text-secondary-hover [&>a]:transition">
@@ -133,9 +113,8 @@ const FooterSocialLinks = ({ data, setData, updateGlobalData }) => {
 };
 
 FooterSocialLinks.propTypes = {
-  data: PropTypes.object.isRequired,
-  setData: PropTypes.func.isRequired,
-  updateGlobalData: PropTypes.func.isRequired,
+  socialLinksData: PropTypes.object.isRequired,
+  setSocialLinksData: PropTypes.func.isRequired,
 };
 
 export default FooterSocialLinks;

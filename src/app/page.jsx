@@ -14,6 +14,7 @@ import { uploadImageToStorage } from '../service/firebaseWrite.jsx';
 import SaveFloatingButton from '../globalComponent/SaveButton/index.jsx';
 import StorySection from '../components/HomePageSection/StorySection/index.jsx';
 import GlobalContext from '../GlobalData.jsx';
+import { FaLessThan } from 'react-icons/fa';
 
 const HomePage = () => {
   const {
@@ -152,7 +153,7 @@ const HomePage = () => {
           buttonColor={secondaryBackgroundColor}
         />
       </div>
-      <SaveFloatingButton visible={true} onSave={saveUpdates} />
+      <SaveFloatingButton onSave={saveUpdates} />
     </div>
   );
 };
