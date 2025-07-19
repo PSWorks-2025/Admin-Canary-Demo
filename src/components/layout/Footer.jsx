@@ -11,9 +11,9 @@ const Footer = ({ tertiaryBackgroundColor, globalData, setGlobalData }) => {
   const [logoAndGroupData, setLogoAndGroupData] = useState({
     group_name: globalData?.group_name || "",
     description: globalData?.description || "",
-    logo_footer: globalData?.logo_footer || "",
+    logo: globalData?.logo || "",
   });
-
+  console.log(globalData)
   const [contactInfoData, setContactInfoData] = useState({
     hotline: globalData?.hotline || "",
     email: globalData?.email || "",
@@ -86,7 +86,7 @@ Footer.propTypes = {
     hotline: PropTypes.string,
     email: PropTypes.string,
     address: PropTypes.string,
-    logo_footer: PropTypes.string,
+    logo: PropTypes.string,
     social_media: PropTypes.object,
   }),
   setGlobalData: PropTypes.func,

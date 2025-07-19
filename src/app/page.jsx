@@ -7,13 +7,13 @@ import {
   ScrollStoryList,
   ScrollStoryListItem,
 } from '../components/Lists/ScrollStoryList.jsx';
-import { ColorContext } from '../layout.jsx';
 import { TextInput } from '../components/Inputs/TextInput.jsx';
 import { db } from '../service/firebaseConfig.jsx';
 import { doc, updateDoc } from 'firebase/firestore';
 import { uploadImageToStorage } from '../service/firebaseWrite.jsx';
 import SaveFloatingButton from '../globalComponent/SaveButton/index.jsx';
 import StorySection from '../components/HomePageSection/StorySection/index.jsx';
+import GlobalContext from '../GlobalData.jsx';
 
 const HomePage = () => {
   const {
@@ -21,7 +21,7 @@ const HomePage = () => {
     secondaryBackgroundColor,
     mainData,
     setMainData,
-  } = useContext(ColorContext);
+  } = useContext(GlobalContext);
 
   const [heroSections, setHeroSections] = useState(mainData.hero_sections);
   const [orgStats, setOrgStats] = useState(mainData.org_stats);

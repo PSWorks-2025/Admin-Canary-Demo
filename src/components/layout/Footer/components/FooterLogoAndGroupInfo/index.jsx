@@ -37,7 +37,7 @@ const FooterLogoAndGroupInfo = ({ data, setData }) => {
           handleImageUpload={(e) => handleLogoUpload(e.target.files[0])}
           className="h-11 w-11 bg-primary rounded-full bg-cover bg-center overflow-hidden flex-shrink-0"
           style={{
-            backgroundImage: `url("${data.logo_footer || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
+            backgroundImage: `url("${data.logo || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
           }}
           section="logo"
         />
