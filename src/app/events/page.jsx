@@ -9,7 +9,7 @@ import './styles.css';
 import { db, storage } from '../../service/firebaseConfig.jsx';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import GlobalContext from '../../GlobalData.jsx';
+import GlobalContext from '../../GlobalContext.jsx';
 
 // Debounce utility
 const debounce = (func, wait) => {

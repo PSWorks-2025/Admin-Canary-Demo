@@ -13,7 +13,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { uploadImageToStorage } from '../service/firebaseWrite.jsx';
 import SaveFloatingButton from '../globalComponent/SaveButton/index.jsx';
 import StorySection from '../components/HomePageSection/StorySection/index.jsx';
-import GlobalContext from '../GlobalData.jsx';
+import GlobalContext from '../GlobalContext';
 import { FaLessThan } from 'react-icons/fa';
 
 const HomePage = () => {

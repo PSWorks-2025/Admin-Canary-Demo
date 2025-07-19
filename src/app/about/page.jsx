@@ -15,7 +15,7 @@ import {
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../service/firebaseConfig.jsx';
-import GlobalContext from '../../GlobalData.jsx';
+import GlobalContext from '../../GlobalContext.jsx';
 
 function Aboutpage() {
   const {
