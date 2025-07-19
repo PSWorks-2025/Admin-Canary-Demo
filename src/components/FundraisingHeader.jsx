@@ -59,10 +59,10 @@ const FundraisingHeader = ({
         section="fundraising-header"
         top="top-2"
         right="right-2"
-      className="relative w-full h-[400px] bg-cover bg-center bg-blend-multiply"
-style={{
-        backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${imageUrl})`,
-      }}
+        className="relative w-full h-[400px] bg-cover bg-center bg-blend-multiply"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${imageUrl})`,
+        }}
       >
       <div className="absolute bottom-4 left-4 right-4">
         <TextInput

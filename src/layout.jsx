@@ -2,12 +2,12 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
+import Header from './components/layout/Header/index.jsx';
+import Footer from './components/layout/Footer/index.jsx';
 import LoadingScreen from './components/screens/LoadingScreen';
 
-import GlobalContext from './GlobalData';
-import { GlobalProvider } from './GlobalData';
+import GlobalContext from './GlobalContext.jsx';
+import { GlobalProvider } from './GlobalContext.jsx';
 import SaveFloatingButton from './globalComponent/SaveButton';
 
 const Layout = ({ children }) => {
@@ -19,7 +19,8 @@ const Layout = ({ children }) => {
 };
 
 const LayoutContent = ({ children }) => {
-  const { loading, handleGlobalSave, ...globalProps } = useContext(GlobalContext);
+  const { loading, handleGlobalSave, ...globalProps } =
+    useContext(GlobalContext);
   const location = useLocation();
 
   // Derive `page` from pathname

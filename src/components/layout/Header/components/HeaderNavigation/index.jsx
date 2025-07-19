@@ -14,7 +14,11 @@ const HeaderNavigation = ({
           url: nav.url,
         }))
       : [
-          { id: 'page_0', name: 'Trang chủ', url: '/Canary-Charity-Club/' },
+          { 
+            id: 'page_0', 
+            name: 'Trang chủ', 
+            url: '/Canary-Charity-Club/' 
+          },
           {
             id: 'page_1',
             name: 'Về Canary',
@@ -70,7 +74,7 @@ const HeaderNavigation = ({
                 href={nav.url}
                 className={
                   page === nav.url.split('#/')[1] ||
-                  (page === 'home' && nav.url === '/Canary-Charity-Club#/')
+                  (page === 'home' && nav.url === '/Canary-Charity-Club/')
                     ? 'text-secondary font-bold hover:text-secondary-hover'
                     : 'hover:text-primary-hover'
                 }
