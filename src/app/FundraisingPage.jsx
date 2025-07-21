@@ -1,32 +1,133 @@
-import React, { useContext, useState } from "react";
-import { Timestamp } from "firebase/firestore";
+import React, { useContext, useState, useEffect } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import PropTypes from "prop-types";
 import useImagePreloader from "../hooks/useImagePreloader";
-import useFundraisingData from "../hooks/useFundraisingData";
 import LoadingScreen from "../components/screens/LoadingScreen";
 import FundraisingHeader from "../components/FundraisingHeader";
 import DonorList from "../components/DonorList";
 import CampaignDetails from "../components/FundRaisingSection/CampaignDetail";
 import { ColorContext } from "../layout";
 import { motion } from "framer-motion";
+import { db, storage } from "../service/firebaseConfig";
 
 const FundraisingPage = () => {
-  const { mainData, setMainData, primaryBackgroundColor, secondaryBackgroundColor } = useContext(ColorContext);
-  const {
-    localData,
-    setLocalData,
-    handleFieldChange,
-    handleImageUpload,
-    handleDonorChange,
-    addDonor,
-    deleteDonor,
-    updateMainData,
-  } = useFundraisingData(mainData, setMainData);
-
+  const { primaryBackgroundColor, secondaryBackgroundColor } = useContext(ColorContext);
+  const [localData, setLocalData] = useState({
+    campaignTitle: "",
+    campaignDescription: "",
+    fundraiserName: "",
+    imageUrl: "https://picsum.photos/800/400",
+    qrCodeUrl: "https://picsum.photos/500",
+    amountRaised: 0,
+    goalAmount: 0,
+    donors: [],
+  });
+  const [pendingImages, setPendingImages] = useState([]); // Array of { field, file, blobUrl }
   const imagesLoaded = useImagePreloader([localData.imageUrl, localData.qrCodeUrl]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const docRef = doc(db, "Main pages", "components");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data().fundraising || {};
+          const donors = (data.donors || []).map((donor) => ({
+            ...donor,
+            id: donor.id || Math.random().toString(36).substr(2, 9),
+          }));
+          setLocalData({
+            campaignTitle: data.campaign_title || "",
+            campaignDescription: data.campaign_description || "",
+            fundraiserName: data.fundraiser_name || "",
+            imageUrl: data.image_url || "https://picsum.photos/800/400",
+            qrCodeUrl: data.qr_code_url || "https://picsum.photos/500",
+            amountRaised: donors.reduce((sum, donor) => sum + (donor.amount || 0), 0),
+            goalAmount: data.goal_amount || 0,
+            donors,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching Firestore data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const updateField = (field, value) => {
+    setLocalData((prev) => ({
+      ...prev,
+      [field]: field === "goalAmount" ? Number(value) || 0 : value,
+    }));
+  };
+
+  const updateImage = (field, file) => {
+    if (file instanceof File || file instanceof Blob) {
+      const blobUrl = URL.createObjectURL(file);
+      setPendingImages((prev) => [...prev.filter((img) => img.field !== field), { field, file, blobUrl }]);
+      setLocalData((prev) => ({ ...prev, [field]: blobUrl }));
+    }
+  };
+
+  const updateDonor = (index, field, value) => {
+    setLocalData((prev) => {
+      const newDonors = [...prev.donors];
+      newDonors[index] = { ...newDonors[index], [field]: field === "amount" ? Number(value) || 0 : value };
+      return { ...prev, donors: newDonors, amountRaised: newDonors.reduce((sum, donor) => sum + (donor.amount || 0), 0) };
+    });
+  };
+
+  const addDonor = () => {
+    const newId = localData.donors.length > 0 ? Math.max(...localData.donors.map((donor) => donor.id || 0)) + 1 : 1;
+    const newDonor = { id: newId, name: "", amount: 0 };
+    setLocalData((prev) => ({ ...prev, donors: [...prev.donors, newDonor] }));
+  };
+
+  const deleteDonor = (index) => {
+    setLocalData((prev) => {
+      const newDonors = prev.donors.filter((_, i) => i !== index);
+      return { ...prev, donors: newDonors, amountRaised: newDonors.reduce((sum, donor) => sum + (donor.amount || 0), 0) };
+    });
+  };
 
   const handleSupportClick = () => {
     alert("Cảm ơn bạn đã ủng hộ! 🎉");
+  };
+
+  const saveChanges = async () => {
+    try {
+      // Upload pending images to Firebase Storage
+      const imageUpdates = {};
+      for (const { field, file } of pendingImages) {
+        const storageRef = ref(storage, `fundraising/${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(storageRef);
+        imageUpdates[field] = downloadUrl;
+        URL.revokeObjectURL(localData[field]); // Clean up Blob URL
+      }
+
+      // Update localData with final image URLs
+      setLocalData((prev) => ({ ...prev, ...imageUpdates }));
+      setPendingImages([]); // Clear pending images
+
+      // Save to Firestore
+      const docRef = doc(db, "Main pages", "components");
+      await updateDoc(docRef, {
+        fundraising: {
+          campaign_title: localData.campaignTitle,
+          campaign_description: localData.campaignDescription,
+          fundraiser_name: localData.fundraiserName,
+          image_url: imageUpdates.imageUrl || localData.imageUrl,
+          qr_code_url: imageUpdates.qrCodeUrl || localData.qrCodeUrl,
+          amount_raised: localData.amountRaised,
+          goal_amount: localData.goalAmount,
+          donors: localData.donors,
+        },
+      });
+    } catch (error) {
+      console.error("Error saving to Firestore:", error);
+    }
   };
 
   if (!imagesLoaded) {
@@ -42,20 +143,20 @@ const FundraisingPage = () => {
         goalAmount={localData.goalAmount}
         qrCodeUrl={localData.qrCodeUrl}
         onSupportClick={handleSupportClick}
-        handleFieldChange={handleFieldChange}
-        handleImageUpload={handleImageUpload}
+        onFieldChange={updateField}
+        onImageUpload={updateImage}
         buttonColor={secondaryBackgroundColor}
       />
       <CampaignDetails
         campaignTitle={localData.campaignTitle}
         campaignDescription={localData.campaignDescription}
-        handleFieldChange={handleFieldChange}
+        onFieldChange={updateField}
       />
       <DonorList
         donors={localData.donors}
-        handleDonorChange={handleDonorChange}
-        addDonor={addDonor}
-        deleteDonor={deleteDonor}
+        onDonorChange={updateDonor}
+        onAddDonor={addDonor}
+        onDeleteDonor={deleteDonor}
         buttonColor={secondaryBackgroundColor}
       />
       <motion.button
@@ -63,7 +164,7 @@ const FundraisingPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         className="fixed bottom-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 group"
-        onClick={() => updateMainData({ fundraising: localData })}
+        onClick={saveChanges}
       >
         <span className="hidden group-hover:inline absolute -top-8 right-0 bg-gray-800 text-white text-sm px-2 py-1 rounded">Save Changes</span>
         Save
@@ -85,17 +186,7 @@ FundraisingPage.propTypes = {
       id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
       name: PropTypes.string.isRequired,
       amount: PropTypes.number.isRequired,
-    }),
-  ),
-  totalCollected: PropTypes.number,
-  totalSpent: PropTypes.number,
-  transactions: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      type: PropTypes.string.isRequired,
-      amount: PropTypes.number.isRequired,
-      date: PropTypes.string.isRequired,
-    }),
+    })
   ),
 };
 

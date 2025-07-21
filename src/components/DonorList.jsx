@@ -1,35 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import { TextInput } from "../components/Inputs/TextInput.jsx";
+import { TextInput } from "./Inputs/TextInput";
 
-const DonorList = ({ donors, handleDonorChange, addDonor, deleteDonor, buttonColor }) => {
+const DonorList = ({ donors, onDonorChange, onAddDonor, onDeleteDonor, buttonColor }) => {
   const [localDonors, setLocalDonors] = useState(donors);
 
   useEffect(() => {
     setLocalDonors(donors);
-    console.log("DonorList rendered with donors:", donors);
   }, [donors]);
 
-  const debounce = (func, wait) => {
+  const debounce = useCallback((func, wait) => {
     let timeout;
     return (...args) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func(...args), wait);
     };
-  };
+  }, []);
 
-  const debouncedHandleDonorChange = debounce(handleDonorChange, 1000);
-
-  const handleChange = (index, field, value) => {
-    console.log("DonorList handleChange:", { index, field, value });
-    const newDonors = [...localDonors];
-    newDonors[index] = {
-      ...newDonors[index],
-      [field]: field === "amount" ? Number(value) || 0 : value,
-    };
-    setLocalDonors(newDonors);
-    debouncedHandleDonorChange(index, field, field === "amount" ? Number(value) || 0 : value);
-  };
+  const handleChange = useCallback(
+    (index, field, value) => {
+      const debouncedHandleDonorChange = debounce(onDonorChange, 1000);
+      setLocalDonors((prev) => {
+        const newDonors = [...prev];
+        newDonors[index] = {
+          ...newDonors[index],
+          [field]: field === "amount" ? Number(value) || 0 : value,
+        };
+        debouncedHandleDonorChange(index, field, field === "amount" ? Number(value) || 0 : value);
+        return newDonors;
+      });
+    },
+    [onDonorChange]
+  );
 
   return (
     <div className="mt-8 max-w-lg mx-auto">
@@ -38,7 +40,7 @@ const DonorList = ({ donors, handleDonorChange, addDonor, deleteDonor, buttonCol
         <button
           className="text-white font-medium px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200"
           style={{ backgroundColor: buttonColor || "#4160DF" }}
-          onClick={addDonor}
+          onClick={onAddDonor}
         >
           Thêm người ủng hộ
         </button>
@@ -63,7 +65,7 @@ const DonorList = ({ donors, handleDonorChange, addDonor, deleteDonor, buttonCol
             </div>
             <button
               className="ml-4 p-2 bg-red-500 text-white rounded-full cursor-pointer hover:bg-red-600"
-              onClick={() => deleteDonor(index)}
+              onClick={() => onDeleteDonor(index)}
             >
               <svg
                 className="w-5 h-5"
@@ -93,12 +95,12 @@ DonorList.propTypes = {
       id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
       name: PropTypes.string.isRequired,
       amount: PropTypes.number.isRequired,
-    }),
+    })
   ).isRequired,
-  handleDonorChange: PropTypes.func.isRequired,
-  addDonor: PropTypes.func.isRequired,
-  deleteDonor: PropTypes.func.isRequired,
-  buttonColor: PropTypes.string.isRequired,
+  onDonorChange: PropTypes.func.isRequired,
+  onAddDonor: PropTypes.func.isRequired,
+  onDeleteDonor: PropTypes.func.isRequired,
+  buttonColor: PropTypes.string,
 };
 
 export default DonorList;
