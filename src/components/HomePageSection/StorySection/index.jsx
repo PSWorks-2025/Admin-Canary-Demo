@@ -101,12 +101,11 @@ const StorySection = ({ data, setData, title, setTitle, enqueueImageUpload, butt
               {sortedStories.map(([id, story]) => (
                 <div key={id} className="w-88 mr-8 h-full">
                   <div className="relative">
-                    <div
-                      className="w-full h-60 bg-cover bg-center rounded-sm"
-                      style={{ backgroundImage: `url("${story.thumbnail.src}")` }}
-                    ></div>
+                   
                     <ImageInput
                       handleImageUpload={(e) => handleImageUpload(id, e.target.files[0])}
+                      className="w-full h-60 bg-cover bg-center rounded-sm"
+                      imagePreview={story.thumbnail.src}
                       section="story"
                       top="top-2"
                       left="left-2"

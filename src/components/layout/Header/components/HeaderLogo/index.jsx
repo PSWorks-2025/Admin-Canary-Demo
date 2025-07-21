@@ -1,23 +1,26 @@
 import PropTypes from 'prop-types';
+import { useContext } from 'react';
 import { ImageInput } from '../../../../Inputs/ImageInput';
+import GlobalContext from '../../../../../GlobalContext';
 
-const HeaderLogo = ({ logoUrl, setLogoUrl, setLogoFile }) => {
+const HeaderLogo = () => {
+  const { enqueueImageUpload, setLogoUrl, logoUrl } = useContext(GlobalContext);
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const tempUrl = URL.createObjectURL(file);
-    setLogoUrl(tempUrl);       // For preview only
-    setLogoFile(file);      // For saving later
+    setLogoUrl(tempUrl); // Hiển thị preview tạm thời
+
+    enqueueImageUpload("logo", "globaldata/logo", file);
   };
 
   return (
     <ImageInput
       handleImageUpload={handleImageUpload}
       className="absolute left-5 sm:left-10 md:left-20 lg:left-36 w-20 h-20 bg-cover bg-center"
-      style={{
-        backgroundImage: `url("${logoUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`,
-      }}
+      imagePreview={logoUrl}
       section="logo"
       top="-top-0.5"
     />
@@ -26,8 +29,6 @@ const HeaderLogo = ({ logoUrl, setLogoUrl, setLogoFile }) => {
 
 HeaderLogo.propTypes = {
   logoUrl: PropTypes.string.isRequired,
-  setLogoUrl: PropTypes.func.isRequired,
-  setLogoFile: PropTypes.func.isRequired,
 };
 
 export default HeaderLogo;

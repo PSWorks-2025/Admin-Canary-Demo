@@ -55,11 +55,7 @@ const Header = ({ page }) => {
       style={{ backgroundColor: secondaryBackgroundColor }}
     >
       <div className="relative w-full h-full">
-        <HeaderLogo
-          logoUrl={logoUrl}
-          setLogoUrl={setLogoUrl}
-          setLogoFile={setLogoFile}
-        />
+        <HeaderLogo />
         <MainColorPicker
           primaryBackgroundColor={primaryBackgroundColor}
           setPrimaryBackgroundColor={setPrimaryBackgroundColor}

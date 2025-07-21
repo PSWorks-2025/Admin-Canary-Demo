@@ -1,6 +1,11 @@
-import React, { useRef } from "react";
+import React, { useRef } from 'react';
 
-export const ImageInput = ({ handleImageUpload, section, top, left, right,className,style,children }) => {
+export const ImageInput = ({
+  imagePreview,
+  handleImageUpload,
+  className,
+  style,
+}) => {
   const inputRef = useRef();
 
   const triggerFileInput = () => {
@@ -17,9 +22,17 @@ export const ImageInput = ({ handleImageUpload, section, top, left, right,classN
         onChange={handleImageUpload}
       />
       <div onClick={triggerFileInput} className={className} style={style}>
-        {children}
+        {
+          <img
+            src={
+              imagePreview ||
+              'https://blog.photobucket.com/hubfs/upload_pics_online.png'
+            }
+            alt="Preview"
+            className="w-full h-full object-cover"
+          />
+        }
       </div>
-
     </>
   );
 };

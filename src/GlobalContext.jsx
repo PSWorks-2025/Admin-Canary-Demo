@@ -1,9 +1,10 @@
 // GlobalContext.jsx
 import { createContext, useState, useEffect, useCallback } from "react";
-import { readData } from "./service/readFirebase.jsx";
 import { doc, updateDoc } from "firebase/firestore";
-import { db, storage} from "./service/firebaseConfig.jsx";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { db, storage } from "./service/firebaseConfig.jsx";
+import { readData } from "./service/readFirebase.jsx";
+import set from "lodash/set";
 
 const GlobalContext = createContext();
 
@@ -15,6 +16,20 @@ export const GlobalProvider = ({ children }) => {
   const [mainData, setMainData] = useState({});
   const [loading, setLoading] = useState(true);
 
+  // Footer-specific states
+  const [logoUrl, setLogoUrl] = useState('');
+  const [logoFile, setLogoFile] = useState(null);
+  const [groupName, setGroupName] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
+  const [contactInfoData, setContactInfoData] = useState({
+    hotline: "",
+    email: "",
+    address: "",
+  });
+  const [socialLinksData, setSocialLinksData] = useState({});
+
+  const [imageUploadQueue, setImageUploadQueue] = useState({});
+
   useEffect(() => {
     const handleGetData = async () => {
       try {
@@ -25,8 +40,6 @@ export const GlobalProvider = ({ children }) => {
           setPrimaryBackgroundColor(res.global.primaryBackgroundColor || "#ffffff");
           setSecondaryBackgroundColor(res.global.secondaryBackgroundColor || "#ffffff");
           setTertiaryBackgroundColor(res.global.tertiaryBackgroundColor || "#4160df");
-
-          // NEW: set footer-specific states
           setGroupName(res.global.group_name || "");
           setGroupDescription(res.global.description || "");
           setContactInfoData({
@@ -45,24 +58,42 @@ export const GlobalProvider = ({ children }) => {
         setLoading(false);
       }
     };
-
     handleGetData();
   }, []);
 
-  // Data destructuring before passing into each page
-  const [logoUrl, setLogoUrl] = useState(globalData?.logo || ''); // always a string URL
-  const [logoFile, setLogoFile] = useState(null); // temp File to upload later
+  // ✅ Enqueue image with unique key (dynamic field path in globalData)
+  const enqueueImageUpload = (key, path, file) => {
+    setImageUploadQueue((prev) => ({
+      ...prev,
+      [key]: { key, path, file }
+    }));
+  };
 
-  // Footer specific data
-  const [groupName, setGroupName] = useState( globalData?.group_name || "");
-  const [groupDescription, setGroupDescription] = useState(globalData?.description || "")
-  const [contactInfoData, setContactInfoData] = useState({
-    hotline: globalData?.hotline || "",
-    email: globalData?.email || "",
-    address: globalData?.address || "",
-  });
-  const [socialLinksData, setSocialLinksData] = useState(globalData?.social_media || {});
-  
+  // ✅ Upload all queued images and update globalData
+  const uploadAllImagesInQueue = async () => {
+    const updated = { ...globalData };
+
+    for (const key in imageUploadQueue) {
+      const { path, file } = imageUploadQueue[key];
+      try {
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        const finalUrl = `${url}?v=${Date.now()}`;
+        set(updated, key, finalUrl); // dynamic set using lodash.set
+
+        // Optional: set logoUrl state if it's logo
+        if (key === "logo" || key === "globalData.logo") {
+          setLogoUrl(finalUrl);
+        }
+      } catch (error) {
+        console.error(`Error uploading image at ${path}:`, error);
+      }
+    }
+
+    setImageUploadQueue({});
+    return updated;
+  };
 
   const updateGlobalData = useCallback(async (updates) => {
     try {
@@ -73,13 +104,12 @@ export const GlobalProvider = ({ children }) => {
       console.log('Firestore updated successfully');
     } catch (error) {
       console.error('Error updating Firestore:', error);
-      setGlobalData(globalData);
     }
-  }, [globalData, setGlobalData]);
+  }, [globalData]);
 
   const handleGlobalSave = useCallback(async () => {
     try {
-      const updatedData = {
+      const baseUpdate = {
         ...globalData,
         primaryBackgroundColor,
         secondaryBackgroundColor,
@@ -92,25 +122,19 @@ export const GlobalProvider = ({ children }) => {
         social_media: socialLinksData,
       };
 
-      if (logoFile) {
-        const storageRef = ref(storage, `header/${logoFile.name}`);
-        await uploadBytes(storageRef, logoFile);
-        const url = await getDownloadURL(storageRef);
-        setLogoUrl(url);
-        updatedData.logo = url;
-        setLogoFile(null);
-      }
+      const imageUpdatedGlobal = await uploadAllImagesInQueue();
+      const finalData = { ...baseUpdate, ...imageUpdatedGlobal };
 
       const docRef = doc(db, "Global", "components");
-      await updateDoc(docRef, updatedData);
-      setGlobalData(updatedData);
-      console.log("Saved all global data!");
+      await updateDoc(docRef, finalData);
+      setGlobalData(finalData);
+      console.log("✅ Global data and image URLs saved successfully!");
     } catch (error) {
-      console.error("Error saving global data:", error);
+      console.error("❌ Error saving global data:", error);
     }
   }, [
     globalData,
-    logoFile,
+    imageUploadQueue,
     primaryBackgroundColor,
     secondaryBackgroundColor,
     tertiaryBackgroundColor,
@@ -119,13 +143,6 @@ export const GlobalProvider = ({ children }) => {
     contactInfoData,
     socialLinksData,
   ]);
-
-
-
-
-
-
-
 
   const contextValue = {
     loading,
@@ -139,19 +156,21 @@ export const GlobalProvider = ({ children }) => {
     setSecondaryBackgroundColor,
     tertiaryBackgroundColor,
     setTertiaryBackgroundColor,
-    logoUrl, 
+    logoUrl,
     setLogoUrl,
-    logoFile, 
+    logoFile,
     setLogoFile,
-    handleGlobalSave,
-    groupName, 
+    groupName,
     setGroupName,
-    groupDescription, 
+    groupDescription,
     setGroupDescription,
-    contactInfoData, 
+    contactInfoData,
     setContactInfoData,
-    socialLinksData, 
+    socialLinksData,
     setSocialLinksData,
+    handleGlobalSave,
+    enqueueImageUpload,
+    imageUploadQueue,
   };
 
   return (

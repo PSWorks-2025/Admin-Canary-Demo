@@ -124,7 +124,6 @@ const EventsSection = ({
           .map(({ key, title, description, imageUrl }) => (
             <div key={key} className="w-full h-84 mt-12 flex relative">
               <div className="w-1/2 h-full px-4">
-              
                   <ImageInput
                     handleImageUpload={(e) =>
                       handleEventImageUpload(key, e.target.files[0])
@@ -132,8 +131,8 @@ const EventsSection = ({
                     section="event"
                     top="top-2"
                     // ref={eventImageRefs.current[key]}
-                           className="w-136 h-full bg-cover bg-center float-right rounded-lg"
-                  style={{ backgroundImage: `url("${imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
+                    className="w-136 h-full bg-cover bg-center float-right rounded-lg"
+                    imagePreview={imageUrl}
                   />
               </div>
               <div className="w-1/2 h-full px-4">

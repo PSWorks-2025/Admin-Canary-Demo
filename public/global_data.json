@@ -1,0 +1,31 @@
+{
+  "project_name": "Tên dự án",
+  "project_logo": "https://url-den-logo",
+  "header_title": "Nội dung header",
+  "header_logo": "https://url-den-logo-header",
+  "meta_description": "Một câu mô tả website",
+  "contact": {
+    "phone": "0123 456 789",
+    "email": "contact@duan.com",
+    "address": "Số 1, Đường ABC, Quận XYZ"
+  },
+  "social_links": {
+    "facebook": "https://facebook.com/project",
+    "instagram": "https://instagram.com/project",
+    "youtube": "https://youtube.com/project"
+  },
+  "style": {
+    "primary_color": "#1E88E5",
+    "secondary_color": "#E3F2FD",
+    "tertiary_color": "#FFFFFF",
+    "text_color": "#212121",
+    "button_style": {
+      "border_radius": "8px",
+      "shadow": true
+    },
+    "font": {
+      "heading": "Montserrat",
+      "body": "Roboto"
+    }
+  }
+}

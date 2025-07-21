@@ -42,11 +42,8 @@ const HeroSection = ({ data, setData, enqueueImageUpload }) => {
         top="top-4"
         right="right-4"
         className="w-full h-178 bg-cover bg-center relative"
+        imagePreview={localImage}
         style={{
-          backgroundImage: `url("${
-            localImage ||
-            'https://blog.photobucket.com/hubfs/upload_pics_online.png'
-          }")`,
           height: 'calc(100vh - 5rem)',
         }}
       />

@@ -1,36 +1,32 @@
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useContext } from "react";
+import GlobalContext from "../../../../../GlobalContext";
 import { ImageInput } from "../../../../Inputs/ImageInput";
 import { TextInput } from "../../../../Inputs/TextInput";
 
 const FooterLogoAndGroupInfo = ({
-  logoUrl,
-  setLogoUrl,
-  setLogoFile,
   groupName,
   setGroupName,
   groupDescription,
   setGroupDescription,
 }) => {
-  const handleLocalLogoChange = (file) => {
+  const { logoUrl, setLogoUrl, enqueueImageUpload } = useContext(GlobalContext);
+
+  const handleLogoUpload = (file) => {
     if (!file) return;
+
     const tempUrl = URL.createObjectURL(file);
-    setLogoFile(file); // for upload later
-    setLogoUrl(tempUrl); // for immediate preview
+    setLogoUrl(tempUrl); // Preview ngay
+    enqueueImageUpload("logo", "globaldata/logo", file); // Thêm vào hàng đợi
   };
 
   return (
     <div className="w-full">
       <div className="h-16 flex items-center relative">
         <ImageInput
-          handleImageUpload={(e) => handleLocalLogoChange(e.target.files[0])}
+          handleImageUpload={(e) => handleLogoUpload(e.target.files[0])}
           className="h-11 w-11 bg-primary rounded-full bg-cover bg-center overflow-hidden flex-shrink-0"
-          style={{
-            backgroundImage: `url("${
-              logoUrl ||
-              "https://blog.photobucket.com/hubfs/upload_pics_online.png"
-            }")`,
-          }}
+          imagePreview={logoUrl}
           section="logo"
         />
         <TextInput
@@ -53,9 +49,6 @@ const FooterLogoAndGroupInfo = ({
 };
 
 FooterLogoAndGroupInfo.propTypes = {
-  logoUrl: PropTypes.string,
-  setLogoUrl: PropTypes.func.isRequired,
-  setLogoFile: PropTypes.func.isRequired,
   groupName: PropTypes.string.isRequired,
   setGroupName: PropTypes.func.isRequired,
   groupDescription: PropTypes.string.isRequired,

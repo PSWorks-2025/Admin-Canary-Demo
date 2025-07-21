@@ -2,8 +2,8 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import Header from './components/layout/Header/index.jsx';
-import Footer from './components/layout/Footer/index.jsx';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
 import LoadingScreen from './components/screens/LoadingScreen';
 
 import GlobalContext from './GlobalContext.jsx';
