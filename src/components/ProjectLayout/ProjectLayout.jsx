@@ -1,29 +1,12 @@
-import { useRef, useState } from "react";
+import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
-import { Timestamp } from "firebase/firestore"; // Added import
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 
-function ProjectLayout({ projects, onChange, onImageUpload, addProject,buttonColor }) {
-  const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  };
-
-  const debouncedOnChange = debounce(onChange, 500);
-
-  const handleChange = (id, field, value) => {
-    debouncedOnChange(id, field, value);
-  };
-
+function ProjectLayout({ projects, onChange, onImageUpload, addProject, deleteProject, buttonColor }) {
   return (
-    <section style={{borderTopColor:buttonColor,borderTopWidth:2}} className="py-8 flex flex-col items-center">
-      <h2 className="text-2xl font-bold mb-4">
-        Dự án & hoạt động nổi bật đã thực hiện
-      </h2>
+    <section style={{ borderTopColor: buttonColor, borderTopWidth: 2 }} className="py-8 flex flex-col items-center">
+      <h2 className="text-2xl font-bold mb-4">Dự án & hoạt động nổi bật đã thực hiện</h2>
       <div className="w-full flex justify-center mb-8">
         <button
           onClick={addProject}
@@ -34,19 +17,18 @@ function ProjectLayout({ projects, onChange, onImageUpload, addProject,buttonCol
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-3/5 max-w-6xl mb-10">
         {Object.entries(projects)
-          .map(([key, project]) => [key.slice(8), project])
-          .sort((a, b) => a[0] - b[0])
+          .map(([key, project]) => [key, project])
+          .sort((a, b) => a[0].slice(8) - b[0].slice(8))
           .map(([key, project]) => (
             <ProjectListItem
               key={`project_${key}`}
-              id={`project_${key}`}
+              id={key}
               title={project.title}
-              imageUrl={project.thumbnail?.src || ""}
-              started_time={project.started_time instanceof Timestamp 
-                ? project.started_time.toDate().toISOString().split("T")[0] 
-                : ""}
-              onChange={handleChange}
+              imageUrl={project.thumbnail?.src}
+              started_time={project.started_time || ""}
+              onChange={onChange}
               onImageUpload={onImageUpload}
+              onDelete={deleteProject}
             />
           ))}
       </div>
@@ -59,50 +41,53 @@ ProjectLayout.propTypes = {
   onChange: PropTypes.func.isRequired,
   onImageUpload: PropTypes.func.isRequired,
   addProject: PropTypes.func.isRequired,
+  deleteProject: PropTypes.func.isRequired,
+  buttonColor: PropTypes.string.isRequired,
 };
 
-function ProjectListItem({ id, title, imageUrl, started_time, onChange, onImageUpload }) {
+function ProjectListItem({ id, title, imageUrl, started_time, onChange, onImageUpload, onDelete }) {
   const [localTitle, setLocalTitle] = useState(title);
   const [localStartedTime, setLocalStartedTime] = useState(started_time);
 
-  const debounce = (func, wait) => {
+  const debounce = useCallback((func, wait) => {
     let timeout;
     return (...args) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func(...args), wait);
     };
-  };
+  }, []);
 
-  const debouncedOnChange = debounce(onChange, 500);
-
-  const handleChange = (field, value) => {
-    if (field === "title") setLocalTitle(value);
-    else if (field === "started_time") setLocalStartedTime(value);
-    debouncedOnChange(id, field, value);
-  };
+  const handleChange = useCallback(
+    (field, value) => {
+      const debouncedOnChange = debounce(onChange, 500);
+      if (field === "title") {
+        setLocalTitle(value);
+      } else if (field === "started_time") {
+        setLocalStartedTime(value);
+      } else if (field === "delete") {
+        onDelete(id);
+        return;
+      }
+      debouncedOnChange(id, field, value);
+    },
+    [onChange, id]
+  );
 
   return (
     <div className="relative h-96 rounded-lg overflow-hidden shadow-md">
       <div className="relative w-full h-full">
-        {/* {imageUrl && (
-          <img
-            src={imageUrl}
-            alt={title || "Project image"}
-          />
-        )} */}
-           <ImageInput
-          handleImageUpload={(file) => onImageUpload(id, file.target.files[0])}
+        <ImageInput
+          handleImageUpload={(file) => onImageUpload(id, file)}
           top="top-2"
           left="left-2"
           section="project"
-            className="w-full h-full object-contain bg-cover bg-center"
-          style={{backgroundImage:`url("${imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`}}
+          className="w-full h-full object-contain bg-cover bg-center"
+          style={{ backgroundImage: `url("${imageUrl}")` }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60"></div>
-     
         <button
           className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-          onClick={() => onChange(id, "delete", null)}
+          onClick={() => handleChange("delete", null)}
         >
           <svg
             className="w-5 h-5"
@@ -144,6 +129,7 @@ ProjectListItem.propTypes = {
   started_time: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onImageUpload: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 };
 
 export default ProjectLayout;

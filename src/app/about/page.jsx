@@ -1,242 +1,285 @@
-import React, { useContext, useEffect } from "react";
-import PropTypes from "prop-types";
-import { Timestamp } from "firebase/firestore";
+import React, { useContext, useState, useEffect } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { motion } from "framer-motion";
 import HeroSection from "../../components/AboutPageSection/HeroSection";
 import MissionSection from "../../components/AboutPageSection/MissionSection";
-import VisionSection from "../../components/AboutPageSection/VisionSection/index.jsx";
+import VisionSection from "../../components/AboutPageSection/VisionSection";
 import {
   ScrollMemberList,
   ScrollMemberListItem,
-} from "../../components/Lists/ScrollMemberList.jsx";
+} from "../../components/Lists/ScrollMemberList";
 import {
   ActivityHistoryList,
   ActivityHistoryListItem,
-} from "../../components/Lists/ActivityHistoryList.jsx";
-import { ColorContext } from "../../layout";
-import { doc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../../service/firebaseConfig.jsx";
+} from "../../components/Lists/ActivityHistoryList";
+import { ColorContext } from "./layout";
+import { db, storage } from "./service/firebaseConfig";
+import useImagePreloader from "./hooks/useImagePreloader";
+import LoadingScreen from "../../components/screens/LoadingScreen";
 
 function Aboutpage() {
-  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor, mainData, setMainData } = useContext(ColorContext);
+  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor } = useContext(ColorContext);
+  const [mainData, setMainData] = useState({
+    hero_sections: { about: { title: "", description: "", coverImage: "" } },
+    statements: { mission: { title: "", description: "", imageUrl: "" }, vision: { title: "", description: "", imageUrl: "" } },
+    members: [],
+    activity_history: [],
+  });
+  const [pendingImages, setPendingImages] = useState([]); // Array of { field, key, file, blobUrl }
+  const imagesToPreload = [
+    mainData.hero_sections?.about?.coverImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+    mainData.statements?.mission?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+    mainData.statements?.vision?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+    ...mainData.members.map((member) => member.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png"),
+    ...mainData.activity_history.flatMap((activity) => [
+      activity.image1 || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+      activity.image2 || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+    ]),
+  ];
+  const imagesLoaded = useImagePreloader(imagesToPreload);
 
-  // Normalize activity_history to ensure Timestamps
   useEffect(() => {
-    if (mainData.activity_history.some(activity => 
-      (activity.started_time && !(activity.started_time instanceof Timestamp)) ||
-      (activity.ended_time && !(activity.ended_time instanceof Timestamp))
-    )) {
-      const normalizedHistory = mainData.activity_history.map(activity => ({
-        ...activity,
-        started_time: activity.started_time instanceof Date 
-          ? Timestamp.fromDate(activity.started_time) 
-          : activity.started_time || null,
-        ended_time: activity.ended_time instanceof Date 
-          ? Timestamp.fromDate(activity.ended_time) 
-          : activity.ended_time || null,
-      }));
-      updateMainData({ activity_history: normalizedHistory });
-    }
-    console.log("mainData.activity_history:", mainData.activity_history);
-  }, [mainData.activity_history]);
-
-  // Deep merge utility to ensure nested updates
-  const deepMerge = (target, source) => {
-    const output = { ...target };
-    for (const key in source) {
-      if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key]) && !(source[key] instanceof Timestamp) && !(source[key] instanceof Date)) {
-        output[key] = deepMerge(target[key] || {}, source[key]);
-      } else {
-        output[key] = source[key];
+    const fetchData = async () => {
+      try {
+        const docRef = doc(db, "Main pages", "components");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setMainData({
+            hero_sections: {
+              about: {
+                title: data.hero_sections?.about?.title || "",
+                description: data.hero_sections?.about?.description || "",
+                coverImage: data.hero_sections?.about?.coverImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+              },
+            },
+            statements: {
+              mission: {
+                title: data.statements?.mission?.title || "",
+                description: data.statements?.mission?.description || "",
+                imageUrl: data.statements?.mission?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+              },
+              vision: {
+                title: data.statements?.vision?.title || "",
+                description: data.statements?.vision?.description || "",
+                imageUrl: data.statements?.vision?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+              },
+            },
+            members: (data.members || []).map((member) => ({
+              name: member.name || "",
+              role: member.role || "",
+              image: member.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+            })),
+            activity_history: (data.activity_history || []).map((activity) => ({
+              started_time: activity.started_time || null,
+              ended_time: activity.ended_time || null,
+              text: activity.text || "",
+              image1: activity.image1 || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+              image2: activity.image2 || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+            })),
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching Firestore data:", error);
       }
-    }
-    return output;
-  };
+    };
+    fetchData();
+  }, []);
 
-  const updateMainData = async (updates) => {
-    try {
-      // Optimistic update: update local state first
-      setMainData((prev) => {
-        const newMainData = deepMerge(prev, updates);
-        console.log("setMainData called with:", newMainData);
-        return newMainData;
-      });
-      // Update Firestore
-      const docRef = doc(db, "Main pages", "components");
-      const mergedData = deepMerge(mainData, updates);
-      await updateDoc(docRef, mergedData);
-      console.log("Firestore updated successfully:", mergedData);
-    } catch (error) {
-      console.error("Error updating mainData:", error);
-      // Revert state on error
-      setMainData(mainData);
-    }
-  };
-
-  const handleFieldChange = async (field, value) => {
-    console.log("handleFieldChange:", { field, value });
-    await updateMainData({
+  const updateHeroField = (field, value) => {
+    setMainData((prev) => ({
+      ...prev,
       hero_sections: {
-        ...mainData.hero_sections,
-        about: { ...mainData.hero_sections.about, [field]: value },
+        ...prev.hero_sections,
+        about: { ...prev.hero_sections.about, [field]: value },
       },
-    });
+    }));
   };
 
-  const handleImageUpload = async (field, file) => {
+  const updateHeroImage = (field, file) => {
     if (file instanceof File || file instanceof Blob) {
-      try {
-        const storageRef = ref(storage, `/hero_sections/about/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(storageRef);
-        await updateMainData({
-          hero_sections: {
-            ...mainData.hero_sections,
-            about: { ...mainData.hero_sections.about, [field]: downloadUrl },
-          },
-        });
-      } catch (error) {
-        console.error(`Error uploading image for field ${field}:`, error);
-      }
-    } else {
-      console.error(`Invalid file for field ${field}:`, file);
+      const blobUrl = URL.createObjectURL(file);
+      setPendingImages((prev) => [...prev.filter((img) => img.field !== field || img.key !== "hero"), { field, key: "hero", file, blobUrl }]);
+      setMainData((prev) => ({
+        ...prev,
+        hero_sections: {
+          ...prev.hero_sections,
+          about: { ...prev.hero_sections.about, [field]: blobUrl },
+        },
+      }));
     }
   };
 
-  const handleNestedFieldChange = async (section, field, value) => {
-    console.log("handleNestedFieldChange:", { section, field, value });
-    await updateMainData({
+  const updateNestedField = (section, field, value) => {
+    setMainData((prev) => ({
+      ...prev,
       statements: {
-        ...mainData.statements,
-        [section]: { ...mainData.statements[section], [field]: value },
+        ...prev.statements,
+        [section]: { ...prev.statements[section], [field]: value },
       },
-    });
+    }));
   };
 
-  const handleNestedImageUpload = async (section, field, file) => {
+  const updateNestedImage = (section, field, file) => {
     if (file instanceof File || file instanceof Blob) {
-      try {
-        const storageRef = ref(storage, `about/statements/${section}/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(storageRef);
-        await updateMainData({
-          statements: {
-            ...mainData.statements,
-            [section]: { ...mainData.statements[section], [field]: downloadUrl },
-          },
-        });
-      } catch (error) {
-        console.error(`Error uploading image for ${section} ${field}:`, error);
-      }
-    } else {
-      console.error(`Invalid file for ${section} ${field}:`, file);
+      const blobUrl = URL.createObjectURL(file);
+      setPendingImages((prev) => [...prev.filter((img) => img.key !== section), { field, key: section, file, blobUrl }]);
+      setMainData((prev) => ({
+        ...prev,
+        statements: {
+          ...prev.statements,
+          [section]: { ...prev.statements[section], [field]: blobUrl },
+        },
+      }));
     }
   };
 
-  const handleMemberChange = async (index, field, value) => {
-    console.log("handleMemberChange:", { index, field, value });
-    await updateMainData({
-      members: mainData.members.map((member, i) =>
-        i === index ? { ...member, [field]: value } : member
+  const updateMemberField = (index, field, value) => {
+    setMainData((prev) => ({
+      ...prev,
+      members: prev.members.map((member, i) => (i === index ? { ...member, [field]: value } : member)),
+    }));
+  };
+
+  const updateMemberImage = (index, file) => {
+    if (file instanceof File || file instanceof Blob) {
+      const blobUrl = URL.createObjectURL(file);
+      setPendingImages((prev) => [...prev.filter((img) => img.key !== `member_${index}`), { field: "image", key: `member_${index}`, file, blobUrl }]);
+      setMainData((prev) => ({
+        ...prev,
+        members: prev.members.map((member, i) => (i === index ? { ...member, image: blobUrl } : member)),
+      }));
+    }
+  };
+
+  const addMember = () => {
+    setMainData((prev) => ({
+      ...prev,
+      members: [...prev.members, { name: "", role: "", image: "https://blog.photobucket.com/hubfs/upload_pics_online.png" }],
+    }));
+  };
+
+  const deleteMember = (index) => {
+    setMainData((prev) => ({
+      ...prev,
+      members: prev.members.filter((_, i) => i !== index),
+    }));
+    setPendingImages((prev) => prev.filter((img) => img.key !== `member_${index}`));
+  };
+
+  const updateActivityField = (index, field, value) => {
+    const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
+    const dateValue = (field === "started_time" || field === "ended_time") && value && isValidDate(value) ? value : value;
+    setMainData((prev) => ({
+      ...prev,
+      activity_history: prev.activity_history.map((activity, i) =>
+        i === index ? { ...activity, [field]: dateValue } : activity
       ),
-    });
+    }));
   };
 
-  const handleMemberImageUpload = async (index, file) => {
+  const updateActivityImage = (index, field, file) => {
     if (file instanceof File || file instanceof Blob) {
-      try {
-        const storageRef = ref(storage, `about/members/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(storageRef);
-        await updateMainData({
-          members: mainData.members.map((member, i) =>
-            i === index ? { ...member, image: downloadUrl } : member
-          ),
-        });
-      } catch (error) {
-        console.error(`Error uploading image for member ${index}:`, error);
-      }
-    } else {
-      console.error(`Invalid file for member ${index}:`, file);
-    }
-  };
-
-  const addMember = async () => {
-    await updateMainData({
-      members: [...mainData.members, { name: "", role: "", image: "" }],
-    });
-  };
-
-  const deleteMember = async (index) => {
-    await updateMainData({
-      members: mainData.members.filter((_, i) => i !== index),
-    });
-  };
-
-  const handleActivityChange = async (index, field, value) => {
-    console.log("handleActivityChange:", { index, field, value });
-    if (field === "delete") {
-      await deleteActivity(index);
-    } else {
-      const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
-      const dateValue =
-        (field === "started_time" || field === "ended_time") && value
-          ? isValidDate(value)
-            ? Timestamp.fromDate(new Date(value))
-            : null
-          : value;
-      await updateMainData({
-        activity_history: mainData.activity_history.map((activity, i) =>
-          i === index
-            ? { ...activity, [field]: dateValue }
-            : activity
+      const blobUrl = URL.createObjectURL(file);
+      setPendingImages((prev) => [...prev.filter((img) => img.key !== `activity_${index}_${field}`), { field, key: `activity_${index}_${field}`, file, blobUrl }]);
+      setMainData((prev) => ({
+        ...prev,
+        activity_history: prev.activity_history.map((activity, i) =>
+          i === index ? { ...activity, [field]: blobUrl } : activity
         ),
-      });
-      if ((field === "started_time" || field === "ended_time") && value && !isValidDate(value)) {
-        console.warn(`Invalid date format for ${field}: ${value}`);
-      }
+      }));
     }
   };
 
-  const handleActivityImageUpload = async (index, field, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      try {
-        const storageRef = ref(storage, `about/activity_history/${field}/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(storageRef);
-        await updateMainData({
-          activity_history: mainData.activity_history.map((activity, i) =>
-            i === index ? { ...activity, [field]: downloadUrl } : activity
-          ),
-        });
-      } catch (error) {
-        console.error(`Error uploading image for activity ${index}, field ${field}:`, error);
-      }
-    } else {
-      console.error(`Invalid file for activity ${index}, field ${field}:`, file);
-    }
-  };
-
-  const addActivity = async () => {
-    await updateMainData({
+  const addActivity = () => {
+    setMainData((prev) => ({
+      ...prev,
       activity_history: [
-        ...mainData.activity_history,
+        ...prev.activity_history,
         {
           started_time: null,
           ended_time: null,
           text: "",
-          image1: "",
-          image2: "",
+          image1: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+          image2: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
         },
       ],
-    });
+    }));
   };
 
-  const deleteActivity = async (index) => {
-    await updateMainData({
-      activity_history: mainData.activity_history.filter((_, i) => i !== index),
-    });
+  const deleteActivity = (index) => {
+    setMainData((prev) => ({
+      ...prev,
+      activity_history: prev.activity_history.filter((_, i) => i !== index),
+    }));
+    setPendingImages((prev) => prev.filter((img) => !img.key.startsWith(`activity_${index}_`)));
   };
+
+  const saveChanges = async () => {
+    try {
+      // Upload pending images to Firebase Storage
+      const imageUpdates = {};
+      for (const { field, key, file } of pendingImages) {
+        const storagePath =
+          key === "hero"
+            ? `hero_sections/about/${file.name}`
+            : key.startsWith("member_")
+            ? `about/members/${file.name}`
+            : key.startsWith("activity_")
+            ? `about/activity_history/${field}/${file.name}`
+            : `about/statements/${key}/${file.name}`;
+        const storageRef = ref(storage, storagePath);
+        await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(storageRef);
+        imageUpdates[`${key}.${field}`] = downloadUrl;
+        URL.revokeObjectURL(file); // Clean up Blob URL
+      }
+
+      // Apply image updates to mainData
+      const updatedMainData = { ...mainData };
+      Object.entries(imageUpdates).forEach(([keyField, url]) => {
+        const [key, field] = keyField.split(".");
+        if (key === "hero") {
+          updatedMainData.hero_sections.about[field] = url;
+        } else if (key.startsWith("member_")) {
+          const index = parseInt(key.replace("member_", ""), 10);
+          updatedMainData.members[index][field] = url;
+        } else if (key.startsWith("activity_")) {
+          const [, index, imageField] = key.match(/activity_(\d+)_(image\d+)/);
+          updatedMainData.activity_history[index][imageField] = url;
+        } else {
+          updatedMainData.statements[key][field] = url;
+        }
+      });
+
+      // Convert date strings to Firestore Timestamps for activity_history
+      updatedMainData.activity_history = updatedMainData.activity_history.map((activity) => ({
+        ...activity,
+        started_time: activity.started_time && !isNaN(new Date(activity.started_time).getTime()) ? Timestamp.fromDate(new Date(activity.started_time)) : null,
+        ended_time: activity.ended_time && !isNaN(new Date(activity.ended_time).getTime()) ? Timestamp.fromDate(new Date(activity.ended_time)) : null,
+      }));
+
+      // Save to Firestore
+      const docRef = doc(db, "Main pages", "components");
+      await updateDoc(docRef, {
+        hero_sections: updatedMainData.hero_sections,
+        statements: updatedMainData.statements,
+        members: updatedMainData.members,
+        activity_history: updatedMainData.activity_history,
+      });
+
+      // Update state
+      setMainData(updatedMainData);
+      setPendingImages([]); // Clear pending images
+    } catch (error) {
+      console.error("Error saving to Firestore:", error);
+    }
+  };
+
+  if (!imagesLoaded) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="w-full max-w-[100vw] overflow-x-hidden" style={{ backgroundColor: primaryBackgroundColor }}>
@@ -245,24 +288,23 @@ function Aboutpage() {
         backgroundColor={primaryBackgroundColor}
         title={mainData.hero_sections.about.title}
         description={mainData.hero_sections.about.description}
-        subtitle={mainData.hero_sections.about.subtitle}
-        handleFieldChange={handleFieldChange}
-        handleImageUpload={handleImageUpload}
+        onFieldChange={updateHeroField}
+        onImageUpload={updateHeroImage}
       />
-      <div className="w-full py-2" style={{borderTopColor:secondaryBackgroundColor,borderTopWidth:2}} >
-      <MissionSection
-        mission={mainData.statements.mission}
-        handleNestedFieldChange={handleNestedFieldChange}
-        handleNestedImageUpload={handleNestedImageUpload}
-      />
-      <VisionSection
-        vision={mainData.statements.vision}
-        handleNestedFieldChange={handleNestedFieldChange}
-        handleNestedImageUpload={handleNestedImageUpload}
-      />
+      <div className="w-full py-2" style={{ borderTopColor: secondaryBackgroundColor, borderTopWidth: 2 }}>
+        <MissionSection
+          mission={mainData.statements.mission}
+          onFieldChange={(field, value) => updateNestedField("mission", field, value)}
+          onImageUpload={(field, file) => updateNestedImage("mission", field, file)}
+        />
+        <VisionSection
+          vision={mainData.statements.vision}
+          onFieldChange={(field, value) => updateNestedField("vision", field, value)}
+          onImageUpload={(field, file) => updateNestedImage("vision", field, file)}
+        />
       </div>
-      <div className="py-2" style={{borderTopColor:secondaryBackgroundColor,borderTopWidth:2}}>
-        <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center" >
+      <div className="py-2" style={{ borderTopColor: secondaryBackgroundColor, borderTopWidth: 2 }}>
+        <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center">
           Đội ngũ thành viên
         </div>
         <div className="w-full flex justify-center my-4 md:mb-8">
@@ -277,38 +319,19 @@ function Aboutpage() {
           {mainData.members.map((member, index) => (
             <div key={`member_${index}`} className="relative w-full max-w-[16rem] mx-auto">
               <ScrollMemberListItem
-                id={`member_${index}`}
+                index={index}
                 imageUrl={member.image}
                 name={member.name}
                 role={member.role}
-                onChange={(field, value) => handleMemberChange(index, field, value)}
-                onImageUpload={(file) => handleMemberImageUpload(index, file)}
+                onChange={(field, value) => updateMemberField(index, field, value)}
+                onImageUpload={(file) => updateMemberImage(index, file)}
                 onDelete={() => deleteMember(index)}
               />
-              <button
-                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-                onClick={() => deleteMember(index)}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
             </div>
           ))}
         </ScrollMemberList>
       </div>
-      <div style={{borderTopColor:secondaryBackgroundColor,borderTopWidth:2}}>
+      <div style={{ borderTopColor: secondaryBackgroundColor, borderTopWidth: 2 }}>
         <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center">
           Lịch sử hoạt động
         </div>
@@ -325,34 +348,33 @@ function Aboutpage() {
             <div key={`activity_${index}`} className="relative w-full max-w-[20rem] mx-auto">
               <ActivityHistoryListItem
                 index={index}
-                startDate={
-                  activity.started_time && activity.started_time.toDate && !isNaN(activity.started_time.toDate().getTime())
-                    ? activity.started_time.toDate().toISOString().split("T")[0]
-                    : ""
-                }
-                endDate={
-                  activity.ended_time && activity.ended_time.toDate && !isNaN(activity.ended_time.toDate().getTime())
-                    ? activity.ended_time.toDate().toISOString().split("T")[0]
-                    : ""
-                }
+                startDate={activity.started_time || ""}
+                endDate={activity.ended_time || ""}
                 imageUrl1={activity.image1}
                 imageUrl2={activity.image2}
                 description={activity.text}
-                onChange={(field, value) => handleActivityChange(index, field, value)}
-                onImageUpload={(field, file) => handleActivityImageUpload(index, field, file)}
+                onChange={(field, value) => updateActivityField(index, field, value)}
+                onImageUpload={(field, file) => updateActivityImage(index, field, file)}
+                onDelete={() => deleteActivity(index)}
                 buttonColor={tertiaryBackgroundColor}
               />
             </div>
           ))}
         </ActivityHistoryList>
       </div>
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="fixed bottom-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 group"
+        onClick={saveChanges}
+      >
+        <span className="hidden group-hover:inline absolute -top-8 right-0 bg-gray-800 text-white text-sm px-2 py-1 rounded">Save Changes</span>
+        Save
+      </motion.button>
       <div className="mt-8 md:mt-20" />
     </div>
   );
 }
-
-Aboutpage.propTypes = {
-  // No props needed since mainData is from ColorContext
-};
 
 export default Aboutpage;

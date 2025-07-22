@@ -7,15 +7,35 @@ import { TextInput } from "../Inputs/TextInput";
 import React from "react";
 
 export function ScrollMemberListItem({ index, imageUrl, name, role, onChange, onImageUpload, onDelete }) {
+  const [localName, setLocalName] = useState(name);
+  const [localRole, setLocalRole] = useState(role);
+
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  const handleChange = (field, value) => {
+    const debouncedHandleChange = debounce(onChange, 500);
+    if (field === "name") {
+      setLocalName(value);
+    } else {
+      setLocalRole(value);
+    }
+    debouncedHandleChange(field, value);
+  };
+
   return (
     <div className="w-64 mr-8 h-full relative flex-shrink-0">
       <div className="relative">
-        
         <ImageInput
           handleImageUpload={(e) => onImageUpload(e.target.files[0])}
           top="top-2"
           left="left-2"
-          style={{ backgroundImage: `url("${imageUrl|| 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
+          style={{ backgroundImage: `url("${imageUrl}")` }}
           className="w-full h-64 bg-cover bg-center rounded-sm"
         />
         <button
@@ -41,14 +61,14 @@ export function ScrollMemberListItem({ index, imageUrl, name, role, onChange, on
       </div>
       <TextInput
         className="w-full font-bold text-lg pt-2 text-primary-title text-center outline-none bg-transparent"
-        value={name}
-        onChange={(e) => onChange("name", e.target.value)}
+        value={localName}
+        onChange={(e) => handleChange("name", e.target.value)}
         placeholder="Nhập tên thành viên"
       />
       <TextInput
         className="w-full text-base/5 text-primary-paragraph text-center outline-none bg-transparent"
-        value={role}
-        onChange={(e) => onChange("role", e.target.value)}
+        value={localRole}
+        onChange={(e) => handleChange("role", e.target.value)}
         placeholder="Nhập chức vụ"
       />
     </div>
@@ -70,12 +90,11 @@ export function ScrollMemberList({ children }) {
   const containerRef = useRef(null);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
-  // Dynamically calculate items per page based on screen width
   useEffect(() => {
     const updateItemsPerPage = () => {
       const width = window.innerWidth;
       if (width < 640) {
-        setItemsPerPage(2); // Mobile: 2 item per page
+        setItemsPerPage(2); // Mobile: 2 items per page
       } else if (width < 1024) {
         setItemsPerPage(3); // Tablet: 3 items per page
       } else {
@@ -94,7 +113,7 @@ export function ScrollMemberList({ children }) {
   const handleNext = () => setPage((prev) => Math.min(prev + 1, numberOfPages - 1));
 
   return (
-    <div className="w-full pt-12 flex  justify-center">
+    <div className="w-full pt-12 flex justify-center">
       <div className="w-full max-w-7xl relative px-6">
         <button
           onClick={handlePrev}
