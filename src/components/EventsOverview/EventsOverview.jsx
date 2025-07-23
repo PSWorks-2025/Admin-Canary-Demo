@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import "./styles.css";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
+import SectionWrap from "../SectionWrap";
 
 function EventsOverview({ pageData, onFieldChange, onImageUpload, addEvent, deleteEvent, buttonColor }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,7 +50,7 @@ function EventsOverview({ pageData, onFieldChange, onImageUpload, addEvent, dele
     .concat(pageData.events.slice(0, Math.max(0, currentIndex + 4 - pageData.events.length)));
 
   return (
-    <section style={{ borderTopColor: buttonColor, borderTopWidth: 2 }} className="px-8 py-8">
+    <SectionWrap className="w-full" borderColor={buttonColor}>
       <TextInput
         className="w-full text-2xl font-bold text-black outline-none bg-transparent text-center mb-4"
         value={localHeading}
@@ -120,7 +121,7 @@ function EventsOverview({ pageData, onFieldChange, onImageUpload, addEvent, dele
           Next
         </button>
       </div>
-    </section>
+    </SectionWrap>
   );
 }
 

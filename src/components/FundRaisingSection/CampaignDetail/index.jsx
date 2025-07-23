@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
-import { TextInput } from "./Inputs/TextInput";
+import { TextInput } from "../../Inputs/TextInput";
+import SectionWrap from "../../SectionWrap";
 
-const CampaignDetails = ({ campaignTitle, campaignDescription, onFieldChange }) => {
+const CampaignDetails = ({ campaignTitle, campaignDescription, onFieldChange, buttonColor }) => {
   const [localTitle, setLocalTitle] = useState(campaignTitle);
   const [localDescription, setLocalDescription] = useState(campaignDescription);
 
@@ -28,7 +29,7 @@ const CampaignDetails = ({ campaignTitle, campaignDescription, onFieldChange }) 
   );
 
   return (
-    <div className="mt-6 px-6 max-w-2xl mx-auto">
+    <SectionWrap borderColor={buttonColor} className="mt-6 px-6 max-w-2xl mx-auto">
       <TextInput
         className="text-4xl font-bold text-gray-900 outline-none bg-transparent w-full border rounded px-2 py-1"
         value={localTitle}
@@ -43,7 +44,7 @@ const CampaignDetails = ({ campaignTitle, campaignDescription, onFieldChange }) 
         placeholder="Nhập mô tả chiến dịch"
         rows="4"
       />
-    </div>
+    </SectionWrap>
   );
 };
 

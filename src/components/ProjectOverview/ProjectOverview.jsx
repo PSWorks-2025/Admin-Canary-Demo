@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
+import SectionWrap from "../SectionWrap";
 
 function ProjectOverview({ pageData, onFieldChange, onImageUpload, buttonColor }) {
   const [localHeading, setLocalHeading] = useState(pageData.heading);
@@ -38,7 +39,7 @@ function ProjectOverview({ pageData, onFieldChange, onImageUpload, buttonColor }
   );
 
   return (
-    <section style={{ borderTopColor: buttonColor, borderTopWidth: 2 }} className="px-8 py-8">
+    <SectionWrap className="w-full" borderColor={buttonColor}>
       <TextInput
         className="w-full text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-6"
         value={localHeading}
@@ -100,7 +101,7 @@ function ProjectOverview({ pageData, onFieldChange, onImageUpload, buttonColor }
           </button>
         </div>
       </div>
-    </section>
+    </SectionWrap>
   );
 }
 

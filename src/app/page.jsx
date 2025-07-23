@@ -15,12 +15,10 @@ import { uploadImageToStorage } from '../service/firebaseWrite.jsx';
 import SaveFloatingButton from '../globalComponent/SaveButton/index.jsx';
 import StorySection from '../components/HomePageSection/StorySection/index.jsx';
 
-const HomePage = () => {
+const HomePage = ({mainData,setMainData}) => {
   const {
     primaryBackgroundColor,
     secondaryBackgroundColor,
-    mainData,
-    setMainData,
   } = useContext(ColorContext);
 
   const [heroSections, setHeroSections] = useState(mainData.hero_sections);
@@ -32,7 +30,7 @@ const HomePage = () => {
     mainData.story_overviews
   );
   const [storiesTitle, setStoriesTitle] = useState(
-    mainData.hero_sections.stories.title || ''
+    mainData?.hero_sections?.stories?.title || ''
   );
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -131,7 +129,6 @@ const HomePage = () => {
         setHasPendingChanges={setHasPendingChanges}
       />
 
-      <div className="border-b-black border-b-3"></div>
       <EventsSection
         data={eventOverviews}
         setData={setEventOverviews}
@@ -140,7 +137,6 @@ const HomePage = () => {
         enqueueImageUpload={enqueueImageUpload}
         buttonColor={secondaryBackgroundColor}
       />
-      <div className="border-b-black border-b-3"></div>
 
       <div className="w-full">
         <StorySection

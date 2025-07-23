@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { ImageInput } from "../../Inputs/ImageInput";
 import { TextInput } from "../../Inputs/TextInput";
+import SectionWrap from "../../SectionWrap";
 
 const StoriesSection = ({
   pageData,
@@ -48,7 +49,7 @@ const StoriesSection = ({
   );
 
   return (
-    <div className="px-4">
+    <SectionWrap className="w-full" borderColor={buttonColor}>
       <TextInput
         className="mt-5 text-center font-bold md:text-2xl text-xl ml-5 sm:ml-0 w-full max-w-[600px] mx-auto outline-none bg-transparent"
         value={localHeading}
@@ -66,7 +67,7 @@ const StoriesSection = ({
                 section={`story-${story.id}`}
                 top="top-2"
                 left="left-2"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover bg-no-repeat bg-center"
                 style={{ backgroundImage: `url("${story.imageUrl || 'https://via.placeholder.com/144x144'}")` }}
               />
               <button
@@ -128,14 +129,14 @@ const StoriesSection = ({
       <div className="hidden sm:block">
         {pageData.stories.map((story, index) => (
           <div key={story.id} className="flex flex-row justify-center items-start mt-10">
-            <div className="image-container w-36 h-36 overflow-hidden rounded-lg mr-4 relative">
+            <div className="image-container w-full max-w-[40%] h-[400px] overflow-hidden rounded-lg mr-4 relative">
               <ImageInput
                 handleImageUpload={(e) => onStoryImageUpload(story.id, e.target.files[0])}
                 section={`story-${story.id}`}
                 top="top-2"
                 left="left-2"
                 style={{ backgroundImage: `url("${story.imageUrl || 'https://via.placeholder.com/144x144'}")` }}
-                className="w-full h-full object-cover bg-center"
+                className="w-full h-full object-cover bg-center bg-no-repeat"
               />
               <button
                 className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
@@ -191,7 +192,7 @@ const StoriesSection = ({
           </button>
         </div>
       </div>
-    </div>
+    </SectionWrap>
   );
 };
 

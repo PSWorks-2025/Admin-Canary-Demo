@@ -2,10 +2,11 @@ import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
+import SectionWrap from "../SectionWrap";
 
 function ProjectLayout({ projects, onChange, onImageUpload, addProject, deleteProject, buttonColor }) {
   return (
-    <section style={{ borderTopColor: buttonColor, borderTopWidth: 2 }} className="py-8 flex flex-col items-center">
+    <SectionWrap className="w-full flex flex-col items-center" borderColor={buttonColor}>
       <h2 className="text-2xl font-bold mb-4">Dự án & hoạt động nổi bật đã thực hiện</h2>
       <div className="w-full flex justify-center mb-8">
         <button
@@ -32,7 +33,7 @@ function ProjectLayout({ projects, onChange, onImageUpload, addProject, deletePr
             />
           ))}
       </div>
-    </section>
+    </SectionWrap>
   );
 }
 

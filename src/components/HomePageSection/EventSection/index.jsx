@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ImageInput } from '../../Inputs/ImageInput';
 import { TextInput } from '../../Inputs/TextInput';
+import SectionWrap from '../../SectionWrap';
 
 const EventsSection = ({
   data,
@@ -91,7 +92,7 @@ const EventsSection = ({
   };
 
   return (
-    <div className="w-full">
+    <SectionWrap className="w-full" borderColor={buttonColor}>
       {/* currently dont allow change title of sections */}
       {/* <TextInput
         className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
@@ -185,7 +186,7 @@ const EventsSection = ({
             </div>
           ))}
       </div>
-    </div>
+    </SectionWrap>
   );
 };
 

@@ -56,11 +56,15 @@ const FundraisingHeader = ({
           backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${imageUrl})`,
         }}
       >
-        <div className="absolute bottom-4 left-4 right-4">
+        <div className="absolute bottom-4 left-4 right-4 event">
           <TextInput
-            className="text-2xl font-bold text-white outline-none bg-transparent border rounded px-2 py-1"
+            className="text-2xl font-bold text-white outline-none bg-transparent border rounded px-2 py-1 z-10"
             value={localFundraiserName}
-            onChange={(e) => handleChange("fundraiserName", e.target.value)}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleChange("fundraiserName", e.target.value);
+            }}
+            onClick={(e) => e.stopPropagation()} // Prevent click from reaching ImageInput
             placeholder="Nhập tên quỹ"
           />
           <div className="mt-2">
@@ -77,9 +81,13 @@ const FundraisingHeader = ({
               <div className="flex flex-row items-center">
                 <TextInput
                   type="number"
-                  className="text-white ml-2 outline-none bg-transparent rounded px-2 py-1 w-32"
+                  className="text-white ml-2 outline-none bg-transparent rounded px-2 py-1 w-32 z-10"
                   value={localGoalAmount}
-                  onChange={(e) => handleChange("goalAmount", e.target.value)}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    handleChange("goalAmount", e.target.value);
+                  }}
+                  onClick={(e) => e.stopPropagation()} // Prevent click from reaching ImageInput
                   placeholder="Nhập mục tiêu"
                   min="0"
                 />
@@ -89,17 +97,23 @@ const FundraisingHeader = ({
           </div>
           <div className="mt-4 flex items-center">
             <ImageInput
-              handleImageUpload={(e) => onImageUpload("qrCodeUrl", e.target.files[0])}
+              handleImageUpload={(e) => {
+                e.stopPropagation();
+                onImageUpload("qrCodeUrl", e.target.files[0]);
+              }}
               section="qr-code"
               top="top-2"
               left="left-2"
-              className="w-24 h-24 object-cover"
+              className="w-24 h-24 object-cover z-10"
               style={{ backgroundImage: `url("${qrCodeUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
             />
             <button
-              className="ml-4 text-white font-medium px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200"
+              className="ml-4 text-white font-medium px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200 z-10"
               style={{ backgroundColor: buttonColor || "#4160DF" }}
-              onClick={onSupportClick}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSupportClick();
+              }}
             >
               Ủng hộ ngay
             </button>

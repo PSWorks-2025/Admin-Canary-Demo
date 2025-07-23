@@ -13,14 +13,16 @@ import {
   ActivityHistoryList,
   ActivityHistoryListItem,
 } from "../../components/Lists/ActivityHistoryList";
-import { ColorContext } from "./layout";
-import { db, storage } from "./service/firebaseConfig";
-import useImagePreloader from "./hooks/useImagePreloader";
+import { ColorContext } from "../../layout";
+import { db, storage } from "../../service/firebaseConfig";
+import useImagePreloader from "../../hooks/useImagePreloader";
 import LoadingScreen from "../../components/screens/LoadingScreen";
+import SaveFloatingButton from "../../globalComponent/SaveButton";
+import SectionWrap from "../../components/SectionWrap";
 
-function Aboutpage() {
+function Aboutpage({mainData,setMainData}) {
   const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor } = useContext(ColorContext);
-  const [mainData, setMainData] = useState({
+  const [localData, setLocalData] = useState({
     hero_sections: { about: { title: "", description: "", coverImage: "" } },
     statements: { mission: { title: "", description: "", imageUrl: "" }, vision: { title: "", description: "", imageUrl: "" } },
     members: [],
@@ -28,11 +30,11 @@ function Aboutpage() {
   });
   const [pendingImages, setPendingImages] = useState([]); // Array of { field, key, file, blobUrl }
   const imagesToPreload = [
-    mainData.hero_sections?.about?.coverImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-    mainData.statements?.mission?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-    mainData.statements?.vision?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-    ...mainData.members.map((member) => member.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png"),
-    ...mainData.activity_history.flatMap((activity) => [
+    localData.hero_sections?.about?.coverImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+    localData.statements?.mission?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+    localData.statements?.vision?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+    ...localData.members.map((member) => member.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png"),
+    ...localData.activity_history.flatMap((activity) => [
       activity.image1 || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
       activity.image2 || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
     ]),
@@ -41,12 +43,8 @@ function Aboutpage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const docRef = doc(db, "Main pages", "components");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setMainData({
+      const data = mainData || {};
+          setLocalData({
             hero_sections: {
               about: {
                 title: data.hero_sections?.about?.title || "",
@@ -80,15 +78,12 @@ function Aboutpage() {
             })),
           });
         }
-      } catch (error) {
-        console.error("Error fetching Firestore data:", error);
-      }
-    };
+     
     fetchData();
   }, []);
 
   const updateHeroField = (field, value) => {
-    setMainData((prev) => ({
+    setLocalData((prev) => ({
       ...prev,
       hero_sections: {
         ...prev.hero_sections,
@@ -101,7 +96,7 @@ function Aboutpage() {
     if (file instanceof File || file instanceof Blob) {
       const blobUrl = URL.createObjectURL(file);
       setPendingImages((prev) => [...prev.filter((img) => img.field !== field || img.key !== "hero"), { field, key: "hero", file, blobUrl }]);
-      setMainData((prev) => ({
+      setLocalData((prev) => ({
         ...prev,
         hero_sections: {
           ...prev.hero_sections,
@@ -112,7 +107,7 @@ function Aboutpage() {
   };
 
   const updateNestedField = (section, field, value) => {
-    setMainData((prev) => ({
+    setLocalData((prev) => ({
       ...prev,
       statements: {
         ...prev.statements,
@@ -125,7 +120,7 @@ function Aboutpage() {
     if (file instanceof File || file instanceof Blob) {
       const blobUrl = URL.createObjectURL(file);
       setPendingImages((prev) => [...prev.filter((img) => img.key !== section), { field, key: section, file, blobUrl }]);
-      setMainData((prev) => ({
+      setLocalData((prev) => ({
         ...prev,
         statements: {
           ...prev.statements,
@@ -136,7 +131,7 @@ function Aboutpage() {
   };
 
   const updateMemberField = (index, field, value) => {
-    setMainData((prev) => ({
+    setLocalData((prev) => ({
       ...prev,
       members: prev.members.map((member, i) => (i === index ? { ...member, [field]: value } : member)),
     }));
@@ -146,7 +141,7 @@ function Aboutpage() {
     if (file instanceof File || file instanceof Blob) {
       const blobUrl = URL.createObjectURL(file);
       setPendingImages((prev) => [...prev.filter((img) => img.key !== `member_${index}`), { field: "image", key: `member_${index}`, file, blobUrl }]);
-      setMainData((prev) => ({
+      setLocalData((prev) => ({
         ...prev,
         members: prev.members.map((member, i) => (i === index ? { ...member, image: blobUrl } : member)),
       }));
@@ -154,14 +149,14 @@ function Aboutpage() {
   };
 
   const addMember = () => {
-    setMainData((prev) => ({
+    setLocalData((prev) => ({
       ...prev,
       members: [...prev.members, { name: "", role: "", image: "https://blog.photobucket.com/hubfs/upload_pics_online.png" }],
     }));
   };
 
   const deleteMember = (index) => {
-    setMainData((prev) => ({
+    setLocalData((prev) => ({
       ...prev,
       members: prev.members.filter((_, i) => i !== index),
     }));
@@ -171,7 +166,7 @@ function Aboutpage() {
   const updateActivityField = (index, field, value) => {
     const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
     const dateValue = (field === "started_time" || field === "ended_time") && value && isValidDate(value) ? value : value;
-    setMainData((prev) => ({
+    setLocalData((prev) => ({
       ...prev,
       activity_history: prev.activity_history.map((activity, i) =>
         i === index ? { ...activity, [field]: dateValue } : activity
@@ -183,7 +178,7 @@ function Aboutpage() {
     if (file instanceof File || file instanceof Blob) {
       const blobUrl = URL.createObjectURL(file);
       setPendingImages((prev) => [...prev.filter((img) => img.key !== `activity_${index}_${field}`), { field, key: `activity_${index}_${field}`, file, blobUrl }]);
-      setMainData((prev) => ({
+      setLocalData((prev) => ({
         ...prev,
         activity_history: prev.activity_history.map((activity, i) =>
           i === index ? { ...activity, [field]: blobUrl } : activity
@@ -193,7 +188,7 @@ function Aboutpage() {
   };
 
   const addActivity = () => {
-    setMainData((prev) => ({
+    setLocalData((prev) => ({
       ...prev,
       activity_history: [
         ...prev.activity_history,
@@ -209,7 +204,7 @@ function Aboutpage() {
   };
 
   const deleteActivity = (index) => {
-    setMainData((prev) => ({
+    setLocalData((prev) => ({
       ...prev,
       activity_history: prev.activity_history.filter((_, i) => i !== index),
     }));
@@ -236,8 +231,8 @@ function Aboutpage() {
         URL.revokeObjectURL(file); // Clean up Blob URL
       }
 
-      // Apply image updates to mainData
-      const updatedMainData = { ...mainData };
+      // Apply image updates to localData
+      const updatedMainData = { ...localData };
       Object.entries(imageUpdates).forEach(([keyField, url]) => {
         const [key, field] = keyField.split(".");
         if (key === "hero") {
@@ -270,7 +265,7 @@ function Aboutpage() {
       });
 
       // Update state
-      setMainData(updatedMainData);
+      setLocalData(updatedMainData);
       setPendingImages([]); // Clear pending images
     } catch (error) {
       console.error("Error saving to Firestore:", error);
@@ -284,26 +279,27 @@ function Aboutpage() {
   return (
     <div className="w-full max-w-[100vw] overflow-x-hidden" style={{ backgroundColor: primaryBackgroundColor }}>
       <HeroSection
-        coverImage={mainData.hero_sections.about.coverImage}
+        coverImage={localData.hero_sections.about.coverImage}
         backgroundColor={primaryBackgroundColor}
-        title={mainData.hero_sections.about.title}
-        description={mainData.hero_sections.about.description}
+        title={localData.hero_sections.about.title}
+        description={localData.hero_sections.about.description}
         onFieldChange={updateHeroField}
         onImageUpload={updateHeroImage}
       />
-      <div className="w-full py-2" style={{ borderTopColor: secondaryBackgroundColor, borderTopWidth: 2 }}>
+      <SectionWrap className="w-full" borderColor={secondaryBackgroundColor}>
         <MissionSection
-          mission={mainData.statements.mission}
+          mission={localData.statements.mission}
           onFieldChange={(field, value) => updateNestedField("mission", field, value)}
           onImageUpload={(field, file) => updateNestedImage("mission", field, file)}
         />
         <VisionSection
-          vision={mainData.statements.vision}
+          vision={localData.statements.vision}
           onFieldChange={(field, value) => updateNestedField("vision", field, value)}
           onImageUpload={(field, file) => updateNestedImage("vision", field, file)}
         />
-      </div>
-      <div className="py-2" style={{ borderTopColor: secondaryBackgroundColor, borderTopWidth: 2 }}>
+      </SectionWrap>
+
+      <SectionWrap borderColor={tertiaryBackgroundColor} className="w-full">
         <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center">
           Đội ngũ thành viên
         </div>
@@ -315,8 +311,8 @@ function Aboutpage() {
             Thêm thành viên
           </button>
         </div>
-        <ScrollMemberList key={mainData.members.length}>
-          {mainData.members.map((member, index) => (
+        <ScrollMemberList key={localData.members.length}>
+          {localData.members.map((member, index) => (
             <div key={`member_${index}`} className="relative w-full max-w-[16rem] mx-auto">
               <ScrollMemberListItem
                 index={index}
@@ -330,8 +326,9 @@ function Aboutpage() {
             </div>
           ))}
         </ScrollMemberList>
-      </div>
-      <div style={{ borderTopColor: secondaryBackgroundColor, borderTopWidth: 2 }}>
+      </SectionWrap>
+
+      <SectionWrap borderColor={tertiaryBackgroundColor}>
         <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center">
           Lịch sử hoạt động
         </div>
@@ -344,7 +341,7 @@ function Aboutpage() {
           </button>
         </div>
         <ActivityHistoryList>
-          {mainData.activity_history.map((activity, index) => (
+          {localData.activity_history.map((activity, index) => (
             <div key={`activity_${index}`} className="relative w-full max-w-[20rem] mx-auto">
               <ActivityHistoryListItem
                 index={index}
@@ -361,17 +358,8 @@ function Aboutpage() {
             </div>
           ))}
         </ActivityHistoryList>
-      </div>
-      <motion.button
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 group"
-        onClick={saveChanges}
-      >
-        <span className="hidden group-hover:inline absolute -top-8 right-0 bg-gray-800 text-white text-sm px-2 py-1 rounded">Save Changes</span>
-        Save
-      </motion.button>
+      </SectionWrap>
+      <SaveFloatingButton visible={true} onSave={saveChanges} />
       <div className="mt-8 md:mt-20" />
     </div>
   );

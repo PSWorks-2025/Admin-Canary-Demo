@@ -1,6 +1,6 @@
-export default function SectionWrap({children,borderColor}){
+export default function SectionWrap({children,borderColor,className}){
     return(
-        <div className="border-t-2 w-full" style={{borderTopColor:borderColor}}>
+        <div className={`${className} border-t-2 w-full py-5 mb-3`} style={{borderTopColor:borderColor}}>
             {children}
         </div>
     )

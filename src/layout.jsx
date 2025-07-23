@@ -6,56 +6,17 @@ import { readData } from "./service/readFirebase.jsx";
 
 export const ColorContext = createContext();
 
-function Layout({ children, page }) {
-  const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState();
-  const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState();
-  const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState();
-  const [globalData, setGlobalData] = useState({});
-  const [mainData, setMainData] = useState({});
-  const [loading, setLoading] = useState(true);
-
-  
-
-  useEffect(() => {
-    const handleGetData = async () => {
-      try {
-        const res = await readData();
-        if (res?.global) {
-          setGlobalData(res.global);
-          setPrimaryBackgroundColor(res.global.primaryBackgroundColor || "#ffffff");
-          setSecondaryBackgroundColor(res.global.secondaryBackgroundColor || "#ffffff");
-          setTertiaryBackgroundColor(res.global.tertiaryBackgroundColor || "#4160df");
-          console.log(res.global.backgroundColor);
-
-        }
-        if (res?.main) {
-          setMainData(res.main);
-          console.log("Layout mainData:", res.main); // Debug
-        }
-      } catch (error) {
-        console.error("Error in Layout useEffect:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    handleGetData();
-  }, []);
+function Layout({ children, page, primaryBackgroundColor, setPrimaryBackgroundColor, secondaryBackgroundColor, setSecondaryBackgroundColor, tertiaryBackgroundColor, setTertiaryBackgroundColor, globalData, setGlobalData }) {
 
   const colorContextValue = {
     primaryBackgroundColor,
-    setPrimaryBackgroundColor,
     secondaryBackgroundColor,
-    setSecondaryBackgroundColor,
     tertiaryBackgroundColor,
-    setTertiaryBackgroundColor,
-    mainData,
-    setMainData,
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <ColorContext.Provider value={colorContextValue}>

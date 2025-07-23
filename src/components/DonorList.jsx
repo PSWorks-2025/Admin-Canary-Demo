@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { TextInput } from "./Inputs/TextInput";
+import SectionWrap from "./SectionWrap";
 
 const DonorList = ({ donors, onDonorChange, onAddDonor, onDeleteDonor, buttonColor }) => {
   const [localDonors, setLocalDonors] = useState(donors);
@@ -34,7 +35,7 @@ const DonorList = ({ donors, onDonorChange, onAddDonor, onDeleteDonor, buttonCol
   );
 
   return (
-    <div className="mt-8 max-w-lg mx-auto">
+    <SectionWrap borderColor={buttonColor} className="mt-8 max-w-lg mx-auto">
       <h3 className="text-2xl font-bold">Danh sách ủng hộ</h3>
       <div className="flex justify-center mt-4">
         <button
@@ -85,7 +86,7 @@ const DonorList = ({ donors, onDonorChange, onAddDonor, onDeleteDonor, buttonCol
           </li>
         ))}
       </ul>
-    </div>
+    </SectionWrap>
   );
 };
 

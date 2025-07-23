@@ -4,6 +4,7 @@ import { TextInput } from "../../Inputs/TextInput";
 import { ImageInput } from "../../Inputs/ImageInput";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
+import SectionWrap from "../../SectionWrap";
 
 const StorySection = ({ data, setData, title, setTitle, enqueueImageUpload, buttonColor }) => {
   const [page, setPage] = useState(0);
@@ -62,7 +63,7 @@ const StorySection = ({ data, setData, title, setTitle, enqueueImageUpload, butt
   const visibleStories = sortedStories.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
 
   return (
-    <div className="w-full">
+    <SectionWrap borderColor={buttonColor} className="w-full">
       <TextInput
         className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
         value={title}
@@ -146,7 +147,7 @@ const StorySection = ({ data, setData, title, setTitle, enqueueImageUpload, butt
           </div>
         </div>
       </div>
-    </div>
+    </SectionWrap>
   );
 };
 

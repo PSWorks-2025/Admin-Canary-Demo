@@ -10,8 +10,9 @@ import CampaignDetails from "../components/FundRaisingSection/CampaignDetail";
 import { ColorContext } from "../layout";
 import { motion } from "framer-motion";
 import { db, storage } from "../service/firebaseConfig";
+import SaveFloatingButton from "../globalComponent/SaveButton";
 
-const FundraisingPage = () => {
+const FundraisingPage = ({mainData,setMainData}) => {
   const { primaryBackgroundColor, secondaryBackgroundColor } = useContext(ColorContext);
   const [localData, setLocalData] = useState({
     campaignTitle: "",
@@ -28,15 +29,7 @@ const FundraisingPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const docRef = doc(db, "Main pages", "components");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data().fundraising || {};
-          const donors = (data.donors || []).map((donor) => ({
-            ...donor,
-            id: donor.id || Math.random().toString(36).substr(2, 9),
-          }));
+      const data = mainData.fundraising || {};
           setLocalData({
             campaignTitle: data.campaign_title || "",
             campaignDescription: data.campaign_description || "",
@@ -48,10 +41,6 @@ const FundraisingPage = () => {
             donors,
           });
         }
-      } catch (error) {
-        console.error("Error fetching Firestore data:", error);
-      }
-    };
     fetchData();
   }, []);
 
@@ -151,6 +140,7 @@ const FundraisingPage = () => {
         campaignTitle={localData.campaignTitle}
         campaignDescription={localData.campaignDescription}
         onFieldChange={updateField}
+        buttonColor={secondaryBackgroundColor}
       />
       <DonorList
         donors={localData.donors}
@@ -159,16 +149,7 @@ const FundraisingPage = () => {
         onDeleteDonor={deleteDonor}
         buttonColor={secondaryBackgroundColor}
       />
-      <motion.button
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 group"
-        onClick={saveChanges}
-      >
-        <span className="hidden group-hover:inline absolute -top-8 right-0 bg-gray-800 text-white text-sm px-2 py-1 rounded">Save Changes</span>
-        Save
-      </motion.button>
+      <SaveFloatingButton visible={true} onSave={saveChanges} />
     </div>
   );
 };
