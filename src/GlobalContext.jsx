@@ -9,12 +9,15 @@ import set from "lodash/set";
 const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
+  // Global and main data
+  const [globalData, setGlobalData] = useState({});
+  const [mainData, setMainData] = useState({});
+
+  const [loading, setLoading] = useState(true);
+
   const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState();
   const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState();
   const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState();
-  const [globalData, setGlobalData] = useState({});
-  const [mainData, setMainData] = useState({});
-  const [loading, setLoading] = useState(true);
 
   // Footer-specific states
   const [logoUrl, setLogoUrl] = useState('');
@@ -31,7 +34,7 @@ export const GlobalProvider = ({ children }) => {
   const [imageUploadQueue, setImageUploadQueue] = useState({});
 
   // Main data states for the main pages
- const [activityHistory, setActivityHistory] = useState([]);
+  const [activityHistory, setActivityHistory] = useState([]);
   const [eventOverviews, setEventOverviews] = useState({});
   const [fundraising, setFundraising] = useState({});
   const [heroSections, setHeroSections] = useState({});
