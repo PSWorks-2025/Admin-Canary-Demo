@@ -13,15 +13,15 @@ import {
   ActivityHistoryList,
   ActivityHistoryListItem,
 } from "../../components/Lists/ActivityHistoryList";
-import { ColorContext } from "../../layout";
 import { db, storage } from "../../service/firebaseConfig";
 import useImagePreloader from "../../hooks/useImagePreloader";
 import LoadingScreen from "../../components/screens/LoadingScreen";
 import SaveFloatingButton from "../../globalComponent/SaveButton";
 import SectionWrap from "../../components/SectionWrap";
+import GlobalContext from "../../GlobalContext";
 
-function Aboutpage({mainData,setMainData}) {
-  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor } = useContext(ColorContext);
+function Aboutpage() {
+  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor,mainData,setMainData } = useContext(GlobalContext);
   const [localData, setLocalData] = useState({
     hero_sections: { about: { title: "", description: "", coverImage: "" } },
     statements: { mission: { title: "", description: "", imageUrl: "" }, vision: { title: "", description: "", imageUrl: "" } },

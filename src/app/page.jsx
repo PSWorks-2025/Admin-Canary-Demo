@@ -7,19 +7,22 @@ import {
   ScrollStoryList,
   ScrollStoryListItem,
 } from '../components/Lists/ScrollStoryList.jsx';
-import { ColorContext } from '../layout.jsx';
 import { TextInput } from '../components/Inputs/TextInput.jsx';
 import { db } from '../service/firebaseConfig.jsx';
 import { doc, updateDoc } from 'firebase/firestore';
 import { uploadImageToStorage } from '../service/firebaseWrite.jsx';
 import SaveFloatingButton from '../globalComponent/SaveButton/index.jsx';
 import StorySection from '../components/HomePageSection/StorySection/index.jsx';
+import GlobalContext from '../GlobalContext';
+import { FaLessThan } from 'react-icons/fa';
 
-const HomePage = ({mainData,setMainData}) => {
+const HomePage = () => {
   const {
     primaryBackgroundColor,
     secondaryBackgroundColor,
-  } = useContext(ColorContext);
+    mainData,
+    setMainData,
+  } = useContext(GlobalContext);
 
   const [heroSections, setHeroSections] = useState(mainData.hero_sections);
   const [orgStats, setOrgStats] = useState(mainData.org_stats);
@@ -30,7 +33,7 @@ const HomePage = ({mainData,setMainData}) => {
     mainData.story_overviews
   );
   const [storiesTitle, setStoriesTitle] = useState(
-    mainData?.hero_sections?.stories?.title || ''
+    mainData.hero_sections.stories?.title || ''
   );
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -132,7 +135,7 @@ const HomePage = ({mainData,setMainData}) => {
       <EventsSection
         data={eventOverviews}
         setData={setEventOverviews}
-        sectionTitle={heroSections.events.title}
+        sectionTitle={heroSections.events?.title}
         setSectionTitle={handleFirstSectionChange}
         enqueueImageUpload={enqueueImageUpload}
         buttonColor={secondaryBackgroundColor}
@@ -148,7 +151,7 @@ const HomePage = ({mainData,setMainData}) => {
           buttonColor={secondaryBackgroundColor}
         />
       </div>
-      <SaveFloatingButton visible={true} onSave={saveUpdates} />
+      <SaveFloatingButton onSave={saveUpdates} />
     </div>
   );
 };

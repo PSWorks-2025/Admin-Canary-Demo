@@ -8,14 +8,14 @@ import ProjectOverview from "../../components/projectOverview/ProjectOverview";
 import ProjectLayout from "../../components/ProjectLayout/ProjectLayout";
 import EventsOverview from "../../components/EventsOverview/EventsOverview";
 import "./styles.css";
-import { ColorContext } from "../../layout";
 import { db, storage } from "../../service/firebaseConfig.jsx";
 import useImagePreloader from "../../hooks/useImagePreloader";
 import LoadingScreen from "../../components/screens/LoadingScreen";
 import SaveFloatingButton from "../../globalComponent/SaveButton/index.jsx";
+import GlobalContext from "../../GlobalContext.jsx";
 
-function Events({mainData,setMainData}) {
-  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor } = useContext(ColorContext);
+function Events() {
+  const { primaryBackgroundColor, secondaryBackgroundColor, tertiaryBackgroundColor,mainData,setMainData } = useContext(GlobalContext);
   const [localData, setLocalData] = useState({
     hero_sections: {
       events: { title: "", description: "", image: "" },

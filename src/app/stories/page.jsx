@@ -4,14 +4,14 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { motion } from "framer-motion";
 import HeroSection from "../../components/StoriesSection/HeroSection";
 import StoriesSection from "../../components/StoriesSection/StoriesSection";
-import { ColorContext } from "../../layout";
 import { db, storage } from "../../service/firebaseConfig";
 import useImagePreloader from "../../hooks/useImagePreloader";
 import LoadingScreen from "../../components/screens/LoadingScreen";
 import SaveFloatingButton from "../../globalComponent/SaveButton";
+import GlobalContext from "../../GlobalContext";
 
-function Story({ mainData, setMainData }) {
-  const { primaryBackgroundColor, secondaryBackgroundColor } = useContext(ColorContext);
+function Story() {
+  const { primaryBackgroundColor, secondaryBackgroundColor,mainData,setMainData } = useContext(GlobalContext);
   const [localData, setLocalData] = useState({
     hero_sections: { stories: { title: "", description: "", image: "" } },
     story_overviews: {},

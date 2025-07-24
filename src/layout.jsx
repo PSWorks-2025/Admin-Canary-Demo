@@ -1,52 +1,51 @@
-import PropTypes from "prop-types";
-import { createContext, useState, useEffect } from "react";
-import Header from "./components/layout/Header.jsx";
-import Footer from "./components/layout/Footer.jsx";
-import { readData } from "./service/readFirebase.jsx";
+import PropTypes from 'prop-types';
+import { useContext } from 'react';
+import { useLocation } from 'react-router';
 
-export const ColorContext = createContext();
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import LoadingScreen from './components/screens/LoadingScreen';
 
-function Layout({ children, page, primaryBackgroundColor, setPrimaryBackgroundColor, secondaryBackgroundColor, setSecondaryBackgroundColor, tertiaryBackgroundColor, setTertiaryBackgroundColor, globalData, setGlobalData }) {
+import GlobalContext from './GlobalContext.jsx';
+import { GlobalProvider } from './GlobalContext.jsx';
+import SaveFloatingButton from './globalComponent/SaveButton';
 
-  const colorContextValue = {
-    primaryBackgroundColor,
-    secondaryBackgroundColor,
-    tertiaryBackgroundColor,
-  };
+const Layout = ({ children }) => {
+  return (
+    <GlobalProvider>
+      <LayoutContent>{children}</LayoutContent>
+    </GlobalProvider>
+  );
+};
 
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
+const LayoutContent = ({ children }) => {
+  const { loading, handleGlobalSave, ...globalProps } =
+    useContext(GlobalContext);
+  const location = useLocation();
+
+  // Derive `page` from pathname
+  const page = location.pathname === '/' ? 'home' : location.pathname.slice(1);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
-    <ColorContext.Provider value={colorContextValue}>
-      <Header
-        page={page}
-        primaryBackgroundColor={primaryBackgroundColor}
-        setPrimaryBackgroundColor={setPrimaryBackgroundColor}
-        secondaryBackgroundColor={secondaryBackgroundColor}
-        setSecondaryBackgroundColor={setSecondaryBackgroundColor}
-        tertiaryBackgroundColor={tertiaryBackgroundColor}
-        setTertiaryBackgroundColor={setTertiaryBackgroundColor}
-        globalData={globalData}
-        setGlobalData={setGlobalData}
-      />
+    <>
+      <Header page={page} {...globalProps} />
       {children}
-      <Footer
-        tertiaryBackgroundColor={tertiaryBackgroundColor}
-        globalData={globalData}
-        setGlobalData={setGlobalData}
-      />
-    </ColorContext.Provider>
+      <Footer {...globalProps} />
+      <SaveFloatingButton visible onSave={handleGlobalSave} />
+    </>
   );
-}
+};
 
 Layout.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]),
-  page: PropTypes.string,
+  children: PropTypes.node,
+};
+
+LayoutContent.propTypes = {
+  children: PropTypes.node,
 };
 
 export default Layout;

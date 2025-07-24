@@ -7,13 +7,13 @@ import LoadingScreen from "../components/screens/LoadingScreen";
 import FundraisingHeader from "../components/FundraisingHeader";
 import DonorList from "../components/DonorList";
 import CampaignDetails from "../components/FundRaisingSection/CampaignDetail";
-import { ColorContext } from "../layout";
 import { motion } from "framer-motion";
 import { db, storage } from "../service/firebaseConfig";
 import SaveFloatingButton from "../globalComponent/SaveButton";
+import GlobalContext from "../GlobalContext";
 
-const FundraisingPage = ({mainData,setMainData}) => {
-  const { primaryBackgroundColor, secondaryBackgroundColor } = useContext(ColorContext);
+const FundraisingPage = () => {
+  const { primaryBackgroundColor, secondaryBackgroundColor,mainData,setMainData } = useContext(GlobalContext);
   const [localData, setLocalData] = useState({
     campaignTitle: "",
     campaignDescription: "",
