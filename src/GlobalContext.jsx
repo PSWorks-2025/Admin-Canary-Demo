@@ -1,10 +1,20 @@
-// GlobalContext.jsx
-import { createContext, useState, useEffect, useCallback } from "react";
+import { createContext, useState, useEffect } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { Timestamp } from "firebase/firestore";
 import { db, storage } from "./service/firebaseConfig.jsx";
 import { readData } from "./service/readFirebase.jsx";
-// import set from "lodash/set";
+
+// Custom function to set nested object values
+const setNestedValue = (obj, path, value) => {
+  const keys = path.split('.');
+  let current = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    current[keys[i]] = current[keys[i]] || {};
+    current = current[keys[i]];
+  }
+  current[keys[keys.length - 1]] = value;
+};
 
 const GlobalContext = createContext();
 
@@ -12,12 +22,12 @@ export const GlobalProvider = ({ children }) => {
   // Global and main data
   const [globalData, setGlobalData] = useState({});
   const [mainData, setMainData] = useState({});
-
   const [loading, setLoading] = useState(true);
 
-  const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState();
-  const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState();
-  const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState();
+  // Theme colors
+  const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState("#ffffff");
+  const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState("#ffffff");
+  const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState("#4160df");
 
   // Footer-specific states
   const [logoUrl, setLogoUrl] = useState('');
@@ -31,6 +41,7 @@ export const GlobalProvider = ({ children }) => {
   });
   const [socialLinksData, setSocialLinksData] = useState({});
 
+  // Image upload queue
   const [imageUploadQueue, setImageUploadQueue] = useState({});
 
   // Main data states for the main pages
@@ -44,7 +55,6 @@ export const GlobalProvider = ({ children }) => {
   const [projectOverviews, setProjectOverviews] = useState({});
   const [statements, setStatements] = useState({});
   const [storyOverviews, setStoryOverviews] = useState({});
-
 
   useEffect(() => {
     const handleGetData = async () => {
@@ -87,7 +97,7 @@ export const GlobalProvider = ({ children }) => {
     handleGetData();
   }, []);
 
-  // ✅ Enqueue image with unique key (dynamic field path in globalData)
+  // Enqueue image with unique key (dynamic field path in globalData or mainData)
   const enqueueImageUpload = (key, path, file) => {
     setImageUploadQueue((prev) => ({
       ...prev,
@@ -95,94 +105,136 @@ export const GlobalProvider = ({ children }) => {
     }));
   };
 
-  // ✅ Upload all queued images and update globalData
+  // Upload all queued images and update globalData/mainData
   const uploadAllImagesInQueue = async () => {
-  const updatedGlobal = { ...globalData };
-  const updatedMain = { ...mainData };
+    const updatedGlobal = { ...globalData };
+    const updatedMain = { ...mainData };
 
-  for (const key in imageUploadQueue) {
-    const { path, file } = imageUploadQueue[key];
-    try {
-      const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      const finalUrl = `${url}?v=${Date.now()}`;
+    for (const key in imageUploadQueue) {
+      const { path, file } = imageUploadQueue[key];
+      try {
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        const finalUrl = `${url}?v=${Date.now()}`;
 
-      if (key.startsWith("global.") || key.startsWith("globalData.") || key.startsWith("Global.")) {
-        const actualKey = key.replace("global.", "");
-        set(updatedGlobal, actualKey, finalUrl);
-
-        // Optional: update local state (e.g., logo preview)
-        if (actualKey === "logo") {
-          setLogoUrl(finalUrl);
+        if (key.startsWith("global.") || key.startsWith("globalData.") || key.startsWith("Global.")) {
+          const actualKey = key.replace(/^global[Data.]?\./i, "");
+          setNestedValue(updatedGlobal, actualKey, finalUrl);
+          if (actualKey === "logo") {
+            setLogoUrl(finalUrl);
+          }
+        } else if (key.startsWith("main.") || key.startsWith("mainData.") || key.startsWith("Main pages.")) {
+          const actualKey = key.replace(/^main[Data.]?\./i, "");
+          setNestedValue(updatedMain, actualKey, finalUrl);
+        } else {
+          console.warn(`❗ Unknown key prefix: ${key}`);
         }
-      } else if (key.startsWith("main.") || key.startsWith("mainData.") || key.startsWith("Main pages.")) {
-        const actualKey = key.replace("main.", "");
-        set(updatedMain, actualKey, finalUrl);
-      } else {
-        console.warn(`❗ Unknown key prefix: ${key}`);
+        URL.revokeObjectURL(file); // Clean up blob URL
+      } catch (error) {
+        console.error(`❌ Error uploading image at ${path}:`, error);
       }
-    } catch (error) {
-      console.error(`❌ Error uploading image at ${path}:`, error);
     }
-  }
 
-  setImageUploadQueue({});
-  return { updatedGlobal, updatedMain };
-};
-
+    setImageUploadQueue({});
+    return { updatedGlobal, updatedMain };
+  };
 
   const handleGlobalSave = async () => {
-  try {
-    // Global data
-    const baseGlobalUpdate = {
-      ...globalData,
-      primaryBackgroundColor,
-      secondaryBackgroundColor,
-      tertiaryBackgroundColor,
-      group_name: groupName,
-      description: groupDescription,
-      hotline: contactInfoData.hotline,
-      email: contactInfoData.email,
-      address: contactInfoData.address,
-      social_media: socialLinksData,
-    };
+    try {
+      // Prepare global data
+      const baseGlobalUpdate = {
+        ...globalData,
+        primaryBackgroundColor,
+        secondaryBackgroundColor,
+        tertiaryBackgroundColor,
+        group_name: groupName,
+        description: groupDescription,
+        hotline: contactInfoData.hotline,
+        email: contactInfoData.email,
+        address: contactInfoData.address,
+        social_media: socialLinksData,
+      };
 
-    const imageUpdatedGlobal = await uploadAllImagesInQueue();
-    const finalGlobalData = { ...baseGlobalUpdate, ...imageUpdatedGlobal };
+      // Upload images and get updated data
+      const { updatedGlobal, updatedMain } = await uploadAllImagesInQueue();
+      const finalGlobalData = { ...baseGlobalUpdate, ...updatedGlobal };
 
-    // Main data
-    const finalMainData = {
-      activity_history: activityHistory,
-      event_overviews: eventOverviews,
-      fundraising: fundraising,
-      hero_sections: heroSections,
-      highlights: highlights,
-      members: members,
-      org_stats: orgStats,
-      project_overviews: projectOverviews,
-      statements: statements,
-      story_overviews: storyOverviews,
-    };
+      // Prepare main data with date conversions
+      const finalMainData = {
+        activity_history: activityHistory.map((activity) => ({
+          ...activity,
+          started_time:
+            activity.started_time && !isNaN(new Date(activity.started_time).getTime())
+              ? Timestamp.fromDate(new Date(activity.started_time))
+              : null,
+          ended_time:
+            activity.ended_time && !isNaN(new Date(activity.ended_time).getTime())
+              ? Timestamp.fromDate(new Date(activity.ended_time))
+              : null,
+        })),
+        event_overviews: eventOverviews,
+        fundraising: {
+          ...fundraising,
+          amount_raised: fundraising.donors
+            ? fundraising.donors.reduce((sum, donor) => sum + (donor.amount || 0), 0)
+            : 0,
+        },
+        hero_sections: heroSections,
+        highlights: highlights,
+        members: members,
+        org_stats: orgStats,
+        project_overviews: Object.entries(projectOverviews).reduce((acc, [key, project]) => ({
+          ...acc,
+          [key]: {
+            ...project,
+            started_time:
+              project.started_time && !isNaN(new Date(project.started_time).getTime())
+                ? Timestamp.fromDate(new Date(project.started_time))
+                : null,
+          },
+        }), {}),
+        statements: statements,
+        story_overviews: Object.entries(storyOverviews).reduce((acc, [key, story]) => ({
+          ...acc,
+          [key]: {
+            ...story,
+            posted_time:
+              story.posted_time && !isNaN(new Date(story.posted_time).getTime())
+                ? Timestamp.fromDate(new Date(story.posted_time))
+                : null,
+          },
+        }), {}),
+      };
 
-    // Firestore writes
-    const globalRef = doc(db, 'Global', 'components');
-    const mainRef = doc(db, 'Main pages', 'components');
+      // Firestore writes
+      const globalRef = doc(db, 'Global', 'components');
+      const mainRef = doc(db, 'Main pages', 'components');
 
-    await Promise.all([
-      updateDoc(globalRef, finalGlobalData),
-      updateDoc(mainRef, finalMainData),
-    ]);
+      await Promise.all([
+        updateDoc(globalRef, finalGlobalData),
+        updateDoc(mainRef, finalMainData),
+      ]);
 
-    setGlobalData(finalGlobalData);
-    setMainData(finalMainData); // if you're still using setMainData for backup
+      // Update local state
+      setGlobalData(finalGlobalData);
+      setMainData(finalMainData);
+      setActivityHistory(finalMainData.activity_history);
+      setEventOverviews(finalMainData.event_overviews);
+      setFundraising(finalMainData.fundraising);
+      setHeroSections(finalMainData.hero_sections);
+      setHighlights(finalMainData.highlights);
+      setMembers(finalMainData.members);
+      setOrgStats(finalMainData.org_stats);
+      setProjectOverviews(finalMainData.project_overviews);
+      setStatements(finalMainData.statements);
+      setStoryOverviews(finalMainData.story_overviews);
 
-    console.log("✅ Global and Main data saved successfully!");
-  } catch (error) {
-    console.error("❌ Error saving global/main data:", error);
-  }
-};
-
+      console.log("✅ Global and Main data saved successfully!");
+    } catch (error) {
+      console.error("❌ Error saving global/main data:", error);
+    }
+  };
 
   const contextValue = {
     loading,
@@ -211,8 +263,7 @@ export const GlobalProvider = ({ children }) => {
     handleGlobalSave,
     enqueueImageUpload,
     imageUploadQueue,
-    
-    // main data
+    // Main data
     activityHistory,
     setActivityHistory,
     eventOverviews,
