@@ -1,90 +1,10 @@
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
-import { BiSolidRightArrow } from "react-icons/bi";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 import React from "react";
-
-export function ScrollMemberListItem({ index, imageUrl, name, role, onChange, onImageUpload, onDelete }) {
-  const [localName, setLocalName] = useState(name || "");
-  const [localRole, setLocalRole] = useState(role || "");
-
-  const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  };
-
-  const handleChange = (field, value) => {
-    const debouncedHandleChange = debounce(onChange, 500);
-    if (field === "name") {
-      setLocalName(value);
-    } else {
-      setLocalRole(value);
-    }
-    debouncedHandleChange(field, value);
-  };
-
-  return (
-    <div className="w-64 mr-8 h-full relative flex-shrink-0">
-      <div className="relative">
-        <ImageInput
-          handleImageUpload={(e) => onImageUpload(e.target.files[0])}
-          top="top-2"
-          left="left-2"
-          style={{ backgroundImage: `url("${imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
-          className="w-full h-64 bg-cover bg-center rounded-sm"
-        />
-        <button
-          className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-          onClick={onDelete}
-          aria-label={`Delete member ${name || "unknown"}`}
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-      </div>
-      <TextInput
-        className="w-full font-bold text-lg pt-2 text-primary-title text-center outline-none bg-transparent"
-        value={localName}
-        onChange={(e) => handleChange("name", e.target.value)}
-        placeholder="Nhập tên thành viên"
-      />
-      <TextInput
-        className="w-full text-base/5 text-primary-paragraph text-center outline-none bg-transparent"
-        value={localRole}
-        onChange={(e) => handleChange("role", e.target.value)}
-        placeholder="Nhập chức vụ"
-      />
-    </div>
-  );
-}
-
-ScrollMemberListItem.propTypes = {
-  index: PropTypes.number.isRequired,
-  imageUrl: PropTypes.string,
-  name: PropTypes.string,
-  role: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  onImageUpload: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-};
 
 export function ScrollMemberList({ children }) {
   const [page, setPage] = useState(0);
@@ -165,4 +85,125 @@ export function ScrollMemberList({ children }) {
 
 ScrollMemberList.propTypes = {
   children: PropTypes.node,
+};
+
+export function ScrollMemberListItem({
+  index,
+  imageUrl,
+  name,
+  role,
+  setMembers,
+  enqueueImageUpload,
+  setHasChanges,
+}) {
+  const [localName, setLocalName] = useState(name || "");
+  const [localRole, setLocalRole] = useState(role || "");
+
+  const debounce = useCallback((func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  }, []);
+
+  const handleChange = useCallback(
+    (field, value) => {
+      console.log(`ScrollMemberListItem[${index}]: Updating ${field} to ${value}`);
+      const debouncedUpdate = debounce((field, value) => {
+        setMembers((prev) =>
+          prev.map((member, i) =>
+            i === index ? { ...member, [field]: value } : member
+          )
+        );
+        setHasChanges(true);
+      }, 500);
+      if (field === "name") setLocalName(value);
+      else setLocalRole(value);
+      debouncedUpdate(field, value);
+    },
+    [index, setMembers, setHasChanges]
+  );
+
+  const handleImageUpload = useCallback(
+    (file) => {
+      if (file instanceof File || file instanceof Blob) {
+        console.log(`ScrollMemberListItem[${index}]: Enqueuing image`);
+        const blobUrl = URL.createObjectURL(file);
+        const storagePath = `about/members/${file.name}`;
+        enqueueImageUpload(`main_pages.members.${index}.image`, storagePath, file);
+        setMembers((prev) =>
+          prev.map((member, i) =>
+            i === index ? { ...member, image: blobUrl } : member
+          )
+        );
+        setHasChanges(true);
+      } else {
+        console.error(`ScrollMemberListItem[${index}]: Invalid file`, file);
+      }
+    },
+    [index, enqueueImageUpload, setMembers, setHasChanges]
+  );
+
+  const handleDelete = useCallback(() => {
+    console.log(`ScrollMemberListItem[${index}]: Deleting member`);
+    setMembers((prev) => prev.filter((_, i) => i !== index));
+    setHasChanges(true);
+  }, [index, setMembers, setHasChanges]);
+
+  return (
+    <div className="w-64 mr-8 h-full relative flex-shrink-0">
+      <div className="relative">
+        <ImageInput
+          handleImageUpload={(e) => handleImageUpload(e.target.files[0])}
+          top="top-2"
+          left="left-2"
+          style={{ backgroundImage: `url("${imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
+          className="w-full h-64 bg-cover bg-center rounded-sm"
+        />
+        <button
+          className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+          onClick={handleDelete}
+          aria-label={`Delete member ${name || "unknown"}`}
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <TextInput
+        className="w-full font-bold text-lg pt-2 text-primary-title text-center outline-none bg-transparent"
+        value={localName}
+        onChange={(e) => handleChange("name", e.target.value)}
+        placeholder="Nhập tên thành viên"
+      />
+      <TextInput
+        className="w-full text-base/5 text-primary-paragraph text-center outline-none bg-transparent"
+        value={localRole}
+        onChange={(e) => handleChange("role", e.target.value)}
+        placeholder="Nhập chức vụ"
+      />
+    </div>
+  );
+}
+
+ScrollMemberListItem.propTypes = {
+  index: PropTypes.number.isRequired,
+  imageUrl: PropTypes.string,
+  name: PropTypes.string,
+  role: PropTypes.string,
+  setMembers: PropTypes.func.isRequired,
+  enqueueImageUpload: PropTypes.func.isRequired,
+  setHasChanges: PropTypes.func.isRequired,
 };

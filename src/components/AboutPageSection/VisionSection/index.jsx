@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import { ImageInput } from "../../Inputs/ImageInput";
 import { TextInput } from "../../Inputs/TextInput";
 
-const VisionSection = ({ vision, onFieldChange, onImageUpload }) => {
+const VisionSection = ({ vision, setStatements, enqueueImageUpload, setHasChanges }) => {
   const [localTitle, setLocalTitle] = useState(vision?.title || "");
   const [localDescription, setLocalDescription] = useState(vision?.description || "");
 
@@ -16,22 +17,45 @@ const VisionSection = ({ vision, onFieldChange, onImageUpload }) => {
 
   const handleChange = useCallback(
     (field, value) => {
-      const debouncedHandleFieldChange = debounce(onFieldChange, 500);
-      if (field === "title") {
-        setLocalTitle(value);
-      } else {
-        setLocalDescription(value);
-      }
-      debouncedHandleFieldChange(field, value);
+      console.log(`VisionSection: Updating ${field} to ${value}`);
+      const debouncedUpdate = debounce((field, value) => {
+        setStatements((prev) => ({
+          ...prev,
+          vision: { ...prev.vision, [field]: value },
+        }));
+        setHasChanges(true);
+      }, 500);
+      if (field === "title") setLocalTitle(value);
+      else setLocalDescription(value);
+      debouncedUpdate(field, value);
     },
-    [onFieldChange]
+    [setStatements, setHasChanges]
+  );
+
+  const handleImageUpload = useCallback(
+    (field, file) => {
+      if (file instanceof File || file instanceof Blob) {
+        console.log(`VisionSection: Enqueuing image for ${field}`);
+        const blobUrl = URL.createObjectURL(file);
+        const storagePath = `about/statements/vision/${file.name}`;
+        enqueueImageUpload(`main_pages.statements.vision.${field}`, storagePath, file);
+        setStatements((prev) => ({
+          ...prev,
+          vision: { ...prev.vision, [field]: blobUrl },
+        }));
+        setHasChanges(true);
+      } else {
+        console.error(`VisionSection: Invalid file for ${field}:`, file);
+      }
+    },
+    [enqueueImageUpload, setStatements, setHasChanges]
   );
 
   return (
     <div className="w-full pt-20 flex flex-row-reverse">
       <div className="w-1/2 px-4 relative">
         <ImageInput
-          handleImageUpload={(e) => onImageUpload("imageUrl", e.target.files[0])}
+          handleImageUpload={(e) => handleImageUpload("imageUrl", e.target.files[0])}
           className="w-162 h-102 -ml-26 bg-cover bg-center rounded-lg"
           style={{ backgroundImage: `url("${vision?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
           section="vision"
@@ -59,6 +83,17 @@ const VisionSection = ({ vision, onFieldChange, onImageUpload }) => {
       </div>
     </div>
   );
+};
+
+VisionSection.propTypes = {
+  vision: PropTypes.shape({
+    title: PropTypes.string,
+    description: PropTypes.string,
+    imageUrl: PropTypes.string,
+  }),
+  setStatements: PropTypes.func.isRequired,
+  enqueueImageUpload: PropTypes.func.isRequired,
+  setHasChanges: PropTypes.func.isRequired,
 };
 
 export default VisionSection;

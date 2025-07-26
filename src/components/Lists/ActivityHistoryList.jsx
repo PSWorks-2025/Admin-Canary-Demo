@@ -1,9 +1,9 @@
+import React, { useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import { MdCircle } from "react-icons/md";
 import { BiSolidRightArrow } from "react-icons/bi";
-import PropTypes from "prop-types";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
-import React, { useState } from "react";
 
 export function ActivityHistoryList({ children }) {
   return (
@@ -31,34 +31,72 @@ export function ActivityHistoryListItem({
   imageUrl1,
   imageUrl2,
   description,
-  onChange,
-  onImageUpload,
-  onDelete,
+  setActivityHistory,
+  enqueueImageUpload,
+  setHasChanges,
   buttonColor,
 }) {
   const [localStartDate, setLocalStartDate] = useState(startDate || "");
   const [localEndDate, setLocalEndDate] = useState(endDate || "");
   const [localDescription, setLocalDescription] = useState(description || "");
 
-  const debounce = (func, wait) => {
+  const debounce = useCallback((func, wait) => {
     let timeout;
     return (...args) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func(...args), wait);
     };
-  };
+  }, []);
 
-  const handleChange = (field, value) => {
-    const debouncedHandleChange = debounce(onChange, 500);
-    if (field === "started_time") {
-      setLocalStartDate(value);
-    } else if (field === "ended_time") {
-      setLocalEndDate(value);
-    } else if (field === "text") {
-      setLocalDescription(value);
-    }
-    debouncedHandleChange(field, value);
-  };
+  const handleChange = useCallback(
+    (field, value) => {
+      console.log(`ActivityHistoryListItem[${index}]: Updating ${field} to ${value}`);
+      const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
+      const dateValue =
+        (field === "started_time" || field === "ended_time") && value && isValidDate(value)
+          ? value
+          : value;
+      const debouncedUpdate = debounce((field, value) => {
+        setActivityHistory((prev) =>
+          prev.map((activity, i) =>
+            i === index ? { ...activity, [field]: dateValue } : activity
+          )
+        );
+        setHasChanges(true);
+      }, 500);
+      if (field === "started_time") setLocalStartDate(value);
+      else if (field === "ended_time") setLocalEndDate(value);
+      else setLocalDescription(value);
+      debouncedUpdate(field, value);
+    },
+    [index, setActivityHistory, setHasChanges]
+  );
+
+  const handleImageUpload = useCallback(
+    (field, file) => {
+      if (file instanceof File || file instanceof Blob) {
+        console.log(`ActivityHistoryListItem[${index}]: Enqueuing image for ${field}`);
+        const blobUrl = URL.createObjectURL(file);
+        const storagePath = `about/activity_history/${field}/${file.name}`;
+        enqueueImageUpload(`main_pages.activity_history.${index}.${field}`, storagePath, file);
+        setActivityHistory((prev) =>
+          prev.map((activity, i) =>
+            i === index ? { ...activity, [field]: blobUrl } : activity
+          )
+        );
+        setHasChanges(true);
+      } else {
+        console.error(`ActivityHistoryListItem[${index}]: Invalid file for ${field}:`, file);
+      }
+    },
+    [index, enqueueImageUpload, setActivityHistory, setHasChanges]
+  );
+
+  const handleDelete = useCallback(() => {
+    console.log(`ActivityHistoryListItem[${index}]: Deleting activity`);
+    setActivityHistory((prev) => prev.filter((_, i) => i !== index));
+    setHasChanges(true);
+  }, [index, setActivityHistory, setHasChanges]);
 
   return (
     <div className="relative">
@@ -67,7 +105,7 @@ export function ActivityHistoryListItem({
           <div className="w-136 h-full float-right relative">
             <div>
               <ImageInput
-                handleImageUpload={(e) => onImageUpload("image1", e.target.files[0])}
+                handleImageUpload={(e) => handleImageUpload("image1", e.target.files[0])}
                 className="absolute w-88 h-62 bg-cover bg-center rounded-lg top-0 left-0"
                 style={{ backgroundImage: `url("${imageUrl1 || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
                 section="activity"
@@ -79,7 +117,7 @@ export function ActivityHistoryListItem({
               <ImageInput
                 className="absolute w-88 h-47 bg-cover bg-center rounded-lg bottom-0 right-0"
                 style={{ backgroundImage: `url("${imageUrl2 || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
-                handleImageUpload={(e) => onImageUpload("image2", e.target.files[0])}
+                handleImageUpload={(e) => handleImageUpload("image2", e.target.files[0])}
                 section="activity"
                 top="top-2"
                 right="right-2"
@@ -125,7 +163,7 @@ export function ActivityHistoryListItem({
       </div>
       <button
         className="absolute top-2 -right-2/2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-        onClick={onDelete}
+        onClick={handleDelete}
       >
         <svg
           className="w-5 h-5"
@@ -153,8 +191,8 @@ ActivityHistoryListItem.propTypes = {
   imageUrl1: PropTypes.string,
   imageUrl2: PropTypes.string,
   description: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  onImageUpload: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
+  setActivityHistory: PropTypes.func.isRequired,
+  enqueueImageUpload: PropTypes.func.isRequired,
+  setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
 };

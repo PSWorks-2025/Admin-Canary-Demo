@@ -5,9 +5,12 @@ import MissionSection from "../../components/AboutPageSection/MissionSection";
 import VisionSection from "../../components/AboutPageSection/VisionSection";
 import {
   ScrollMemberList,
-  ScrollMemberListItem
+  ScrollMemberListItem,
 } from "../../components/Lists/ScrollMemberList";
-import {ActivityHistoryList, ActivityHistoryListItem} from "../../components/Lists/ActivityHistoryList";
+import {
+  ActivityHistoryList,
+  ActivityHistoryListItem,
+} from "../../components/Lists/ActivityHistoryList";
 import useImagePreloader from "../../hooks/useImagePreloader";
 import LoadingScreen from "../../components/screens/LoadingScreen";
 import SectionWrap from "../../components/SectionWrap";
@@ -42,144 +45,9 @@ function Aboutpage() {
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
-  // Track changes to trigger save
+  // Xem thay đổi mà lỗi thì anh sửa
   const [hasChanges, setHasChanges] = useState(false);
 
-  useEffect(() => {
-    if (hasChanges) {
-      handleGlobalSave();
-      setHasChanges(false);
-    }
-  }, [hasChanges, handleGlobalSave]);
-
-  const updateHeroField = (field, value) => {
-    setHeroSections((prev) => ({
-      ...prev,
-      about: { ...prev.about, [field]: value },
-    }));
-    setHasChanges(true);
-  };
-
-  const updateHeroImage = (field, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      const blobUrl = URL.createObjectURL(file);
-      const storagePath = `hero_sections/about/${file.name}`;
-      enqueueImageUpload(`main_pages.hero_sections.about.${field}`, storagePath, file);
-      setHeroSections((prev) => ({
-        ...prev,
-        about: { ...prev.about, [field]: blobUrl },
-      }));
-      setHasChanges(true);
-    }
-  };
-
-  const updateNestedField = (section, field, value) => {
-    setStatements((prev) => ({
-      ...prev,
-      [section]: { ...prev[section], [field]: value },
-    }));
-    setHasChanges(true);
-  };
-
-  const updateNestedImage = (section, field, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      const blobUrl = URL.createObjectURL(file);
-      const storagePath = `about/statements/${section}/${file.name}`;
-      enqueueImageUpload(`main_pages.statements.${section}.${field}`, storagePath, file);
-      setStatements((prev) => ({
-        ...prev,
-        [section]: { ...prev[section], [field]: blobUrl },
-      }));
-      setHasChanges(true);
-    }
-  };
-
-  const updateMemberField = (index, field, value) => {
-    setMembers((prev) =>
-      prev.map((member, i) =>
-        i === index ? { ...member, [field]: value } : member
-      )
-    );
-    setHasChanges(true);
-  };
-
-  const updateMemberImage = (index, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      const blobUrl = URL.createObjectURL(file);
-      const storagePath = `about/members/${file.name}`;
-      enqueueImageUpload(`main_pages.members.${index}.image`, storagePath, file);
-      setMembers((prev) =>
-        prev.map((member, i) =>
-          i === index ? { ...member, image: blobUrl } : member
-        )
-      );
-      setHasChanges(true);
-    }
-  };
-
-  const addMember = () => {
-    setMembers((prev) => [
-      ...prev,
-      {
-        name: "",
-        role: "",
-        image: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-      },
-    ]);
-    setHasChanges(true);
-  };
-
-  const deleteMember = (index) => {
-    setMembers((prev) => prev.filter((_, i) => i !== index));
-    setHasChanges(true);
-  };
-
-  const updateActivityField = (index, field, value) => {
-    const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
-    const dateValue =
-      (field === "started_time" || field === "ended_time") && value && isValidDate(value)
-        ? value
-        : value;
-    setActivityHistory((prev) =>
-      prev.map((activity, i) =>
-        i === index ? { ...activity, [field]: dateValue } : activity
-      )
-    );
-    setHasChanges(true);
-  };
-
-  const updateActivityImage = (index, field, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      const blobUrl = URL.createObjectURL(file);
-      const storagePath = `about/activity_history/${field}/${file.name}`;
-      enqueueImageUpload(`main_pages.activity_history.${index}.${field}`, storagePath, file);
-      setActivityHistory((prev) =>
-        prev.map((activity, i) =>
-          i === index ? { ...activity, [field]: blobUrl } : activity
-        )
-      );
-      setHasChanges(true);
-    }
-  };
-
-  const addActivity = () => {
-    setActivityHistory((prev) => [
-      ...prev,
-      {
-        started_time: null,
-        ended_time: null,
-        text: "",
-        image1: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-        image2: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-      },
-    ]);
-    setHasChanges(true);
-  };
-
-  const deleteActivity = (index) => {
-    setActivityHistory((prev) => prev.filter((_, i) => i !== index));
-    setHasChanges(true);
-  };
 
   if (!imagesLoaded) {
     return <LoadingScreen />;
@@ -195,19 +63,22 @@ function Aboutpage() {
         backgroundColor={primaryBackgroundColor}
         title={heroSections?.about?.title}
         description={heroSections?.about?.description}
-        onFieldChange={updateHeroField}
-        onImageUpload={updateHeroImage}
+        setHeroSections={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
+        setHasChanges={setHasChanges}
       />
       <SectionWrap className="w-full" borderColor={secondaryBackgroundColor}>
         <MissionSection
           mission={statements?.mission || { title: "", description: "", imageUrl: "" }}
-          onFieldChange={(field, value) => updateNestedField("mission", field, value)}
-          onImageUpload={(field, file) => updateNestedImage("mission", field, file)}
+          setStatements={setStatements}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
         />
         <VisionSection
           vision={statements?.vision || { title: "", description: "", imageUrl: "" }}
-          onFieldChange={(field, value) => updateNestedField("vision", field, value)}
-          onImageUpload={(field, file) => updateNestedImage("vision", field, file)}
+          setStatements={setStatements}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
         />
       </SectionWrap>
       <SectionWrap borderColor={tertiaryBackgroundColor} className="w-full">
@@ -216,7 +87,17 @@ function Aboutpage() {
         </div>
         <div className="w-full flex justify-center my-4 md:mb-8">
           <button
-            onClick={addMember}
+            onClick={() => {
+              setMembers((prev) => [
+                ...prev,
+                {
+                  name: "",
+                  role: "",
+                  image: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+                },
+              ]);
+              setHasChanges(true);
+            }}
             className="py-2 px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title"
           >
             Thêm thành viên
@@ -233,9 +114,9 @@ function Aboutpage() {
                 imageUrl={member.image}
                 name={member.name}
                 role={member.role}
-                onChange={(field, value) => updateMemberField(index, field, value)}
-                onImageUpload={(file) => updateMemberImage(index, file)}
-                onDelete={() => deleteMember(index)}
+                setMembers={setMembers}
+                enqueueImageUpload={enqueueImageUpload}
+                setHasChanges={setHasChanges}
               />
             </div>
           ))}
@@ -247,7 +128,19 @@ function Aboutpage() {
         </div>
         <div className="w-full flex justify-center my-4 md:mb-8">
           <button
-            onClick={addActivity}
+            onClick={() => {
+              setActivityHistory((prev) => [
+                ...prev,
+                {
+                  started_time: null,
+                  ended_time: null,
+                  text: "",
+                  image1: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+                  image2: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+                },
+              ]);
+              setHasChanges(true);
+            }}
             className="py-2 px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title"
           >
             Thêm hoạt động
@@ -266,9 +159,9 @@ function Aboutpage() {
                 imageUrl1={activity.image1}
                 imageUrl2={activity.image2}
                 description={activity.text}
-                onChange={(field, value) => updateActivityField(index, field, value)}
-                onImageUpload={(field, file) => updateActivityImage(index, field, file)}
-                onDelete={() => deleteActivity(index)}
+                setActivityHistory={setActivityHistory}
+                enqueueImageUpload={enqueueImageUpload}
+                setHasChanges={setHasChanges}
                 buttonColor={tertiaryBackgroundColor}
               />
             </div>
