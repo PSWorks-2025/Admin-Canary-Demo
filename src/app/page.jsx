@@ -47,35 +47,35 @@ const HomePage = () => {
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
   const [imageUploadQueue, setImageUploadQueue] = useState([]);
 
-  const enqueueImageUpload = ({ section, key, file, path }) => {
-    const tempUrl = URL.createObjectURL(file);
+  // const enqueueImageUpload = ({ section, key, file, path }) => {
+  //   const tempUrl = URL.createObjectURL(file);
 
-    if (section === 'hero') { // todo: add path for firebase deletion
-      setHeroSections((prev) => ({
-        ...prev,
-        home: { ...prev.home, image: tempUrl },
-      }));
-    } else if (section === 'events') {
-      setEventOverviews((prev) => ({
-        ...prev,
-        [key]: {
-          ...prev[key],
-          thumbnail: { ...prev[key].thumbnail, src: tempUrl },
-        },
-      }));
-    } else if (section === 'stories') {
-      setStoryOverviews((prev) => ({
-        ...prev,
-        [key]: {
-          ...prev[key],
-          thumbnail: { ...prev[key].thumbnail, src: tempUrl },
-        },
-      }));
-    }
+  //   if (section === 'hero') { // todo: add path for firebase deletion
+  //     setHeroSections((prev) => ({
+  //       ...prev,
+  //       home: { ...prev.home, image: tempUrl },
+  //     }));
+  //   } else if (section === 'events') {
+  //     setEventOverviews((prev) => ({
+  //       ...prev,
+  //       [key]: {
+  //         ...prev[key],
+  //         thumbnail: { ...prev[key].thumbnail, src: tempUrl },
+  //       },
+  //     }));
+  //   } else if (section === 'stories') {
+  //     setStoryOverviews((prev) => ({
+  //       ...prev,
+  //       [key]: {
+  //         ...prev[key],
+  //         thumbnail: { ...prev[key].thumbnail, src: tempUrl },
+  //       },
+  //     }));
+  //   }
 
-    setImageUploadQueue((prev) => [...prev, { section, key, file, path }]);
-    setHasPendingChanges(true);
-  };
+  //   setImageUploadQueue((prev) => [...prev, { section, key, file, path }]);
+  //   setHasPendingChanges(true);
+  // };
 
   const handleFirstSectionChange = (value) => {
     setHeroSections((prev) => ({
@@ -85,43 +85,43 @@ const HomePage = () => {
     setHasPendingChanges(true);
   };
 
-  const saveUpdates = async () => {
-    try {
-      const updatedHeroSections = { ...heroSections };
+  // const saveUpdates = async () => {
+  //   try {
+  //     const updatedHeroSections = { ...heroSections };
 
-      for (const { section, key, file, path } of imageUploadQueue) {
-        const url = await uploadImageToStorage(path, file);
-        if (!url) continue;
+  //     for (const { section, key, file, path } of imageUploadQueue) {
+  //       const url = await uploadImageToStorage(path, file);
+  //       if (!url) continue;
 
-        if (section === 'hero') {
-          updatedHeroSections.home.image = url;
-        } else if (section === 'events') {
-          eventOverviews[key].thumbnail.src = url;
-        } else if (section === 'stories') {
-          storyOverviews[key].thumbnail.src = url;
-        }
-      }
+  //       if (section === 'hero') {
+  //         updatedHeroSections.home.image = url;
+  //       } else if (section === 'events') {
+  //         eventOverviews[key].thumbnail.src = url;
+  //       } else if (section === 'stories') {
+  //         storyOverviews[key].thumbnail.src = url;
+  //       }
+  //     }
 
-      const docRef = doc(db, 'Main pages', 'components');
-      const mergedData = {
-        org_stats: orgStats,
-        hero_sections: {
-          ...updatedHeroSections,
-          stories: { ...updatedHeroSections.stories, title: storiesTitle },
-        },
-        event_overviews: eventOverviews,
-        story_overviews: storyOverviews,
-      };
-      await updateDoc(docRef, mergedData);
-      setMainData(mergedData);
-      setHasPendingChanges(false);
-      setImageUploadQueue([]);
-    } catch (err) {
-      console.error('Save error:', err);
-    } finally {
-      console.log('Finished Saving');
-    }
-  };
+  //     const docRef = doc(db, 'Main pages', 'components');
+  //     const mergedData = {
+  //       org_stats: orgStats,
+  //       hero_sections: {
+  //         ...updatedHeroSections,
+  //         stories: { ...updatedHeroSections.stories, title: storiesTitle },
+  //       },
+  //       event_overviews: eventOverviews,
+  //       story_overviews: storyOverviews,
+  //     };
+  //     await updateDoc(docRef, mergedData);
+  //     setMainData(mergedData);
+  //     setHasPendingChanges(false);
+  //     setImageUploadQueue([]);
+  //   } catch (err) {
+  //     console.error('Save error:', err);
+  //   } finally {
+  //     console.log('Finished Saving');
+  //   }
+  // };
 
   return (
     <div
@@ -131,7 +131,6 @@ const HomePage = () => {
       <HeroSection
         data={heroSections}
         setData={setHeroSections}
-        enqueueImageUpload={enqueueImageUpload}
       />
 
       <StatsSection
@@ -146,7 +145,6 @@ const HomePage = () => {
         setData={setEventOverviews}
         sectionTitle={heroSections?.events?.title}
         setSectionTitle={handleFirstSectionChange}
-        enqueueImageUpload={enqueueImageUpload}
         buttonColor={secondaryBackgroundColor}
       />
       <div className="border-b-black border-b-3"></div>
@@ -157,7 +155,6 @@ const HomePage = () => {
           setData={setStoryOverviews}
           title={storiesTitle}
           setTitle={setStoriesTitle}
-          enqueueImageUpload={enqueueImageUpload}
           buttonColor={secondaryBackgroundColor}
         />
       </div>
