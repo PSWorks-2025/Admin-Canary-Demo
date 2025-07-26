@@ -1,12 +1,13 @@
 import React, { useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 import SectionWrap from "../SectionWrap";
 
-function DonateOverview({ pageData, onFieldChange, onImageUpload, buttonColor }) {
-  const [localHeading, setLocalHeading] = useState(pageData.heading);
-  const [localTitle1, setLocalTitle1] = useState(pageData.title1);
-  const [localTitle2, setLocalTitle2] = useState(pageData.title2);
+function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasChanges, buttonColor }) {
+  const [localHeading, setLocalHeading] = useState(pageData.heading || "");
+  const [localTitle1, setLocalTitle1] = useState(pageData.title1 || "");
+  const [localTitle2, setLocalTitle2] = useState(pageData.title2 || "");
 
   const debounce = useCallback((func, wait) => {
     let timeout;
@@ -18,17 +19,43 @@ function DonateOverview({ pageData, onFieldChange, onImageUpload, buttonColor })
 
   const handleChange = useCallback(
     (field, value) => {
-      const debouncedHandleFieldChange = debounce(onFieldChange, 500);
-      if (field === "heading") {
-        setLocalHeading(value);
-      } else if (field === "title1") {
-        setLocalTitle1(value);
-      } else {
-        setLocalTitle2(value);
-      }
-      debouncedHandleFieldChange(field, value);
+      console.log(`DonateOverview: Updating ${field} to ${value}`);
+      const debouncedUpdate = debounce((field, value) => {
+        setHeroSections((prev) => ({
+          ...prev,
+          donate: { ...prev.donate, [field]: value },
+        }));
+        setHasChanges(true);
+      }, 500);
+      if (field === "heading") setLocalHeading(value);
+      else if (field === "title1") setLocalTitle1(value);
+      else setLocalTitle2(value);
+      debouncedUpdate(field, value);
     },
-    [onFieldChange]
+    [setHeroSections, setHasChanges]
+  );
+
+  const handleImageUpload = useCallback(
+    (index, file) => {
+      if (file instanceof File || file instanceof Blob) {
+        console.log(`DonateOverview: Enqueuing image for images[${index}]`);
+        const blobUrl = URL.createObjectURL(file);
+        const storagePath = `hero/donate/${file.name}`;
+        enqueueImageUpload(`main_pages.hero_sections.donate.images.${index}`, storagePath, file);
+        setHeroSections((prev) => {
+          const newImages = [...(prev.donate?.images || ["", ""])];
+          newImages[index] = blobUrl;
+          return {
+            ...prev,
+            donate: { ...prev.donate, images: newImages },
+          };
+        });
+        setHasChanges(true);
+      } else {
+        console.error(`DonateOverview: Invalid file for images[${index}]:`, file);
+      }
+    },
+    [enqueueImageUpload, setHeroSections, setHasChanges]
   );
 
   return (
@@ -49,10 +76,10 @@ function DonateOverview({ pageData, onFieldChange, onImageUpload, buttonColor })
               placeholder="Nhập tiêu đề"
             />
             <ImageInput
-              handleImageUpload={(file) => onImageUpload(0, file)}
+              handleImageUpload={(e) => handleImageUpload(0, e.target.files[0])}
               className="bg-cover bg-center rounded-lg flex justify-center items-center"
               style={{
-                backgroundImage: `url("${pageData.images[0]}")`,
+                backgroundImage: `url("${pageData.images[0] || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
                 height: "100%",
                 width: "100%",
               }}
@@ -75,10 +102,10 @@ function DonateOverview({ pageData, onFieldChange, onImageUpload, buttonColor })
               placeholder="Nhập tiêu đề"
             />
             <ImageInput
-              handleImageUpload={(file) => onImageUpload(1, file)}
+              handleImageUpload={(e) => handleImageUpload(1, e.target.files[0])}
               className="bg-cover bg-center rounded-lg flex justify-center items-center"
               style={{
-                backgroundImage: `url("${pageData.images[1]}")`,
+                backgroundImage: `url("${pageData.images[1] || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
                 height: "100%",
                 width: "100%",
               }}
@@ -96,5 +123,18 @@ function DonateOverview({ pageData, onFieldChange, onImageUpload, buttonColor })
     </SectionWrap>
   );
 }
+
+DonateOverview.propTypes = {
+  pageData: PropTypes.shape({
+    heading: PropTypes.string,
+    title1: PropTypes.string,
+    title2: PropTypes.string,
+    images: PropTypes.arrayOf(PropTypes.string),
+  }).isRequired,
+  setHeroSections: PropTypes.func.isRequired,
+  enqueueImageUpload: PropTypes.func.isRequired,
+  setHasChanges: PropTypes.func.isRequired,
+  buttonColor: PropTypes.string.isRequired,
+};
 
 export default DonateOverview;

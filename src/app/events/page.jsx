@@ -1,8 +1,7 @@
-import React, { useContext, useCallback } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import HeroSection from "../../components/EventsSection/HeroSection/index.jsx";
 import DonateOverview from "../../components/DonateOverview/DonateOverview";
-import ProjectOverview from "../../components/projectOverview/ProjectOverview";
 import ProjectLayout from "../../components/ProjectLayout/ProjectLayout";
 import EventsOverview from "../../components/EventsOverview/EventsOverview";
 import "./styles.css";
@@ -21,6 +20,7 @@ function Events() {
     eventOverviews,
     setEventOverviews,
     enqueueImageUpload,
+    handleGlobalSave,
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
@@ -37,198 +37,7 @@ function Events() {
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
-  const updateHeroField = useCallback((field, value) => {
-    setHeroSections((prev) => ({
-      ...prev,
-      events: { ...prev.events, [field]: value },
-    }));
-  }, [setHeroSections]);
-
-  const updateHeroImage = useCallback(
-    (file) => {
-      if (file instanceof File || file instanceof Blob) {
-        const blobUrl = URL.createObjectURL(file);
-        const storagePath = `hero/events/${file.name}`;
-        enqueueImageUpload(`main_pages.hero_sections.events.image`, storagePath, file);
-        setHeroSections((prev) => ({
-          ...prev,
-          events: { ...prev.events, image: blobUrl },
-        }));
-      }
-    },
-    [setHeroSections, enqueueImageUpload]
-  );
-
-  const updateDonateField = useCallback((field, value) => {
-    setHeroSections((prev) => ({
-      ...prev,
-      donate: { ...prev.donate, [field]: value },
-    }));
-  }, [setHeroSections]);
-
-  const updateDonateImage = useCallback(
-    (index, file) => {
-      if (file instanceof File || file instanceof Blob) {
-        const blobUrl = URL.createObjectURL(file);
-        const storagePath = `hero/donate/${file.name}`;
-        enqueueImageUpload(`main_pages.hero_sections.donate.images.${index}`, storagePath, file);
-        setHeroSections((prev) => {
-          const newImages = [...(prev.donate.images || ["", ""])];
-          newImages[index] = blobUrl;
-          return {
-            ...prev,
-            donate: { ...prev.donate, images: newImages },
-          };
-        });
-      }
-    },
-    [setHeroSections, enqueueImageUpload]
-  );
-
-  const updateProjectField = useCallback(
-    (id, field, value) => {
-      const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
-      const dateValue = field === "started_time" && value && isValidDate(value) ? value : value;
-      setProjectOverviews((prev) => ({
-        ...prev,
-        [id]: {
-          ...prev[id] || {
-            title: "",
-            abstract: "",
-            thumbnail: { src: "", alt: "", caption: "" },
-            started_time: null,
-          },
-          [field === "description" ? "abstract" : field]: dateValue,
-          thumbnail: {
-            ...prev[id]?.thumbnail || { src: "", alt: "", caption: "" },
-            title: field === "title" ? value : prev[id]?.title || "",
-          },
-        },
-      }));
-    },
-    [setProjectOverviews]
-  );
-
-  const updateProjectImage = useCallback(
-    (id, file) => {
-      if (file instanceof File || file instanceof Blob) {
-        const blobUrl = URL.createObjectURL(file);
-        const storagePath = `projects/${file.name}`;
-        enqueueImageUpload(`main_pages.project_overviews.${id}.thumbnail.src`, storagePath, file);
-        setProjectOverviews((prev) => ({
-          ...prev,
-          [id]: {
-            ...prev[id] || {
-              title: "",
-              abstract: "",
-              thumbnail: { src: "", alt: "", caption: "" },
-              started_time: null,
-            },
-            thumbnail: {
-              ...prev[id]?.thumbnail || { src: "", alt: "", caption: "" },
-              src: blobUrl,
-            },
-          },
-        }));
-      }
-    },
-    [setProjectOverviews, enqueueImageUpload]
-  );
-
-  const updateEventsField = useCallback(
-    (id, field, value) => {
-      setEventOverviews((prev) => ({
-        ...prev,
-        [id]: {
-          ...prev[id] || {
-            title: "",
-            abstract: "",
-            thumbnail: { src: "", alt: "", caption: "" },
-          },
-          [field === "description" ? "abstract" : field]: value,
-          thumbnail: {
-            ...prev[id]?.thumbnail || { src: "", alt: "", caption: "" },
-            title: field === "title" ? value : prev[id]?.title || "",
-          },
-        },
-      }));
-    },
-    [setEventOverviews]
-  );
-
-  const updateEventsImage = useCallback(
-    (id, file) => {
-      if (file instanceof File || file instanceof Blob) {
-        const blobUrl = URL.createObjectURL(file);
-        const storagePath = `events/${file.name}`;
-        enqueueImageUpload(`main_pages.event_overviews.${id}.thumbnail.src`, storagePath, file);
-        setEventOverviews((prev) => ({
-          ...prev,
-          [id]: {
-            ...prev[id] || {
-              title: "",
-              abstract: "",
-              thumbnail: { src: "", alt: "", caption: "" },
-            },
-            thumbnail: {
-              ...prev[id]?.thumbnail || { src: "", alt: "", caption: "" },
-              src: blobUrl,
-            },
-          },
-        }));
-      }
-    },
-    [setEventOverviews, enqueueImageUpload]
-  );
-
-  const createProject = useCallback(() => {
-    const newId = `Dự Án_${Object.keys(projectOverviews).length}_${new Date().toISOString()}`;
-    setProjectOverviews((prev) => ({
-      ...prev,
-      [newId]: {
-        title: "",
-        abstract: "",
-        thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
-        started_time: null,
-      },
-    }));
-  }, [projectOverviews, setProjectOverviews]);
-
-  const removeProject = useCallback(
-    (id) => {
-      setProjectOverviews((prev) => {
-        const newProjects = Object.keys(prev)
-          .filter((key) => key !== id)
-          .reduce((acc, key) => ({ ...acc, [key]: prev[key] }), {});
-        return newProjects;
-      });
-    },
-    [setProjectOverviews]
-  );
-
-  const createEvent = useCallback(() => {
-    const newId = `Sự Kiện_${Object.keys(eventOverviews).length}_${new Date().toISOString()}`;
-    setEventOverviews((prev) => ({
-      ...prev,
-      [newId]: {
-        title: "",
-        abstract: "",
-        thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
-      },
-    }));
-  }, [eventOverviews, setEventOverviews]);
-
-  const removeEvent = useCallback(
-    (id) => {
-      setEventOverviews((prev) => {
-        const newEvents = Object.keys(prev)
-          .filter((key) => key !== id)
-          .reduce((acc, key) => ({ ...acc, [key]: prev[key] }), {});
-        return newEvents;
-      });
-    },
-    [setEventOverviews]
-  );
+  const [hasChanges, setHasChanges] = useState(false);
 
   if (!imagesLoaded) {
     return <LoadingScreen />;
@@ -277,36 +86,30 @@ function Events() {
         title={heroSections?.events?.title}
         description={heroSections?.events?.description}
         backgroundImage={heroSections?.events?.image}
-        onFieldChange={updateHeroField}
-        onImageUpload={updateHeroImage}
+        setHeroSections={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
+        setHasChanges={setHasChanges}
       />
       <div className="projects">
-        {/* <ProjectOverview
-          pageData={projectOverview}
-          onFieldChange={updateProjectField}
-          onImageUpload={updateProjectImage}
-          buttonColor={secondaryBackgroundColor}
-        /> */}
         <DonateOverview
           pageData={donateOverview}
-          onFieldChange={updateDonateField}
-          onImageUpload={updateDonateImage}
+          setHeroSections={setHeroSections}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
           buttonColor={secondaryBackgroundColor}
         />
         <ProjectLayout
           projects={projectOverviews}
-          onChange={updateProjectField}
-          onImageUpload={updateProjectImage}
-          addProject={createProject}
-          deleteProject={removeProject}
+          setProjectOverviews={setProjectOverviews}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
           buttonColor={secondaryBackgroundColor}
         />
         <EventsOverview
           pageData={eventsOverview}
-          onFieldChange={updateEventsField}
-          onImageUpload={updateEventsImage}
-          addEvent={createEvent}
-          deleteEvent={removeEvent}
+          setEventOverviews={setEventOverviews}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
           buttonColor={secondaryBackgroundColor}
         />
       </div>
