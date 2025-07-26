@@ -4,18 +4,18 @@ import { ImageInput } from "./Inputs/ImageInput";
 import { TextInput } from "./Inputs/TextInput";
 
 const FundraisingHeader = ({
-  imageUrl,
-  fundraiserName,
-  amountRaised,
-  goalAmount,
-  qrCodeUrl,
+  image_url,
+  fundraiser_name,
+  amount_raised,
+  goal_amount,
+  qr_code_url,
   onSupportClick,
   onFieldChange,
   onImageUpload,
   buttonColor,
 }) => {
-  const [localFundraiserName, setLocalFundraiserName] = useState(fundraiserName);
-  const [localGoalAmount, setLocalGoalAmount] = useState(goalAmount);
+  const [localFundraiserName, setLocalFundraiserName] = useState(fundraiser_name || "");
+  const [localGoalAmount, setLocalGoalAmount] = useState(goal_amount || 0);
 
   const debounce = useCallback((func, wait) => {
     let timeout;
@@ -27,11 +27,12 @@ const FundraisingHeader = ({
 
   const handleChange = useCallback(
     (field, value) => {
-      const debouncedHandleFieldChange = debounce(onFieldChange, 1500);
-      if (field === "fundraiserName") {
+      console.log(`FundraisingHeader: Changing ${field} to ${value}`);
+      const debouncedHandleFieldChange = debounce(onFieldChange, 500);
+      if (field === "fundraiser_name") {
         setLocalFundraiserName(value);
         debouncedHandleFieldChange(field, value);
-      } else if (field === "goalAmount") {
+      } else if (field === "goal_amount") {
         const finalValue = value === "" ? "" : Number(value) >= 0 ? Number(value) : 0;
         setLocalGoalAmount(finalValue);
         if (value !== "") {
@@ -42,18 +43,21 @@ const FundraisingHeader = ({
     [onFieldChange]
   );
 
-  const progressPercentage = localGoalAmount > 0 ? Math.min((amountRaised / localGoalAmount) * 100, 100) : 0;
+  const progressPercentage = localGoalAmount > 0 ? Math.min((amount_raised / localGoalAmount) * 100, 100) : 0;
 
   return (
     <div>
       <ImageInput
-        handleImageUpload={(e) => onImageUpload("imageUrl", e.target.files[0])}
+        handleImageUpload={(e) => {
+          console.log("Uploading image for image_url");
+          onImageUpload("image_url", e.target.files[0]);
+        }}
         section="fundraising-header"
         top="top-2"
         right="right-2"
         className="relative w-full h-[400px] bg-cover bg-center bg-blend-multiply"
         style={{
-          backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${imageUrl})`,
+          backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${image_url || "https://blog.photobucket.com/hubfs/upload_pics_online.png"})`,
         }}
       >
         <div className="absolute bottom-4 left-4 right-4 event">
@@ -62,9 +66,9 @@ const FundraisingHeader = ({
             value={localFundraiserName}
             onChange={(e) => {
               e.stopPropagation();
-              handleChange("fundraiserName", e.target.value);
+              handleChange("fundraiser_name", e.target.value);
             }}
-            onClick={(e) => e.stopPropagation()} // Prevent click from reaching ImageInput
+            onClick={(e) => e.stopPropagation()}
             placeholder="Nhập tên quỹ"
           />
           <div className="mt-2">
@@ -76,7 +80,7 @@ const FundraisingHeader = ({
             </div>
             <div className="flex items-center mt-1">
               <p className="text-white whitespace-nowrap">
-                Đã quyên góp: {amountRaised.toLocaleString()} /
+                Đã quyên góp: {amount_raised.toLocaleString()} /
               </p>
               <div className="flex flex-row items-center">
                 <TextInput
@@ -85,9 +89,9 @@ const FundraisingHeader = ({
                   value={localGoalAmount}
                   onChange={(e) => {
                     e.stopPropagation();
-                    handleChange("goalAmount", e.target.value);
+                    handleChange("goal_amount", e.target.value);
                   }}
-                  onClick={(e) => e.stopPropagation()} // Prevent click from reaching ImageInput
+                  onClick={(e) => e.stopPropagation()}
                   placeholder="Nhập mục tiêu"
                   min="0"
                 />
@@ -99,13 +103,14 @@ const FundraisingHeader = ({
             <ImageInput
               handleImageUpload={(e) => {
                 e.stopPropagation();
-                onImageUpload("qrCodeUrl", e.target.files[0]);
+                console.log("Uploading image for qr_code_url");
+                onImageUpload("qr_code_url", e.target.files[0]);
               }}
               section="qr-code"
               top="top-2"
               left="left-2"
               className="w-24 h-24 object-cover z-10"
-              style={{ backgroundImage: `url("${qrCodeUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
+              style={{ backgroundImage: `url("${qr_code_url || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
             />
             <button
               className="ml-4 text-white font-medium px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200 z-10"
@@ -125,11 +130,11 @@ const FundraisingHeader = ({
 };
 
 FundraisingHeader.propTypes = {
-  imageUrl: PropTypes.string.isRequired,
-  fundraiserName: PropTypes.string.isRequired,
-  amountRaised: PropTypes.number.isRequired,
-  goalAmount: PropTypes.number.isRequired,
-  qrCodeUrl: PropTypes.string.isRequired,
+  image_url: PropTypes.string,
+  fundraiser_name: PropTypes.string,
+  amount_raised: PropTypes.number,
+  goal_amount: PropTypes.number,
+  qr_code_url: PropTypes.string,
   onSupportClick: PropTypes.func.isRequired,
   onFieldChange: PropTypes.func.isRequired,
   onImageUpload: PropTypes.func.isRequired,

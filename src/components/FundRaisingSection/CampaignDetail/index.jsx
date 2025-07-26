@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { TextInput } from "../../Inputs/TextInput";
 import SectionWrap from "../../SectionWrap";
 
-const CampaignDetails = ({ campaignTitle, campaignDescription, onFieldChange, buttonColor }) => {
-  const [localTitle, setLocalTitle] = useState(campaignTitle);
-  const [localDescription, setLocalDescription] = useState(campaignDescription);
+const CampaignDetails = ({ campaign_title, campaign_description, onFieldChange, buttonColor }) => {
+  const [localTitle, setLocalTitle] = useState(campaign_title || "");
+  const [localDescription, setLocalDescription] = useState(campaign_description || "");
 
   const debounce = useCallback((func, wait) => {
     let timeout;
@@ -17,8 +17,8 @@ const CampaignDetails = ({ campaignTitle, campaignDescription, onFieldChange, bu
 
   const handleChange = useCallback(
     (field, value) => {
-      const debouncedHandleFieldChange = debounce(onFieldChange, 1500);
-      if (field === "campaignTitle") {
+      const debouncedHandleFieldChange = debounce(onFieldChange, 500);
+      if (field === "campaign_title") {
         setLocalTitle(value);
       } else {
         setLocalDescription(value);
@@ -33,14 +33,14 @@ const CampaignDetails = ({ campaignTitle, campaignDescription, onFieldChange, bu
       <TextInput
         className="text-4xl font-bold text-gray-900 outline-none bg-transparent w-full border rounded px-2 py-1"
         value={localTitle}
-        onChange={(e) => handleChange("campaignTitle", e.target.value)}
+        onChange={(e) => handleChange("campaign_title", e.target.value)}
         placeholder="Nhập tiêu đề chiến dịch"
       />
       <TextInput
         type="textarea"
         className="text-gray-700 mt-2 outline-none bg-transparent resize-none w-full border rounded px-2 py-1"
         value={localDescription}
-        onChange={(e) => handleChange("campaignDescription", e.target.value)}
+        onChange={(e) => handleChange("campaign_description", e.target.value)}
         placeholder="Nhập mô tả chiến dịch"
         rows="4"
       />
@@ -49,9 +49,10 @@ const CampaignDetails = ({ campaignTitle, campaignDescription, onFieldChange, bu
 };
 
 CampaignDetails.propTypes = {
-  campaignTitle: PropTypes.string.isRequired,
-  campaignDescription: PropTypes.string.isRequired,
+  campaign_title: PropTypes.string,
+  campaign_description: PropTypes.string,
   onFieldChange: PropTypes.func.isRequired,
+  buttonColor: PropTypes.string,
 };
 
 export default CampaignDetails;

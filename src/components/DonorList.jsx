@@ -4,10 +4,10 @@ import { TextInput } from "./Inputs/TextInput";
 import SectionWrap from "./SectionWrap";
 
 const DonorList = ({ donors, onDonorChange, onAddDonor, onDeleteDonor, buttonColor }) => {
-  const [localDonors, setLocalDonors] = useState(donors);
+  const [localDonors, setLocalDonors] = useState(donors || []);
 
   useEffect(() => {
-    setLocalDonors(donors);
+    setLocalDonors(donors || []);
   }, [donors]);
 
   const debounce = useCallback((func, wait) => {
@@ -62,6 +62,7 @@ const DonorList = ({ donors, onDonorChange, onAddDonor, onDeleteDonor, buttonCol
                 value={donor.amount !== undefined ? donor.amount : ""}
                 onChange={(e) => handleChange(index, "amount", e.target.value)}
                 placeholder="Nhập số tiền"
+                min="0"
               />
             </div>
             <button
@@ -94,10 +95,10 @@ DonorList.propTypes = {
   donors: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      name: PropTypes.string.isRequired,
-      amount: PropTypes.number.isRequired,
+      name: PropTypes.string,
+      amount: PropTypes.number,
     })
-  ).isRequired,
+  ),
   onDonorChange: PropTypes.func.isRequired,
   onAddDonor: PropTypes.func.isRequired,
   onDeleteDonor: PropTypes.func.isRequired,
