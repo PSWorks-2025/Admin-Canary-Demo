@@ -36,9 +36,9 @@ export function ActivityHistoryListItem({
   onDelete,
   buttonColor,
 }) {
-  const [localStartDate, setLocalStartDate] = useState(startDate);
-  const [localEndDate, setLocalEndDate] = useState(endDate);
-  const [localDescription, setLocalDescription] = useState(description);
+  const [localStartDate, setLocalStartDate] = useState(startDate || "");
+  const [localEndDate, setLocalEndDate] = useState(endDate || "");
+  const [localDescription, setLocalDescription] = useState(description || "");
 
   const debounce = (func, wait) => {
     let timeout;
@@ -56,9 +56,6 @@ export function ActivityHistoryListItem({
       setLocalEndDate(value);
     } else if (field === "text") {
       setLocalDescription(value);
-    } else if (field === "delete") {
-      onDelete();
-      return;
     }
     debouncedHandleChange(field, value);
   };
@@ -70,9 +67,9 @@ export function ActivityHistoryListItem({
           <div className="w-136 h-full float-right relative">
             <div>
               <ImageInput
-                handleImageUpload={(file) => onImageUpload("image1", file)}
+                handleImageUpload={(e) => onImageUpload("image1", e.target.files[0])}
                 className="absolute w-88 h-62 bg-cover bg-center rounded-lg top-0 left-0"
-                style={{ backgroundImage: `url("${imageUrl1}")` }}
+                style={{ backgroundImage: `url("${imageUrl1 || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
                 section="activity"
                 top="top-2"
                 left="left-2"
@@ -81,8 +78,8 @@ export function ActivityHistoryListItem({
             <div>
               <ImageInput
                 className="absolute w-88 h-47 bg-cover bg-center rounded-lg bottom-0 right-0"
-                style={{ backgroundImage: `url("${imageUrl2}")` }}
-                handleImageUpload={(file) => onImageUpload("image2", file)}
+                style={{ backgroundImage: `url("${imageUrl2 || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
+                handleImageUpload={(e) => onImageUpload("image2", e.target.files[0])}
                 section="activity"
                 top="top-2"
                 right="right-2"
@@ -95,14 +92,14 @@ export function ActivityHistoryListItem({
             <div className="w-83 flex justify-between text-[1.6rem] font-bold text-primary-title">
               <TextInput
                 className="w-50 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
-                value={localStartDate || ""}
+                value={localStartDate}
                 type="date"
                 onChange={(e) => handleChange("started_time", e.target.value)}
                 placeholder="Start date"
               />
               <TextInput
                 className="w-50 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
-                value={localEndDate || ""}
+                value={localEndDate}
                 type="date"
                 onChange={(e) => handleChange("ended_time", e.target.value)}
                 placeholder="End date"
@@ -128,7 +125,7 @@ export function ActivityHistoryListItem({
       </div>
       <button
         className="absolute top-2 -right-2/2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-        onClick={() => handleChange("delete", null)}
+        onClick={onDelete}
       >
         <svg
           className="w-5 h-5"
@@ -153,9 +150,9 @@ ActivityHistoryListItem.propTypes = {
   index: PropTypes.number.isRequired,
   startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
   endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-  imageUrl1: PropTypes.string.isRequired,
-  imageUrl2: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
+  imageUrl1: PropTypes.string,
+  imageUrl2: PropTypes.string,
+  description: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   onImageUpload: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,

@@ -49,7 +49,7 @@ function Events() {
       if (file instanceof File || file instanceof Blob) {
         const blobUrl = URL.createObjectURL(file);
         const storagePath = `hero/events/${file.name}`;
-        enqueueImageUpload(`main.hero_sections.events.image`, storagePath, file);
+        enqueueImageUpload(`main_pages.hero_sections.events.image`, storagePath, file);
         setHeroSections((prev) => ({
           ...prev,
           events: { ...prev.events, image: blobUrl },
@@ -71,7 +71,7 @@ function Events() {
       if (file instanceof File || file instanceof Blob) {
         const blobUrl = URL.createObjectURL(file);
         const storagePath = `hero/donate/${file.name}`;
-        enqueueImageUpload(`main.hero_sections.donate.images.${index}`, storagePath, file);
+        enqueueImageUpload(`main_pages.hero_sections.donate.images.${index}`, storagePath, file);
         setHeroSections((prev) => {
           const newImages = [...(prev.donate.images || ["", ""])];
           newImages[index] = blobUrl;
@@ -114,7 +114,7 @@ function Events() {
       if (file instanceof File || file instanceof Blob) {
         const blobUrl = URL.createObjectURL(file);
         const storagePath = `projects/${file.name}`;
-        enqueueImageUpload(`main.project_overviews.${id}.thumbnail.src`, storagePath, file);
+        enqueueImageUpload(`main_pages.project_overviews.${id}.thumbnail.src`, storagePath, file);
         setProjectOverviews((prev) => ({
           ...prev,
           [id]: {
@@ -161,7 +161,7 @@ function Events() {
       if (file instanceof File || file instanceof Blob) {
         const blobUrl = URL.createObjectURL(file);
         const storagePath = `events/${file.name}`;
-        enqueueImageUpload(`main.event_overviews.${id}.thumbnail.src`, storagePath, file);
+        enqueueImageUpload(`main_pages.event_overviews.${id}.thumbnail.src`, storagePath, file);
         setEventOverviews((prev) => ({
           ...prev,
           [id]: {
@@ -281,12 +281,12 @@ function Events() {
         onImageUpload={updateHeroImage}
       />
       <div className="projects">
-        <ProjectOverview
+        {/* <ProjectOverview
           pageData={projectOverview}
           onFieldChange={updateProjectField}
           onImageUpload={updateProjectImage}
           buttonColor={secondaryBackgroundColor}
-        />
+        /> */}
         <DonateOverview
           pageData={donateOverview}
           onFieldChange={updateDonateField}

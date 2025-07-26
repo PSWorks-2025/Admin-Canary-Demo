@@ -1,20 +1,11 @@
-import { createContext, useState, useEffect } from "react";
-import { doc, updateDoc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { Timestamp } from "firebase/firestore";
-import { db, storage } from "./service/firebaseConfig.jsx";
-import { readData } from "./service/readFirebase.jsx";
-
-// Custom function to set nested object values
-const setNestedValue = (obj, path, value) => {
-  const keys = path.split('.');
-  let current = obj;
-  for (let i = 0; i < keys.length - 1; i++) {
-    current[keys[i]] = current[keys[i]] || {};
-    current = current[keys[i]];
-  }
-  current[keys[keys.length - 1]] = value;
-};
+import { createContext, useState, useEffect, useCallback } from 'react';
+import { doc, setDoc } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { Timestamp } from 'firebase/firestore';
+import { db, storage } from './service/firebaseConfig.jsx';
+import { readData } from './service/readFirebase.jsx';
+import set from 'lodash/set';
+import { createFinalData } from './utils/deepMerge.js';
 
 const GlobalContext = createContext();
 
@@ -25,19 +16,19 @@ export const GlobalProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Theme colors
-  const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState("#ffffff");
-  const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState("#ffffff");
-  const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState("#4160df");
+  const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState('#ffffff');
+  const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState('#ffffff');
+  const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState('#4160df');
 
   // Footer-specific states
   const [logoUrl, setLogoUrl] = useState('');
   const [logoFile, setLogoFile] = useState(null);
-  const [groupName, setGroupName] = useState("");
-  const [groupDescription, setGroupDescription] = useState("");
+  const [groupName, setGroupName] = useState('');
+  const [groupDescription, setGroupDescription] = useState('');
   const [contactInfoData, setContactInfoData] = useState({
-    hotline: "",
-    email: "",
-    address: "",
+    hotline: null,
+    email: null,
+    address: null,
   });
   const [socialLinksData, setSocialLinksData] = useState({});
 
@@ -57,21 +48,25 @@ export const GlobalProvider = ({ children }) => {
   const [storyOverviews, setStoryOverviews] = useState({});
 
   useEffect(() => {
+    console.log(groupName);
+  }, [groupName]);
+
+  useEffect(() => {
     const handleGetData = async () => {
       try {
         const res = await readData();
         if (res?.global) {
           setGlobalData(res.global);
           setLogoUrl(res.global.logo || '');
-          setPrimaryBackgroundColor(res.global.primaryBackgroundColor || "#ffffff");
-          setSecondaryBackgroundColor(res.global.secondaryBackgroundColor || "#ffffff");
-          setTertiaryBackgroundColor(res.global.tertiaryBackgroundColor || "#4160df");
-          setGroupName(res.global.group_name || "");
-          setGroupDescription(res.global.description || "");
+          setPrimaryBackgroundColor(res.global.primaryBackgroundColor || '#ffffff');
+          setSecondaryBackgroundColor(res.global.secondaryBackgroundColor || '#ffffff');
+          setTertiaryBackgroundColor(res.global.tertiaryBackgroundColor || '#4160df');
+          setGroupName(res.global.group_name || '');
+          setGroupDescription(res.global.description || '');
           setContactInfoData({
-            hotline: res.global.hotline || "",
-            email: res.global.email || "",
-            address: res.global.address || "",
+            hotline: res.global.hotline || null,
+            email: res.global.email || null,
+            address: res.global.address || null,
           });
           setSocialLinksData(res.global.social_media || {});
         }
@@ -89,7 +84,7 @@ export const GlobalProvider = ({ children }) => {
           setStoryOverviews(res.main.story_overviews || {});
         }
       } catch (error) {
-        console.error("Error in GlobalProvider useEffect:", error);
+        console.error('Error in GlobalProvider useEffect:', error);
       } finally {
         setLoading(false);
       }
@@ -97,18 +92,33 @@ export const GlobalProvider = ({ children }) => {
     handleGetData();
   }, []);
 
-  // Enqueue image with unique key (dynamic field path in globalData or mainData)
-  const enqueueImageUpload = (key, path, file) => {
+  // Enqueue image with unique key (supports both object and string key signatures)
+  const enqueueImageUpload = useCallback((keyOrObj, path, file) => {
+    let key;
+    if (typeof keyOrObj === 'object' && keyOrObj.key) {
+      key = keyOrObj.key;
+      path = keyOrObj.path;
+      file = keyOrObj.file;
+    } else {
+      key = keyOrObj;
+    }
+
+    if (!key.startsWith('main_pages.') && !key.startsWith('global.')) {
+      console.warn(
+        `❗ enqueueImageUpload: Key should start with 'main_pages.' or 'global.' Got: ${key}`
+      );
+    }
+
     setImageUploadQueue((prev) => ({
       ...prev,
-      [key]: { key, path, file }
+      [key]: { key, path, file },
     }));
-  };
+  }, []);
 
   // Upload all queued images and update globalData/mainData
-  const uploadAllImagesInQueue = async () => {
-    const updatedGlobal = { ...globalData };
-    const updatedMain = { ...mainData };
+  const uploadAllImagesInQueue = async (baseGlobalUpdate, baseMainUpdate) => {
+    const updatedGlobal = { ...baseGlobalUpdate };
+    const updatedMain = { ...baseMainUpdate };
 
     for (const key in imageUploadQueue) {
       const { path, file } = imageUploadQueue[key];
@@ -117,20 +127,35 @@ export const GlobalProvider = ({ children }) => {
         await uploadBytes(storageRef, file);
         const url = await getDownloadURL(storageRef);
         const finalUrl = `${url}?v=${Date.now()}`;
+        URL.revokeObjectURL(file); // Clean up blob URL
 
-        if (key.startsWith("global.") || key.startsWith("globalData.") || key.startsWith("Global.")) {
-          const actualKey = key.replace(/^global[Data.]?\./i, "");
-          setNestedValue(updatedGlobal, actualKey, finalUrl);
-          if (actualKey === "logo") {
+        let actualKey = key
+          .replace(/^globalData\./, '')
+          .replace(/^global\./, '')
+          .replace(/^mainData\./, '')
+          .replace(/^main_pages\./, '')
+          .replace(/^main\./, '')
+          .replace(/^Main pages\./, '');
+
+        if (
+          key.startsWith('global.') ||
+          key.startsWith('globalData.') ||
+          key.startsWith('Global.')
+        ) {
+          set(updatedGlobal, actualKey, finalUrl);
+          if (actualKey === 'logo') {
             setLogoUrl(finalUrl);
           }
-        } else if (key.startsWith("main.") || key.startsWith("mainData.") || key.startsWith("Main pages.")) {
-          const actualKey = key.replace(/^main[Data.]?\./i, "");
-          setNestedValue(updatedMain, actualKey, finalUrl);
+        } else if (
+          key.startsWith('main.') ||
+          key.startsWith('mainData.') ||
+          key.startsWith('Main pages.') ||
+          key.startsWith('main_pages.')
+        ) {
+          set(updatedMain, actualKey, finalUrl);
         } else {
           console.warn(`❗ Unknown key prefix: ${key}`);
         }
-        URL.revokeObjectURL(file); // Clean up blob URL
       } catch (error) {
         console.error(`❌ Error uploading image at ${path}:`, error);
       }
@@ -156,12 +181,8 @@ export const GlobalProvider = ({ children }) => {
         social_media: socialLinksData,
       };
 
-      // Upload images and get updated data
-      const { updatedGlobal, updatedMain } = await uploadAllImagesInQueue();
-      const finalGlobalData = { ...baseGlobalUpdate, ...updatedGlobal };
-
       // Prepare main data with date conversions
-      const finalMainData = {
+      const baseMainUpdate = {
         activity_history: activityHistory.map((activity) => ({
           ...activity,
           started_time:
@@ -201,19 +222,26 @@ export const GlobalProvider = ({ children }) => {
             ...story,
             posted_time:
               story.posted_time && !isNaN(new Date(story.posted_time).getTime())
-                ? Timestamp.fromDate(new Date(story.posted_time))
-                : null,
+              ? Timestamp.fromDate(new Date(story.posted_time))
+              : null,
           },
         }), {}),
       };
+
+      // Upload images and get updated data
+      const { updatedGlobal, updatedMain } = await uploadAllImagesInQueue(baseGlobalUpdate, baseMainUpdate);
+
+      // Merge updates
+      const finalGlobalData = createFinalData(baseGlobalUpdate, updatedGlobal);
+      const finalMainData = createFinalData(baseMainUpdate, updatedMain);
 
       // Firestore writes
       const globalRef = doc(db, 'Global', 'components');
       const mainRef = doc(db, 'Main pages', 'components');
 
       await Promise.all([
-        updateDoc(globalRef, finalGlobalData),
-        updateDoc(mainRef, finalMainData),
+        setDoc(globalRef, finalGlobalData),
+        setDoc(mainRef, finalMainData),
       ]);
 
       // Update local state
@@ -230,9 +258,9 @@ export const GlobalProvider = ({ children }) => {
       setStatements(finalMainData.statements);
       setStoryOverviews(finalMainData.story_overviews);
 
-      console.log("✅ Global and Main data saved successfully!");
+      console.log('✅ Global and Main data saved successfully!');
     } catch (error) {
-      console.error("❌ Error saving global/main data:", error);
+      console.error('❌ Error saving global/main data:', error);
     }
   };
 

@@ -3,8 +3,8 @@ import { ImageInput } from "../../Inputs/ImageInput";
 import { TextInput } from "../../Inputs/TextInput";
 
 const VisionSection = ({ vision, onFieldChange, onImageUpload }) => {
-  const [localTitle, setLocalTitle] = useState(vision.title);
-  const [localDescription, setLocalDescription] = useState(vision.description);
+  const [localTitle, setLocalTitle] = useState(vision?.title || "");
+  const [localDescription, setLocalDescription] = useState(vision?.description || "");
 
   const debounce = useCallback((func, wait) => {
     let timeout;
@@ -31,9 +31,9 @@ const VisionSection = ({ vision, onFieldChange, onImageUpload }) => {
     <div className="w-full pt-20 flex flex-row-reverse">
       <div className="w-1/2 px-4 relative">
         <ImageInput
-          handleImageUpload={(file) => onImageUpload("imageUrl", file.target.files[0])}
+          handleImageUpload={(e) => onImageUpload("imageUrl", e.target.files[0])}
           className="w-162 h-102 -ml-26 bg-cover bg-center rounded-lg"
-          style={{ backgroundImage: `url("${vision.imageUrl}")` }}
+          style={{ backgroundImage: `url("${vision?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
           section="vision"
           top="top-2"
           left="left-2"

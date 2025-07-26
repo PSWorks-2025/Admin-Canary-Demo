@@ -1,5 +1,6 @@
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
+import { BiSolidRightArrow } from "react-icons/bi";
 import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { ImageInput } from "../Inputs/ImageInput";
@@ -7,8 +8,8 @@ import { TextInput } from "../Inputs/TextInput";
 import React from "react";
 
 export function ScrollMemberListItem({ index, imageUrl, name, role, onChange, onImageUpload, onDelete }) {
-  const [localName, setLocalName] = useState(name);
-  const [localRole, setLocalRole] = useState(role);
+  const [localName, setLocalName] = useState(name || "");
+  const [localRole, setLocalRole] = useState(role || "");
 
   const debounce = (func, wait) => {
     let timeout;
@@ -35,7 +36,7 @@ export function ScrollMemberListItem({ index, imageUrl, name, role, onChange, on
           handleImageUpload={(e) => onImageUpload(e.target.files[0])}
           top="top-2"
           left="left-2"
-          style={{ backgroundImage: `url("${imageUrl}")` }}
+          style={{ backgroundImage: `url("${imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
           className="w-full h-64 bg-cover bg-center rounded-sm"
         />
         <button
@@ -77,9 +78,9 @@ export function ScrollMemberListItem({ index, imageUrl, name, role, onChange, on
 
 ScrollMemberListItem.propTypes = {
   index: PropTypes.number.isRequired,
-  imageUrl: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  role: PropTypes.string.isRequired,
+  imageUrl: PropTypes.string,
+  name: PropTypes.string,
+  role: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   onImageUpload: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,

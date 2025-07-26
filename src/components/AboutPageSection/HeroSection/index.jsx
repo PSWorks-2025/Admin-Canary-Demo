@@ -3,8 +3,8 @@ import { ImageInput } from "../../Inputs/ImageInput";
 import { TextInput } from "../../Inputs/TextInput";
 
 const HeroSection = ({ coverImage, backgroundColor, title, description, onFieldChange, onImageUpload }) => {
-  const [localTitle, setLocalTitle] = useState(title);
-  const [localDescription, setLocalDescription] = useState(description);
+  const [localTitle, setLocalTitle] = useState(title || "");
+  const [localDescription, setLocalDescription] = useState(description || "");
 
   const debounce = useCallback((func, wait) => {
     let timeout;
@@ -35,7 +35,7 @@ const HeroSection = ({ coverImage, backgroundColor, title, description, onFieldC
         right="right-2"
         className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url("${coverImage}")`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url("${coverImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
           height: "calc(100vh - 5rem)",
         }}
         section="hero"

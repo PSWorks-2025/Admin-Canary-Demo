@@ -3,8 +3,8 @@ import { ImageInput } from "../../Inputs/ImageInput";
 import { TextInput } from "../../Inputs/TextInput";
 
 const MissionSection = ({ mission, onFieldChange, onImageUpload }) => {
-  const [localTitle, setLocalTitle] = useState(mission.title);
-  const [localDescription, setLocalDescription] = useState(mission.description);
+  const [localTitle, setLocalTitle] = useState(mission?.title || "");
+  const [localDescription, setLocalDescription] = useState(mission?.description || "");
 
   const debounce = useCallback((func, wait) => {
     let timeout;
@@ -31,11 +31,11 @@ const MissionSection = ({ mission, onFieldChange, onImageUpload }) => {
     <div className="w-full pt-20 flex">
       <div className="w-1/2 px-4 relative">
         <ImageInput
-          handleImageUpload={(file) => onImageUpload("imageUrl", file.target.files[0])}
+          handleImageUpload={(e) => onImageUpload("imageUrl", e.target.files[0])}
           section="mission"
           top="top-2"
           className="w-162 h-102 -mr-26 bg-cover bg-center float-right rounded-lg"
-          style={{ backgroundImage: `url("${mission.imageUrl}")` }}
+          style={{ backgroundImage: `url("${mission?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
           left="left-1/2"
         />
       </div>

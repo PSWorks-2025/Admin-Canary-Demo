@@ -18,8 +18,8 @@ const FundraisingPage = () => {
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
-    fundraising?.image_url || "https://picsum.photos/800/400",
-    fundraising?.qr_code_url || "https://picsum.photos/500",
+    fundraising?.image_url || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+    fundraising?.qr_code_url || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
@@ -34,7 +34,7 @@ const FundraisingPage = () => {
     if (file instanceof File || file instanceof Blob) {
       const blobUrl = URL.createObjectURL(file);
       const storagePath = `fundraising/${file.name}`;
-      enqueueImageUpload(`main.fundraising.${field}`, storagePath, file);
+      enqueueImageUpload(`main_pages.fundraising.${field}`, storagePath, file);
       setFundraising((prev) => ({ ...prev, [field]: blobUrl }));
     }
   };
@@ -49,16 +49,13 @@ const FundraisingPage = () => {
       return {
         ...prev,
         donors: newDonors,
-        amount_raised: newDonors.reduce((sum, donor) => sum + (donor.amount || 0), 0),
+        amount_raised: newDonors.reduce((sum, donor) => sum + (Number(donor.amount) || 0), 0),
       };
     });
   };
 
   const addDonor = () => {
-    const newId =
-      fundraising.donors.length > 0
-        ? Math.max(...fundraising.donors.map((donor) => donor.id || 0)) + 1
-        : 1;
+    const newId = `donor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     setFundraising((prev) => ({
       ...prev,
       donors: [...prev.donors, { id: newId, name: "", amount: 0 }],
@@ -71,7 +68,7 @@ const FundraisingPage = () => {
       return {
         ...prev,
         donors: newDonors,
-        amount_raised: newDonors.reduce((sum, donor) => sum + (donor.amount || 0), 0),
+        amount_raised: newDonors.reduce((sum, donor) => sum + (Number(donor.amount) || 0), 0),
       };
     });
   };

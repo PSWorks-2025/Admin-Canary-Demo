@@ -18,9 +18,9 @@ function Story() {
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
-    heroSections?.stories?.image || "https://via.placeholder.com/1200x600",
+    heroSections?.stories?.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
     ...Object.values(storyOverviews || {}).map(
-      (story) => story.thumbnail?.src || "https://via.placeholder.com/144x144"
+      (story) => story.thumbnail?.src || "https://blog.photobucket.com/hubfs/upload_pics_online.png"
     ),
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
@@ -36,7 +36,7 @@ function Story() {
     if (file instanceof File || file instanceof Blob) {
       const blobUrl = URL.createObjectURL(file);
       const storagePath = `hero/stories/${file.name}`;
-      enqueueImageUpload(`main.hero_sections.stories.${field}`, storagePath, file);
+      enqueueImageUpload(`main_pages.hero_sections.stories.${field}`, storagePath, file);
       setHeroSections((prev) => ({
         ...prev,
         stories: { ...prev.stories, [field]: blobUrl },
@@ -65,7 +65,7 @@ function Story() {
     if (file instanceof File || file instanceof Blob) {
       const blobUrl = URL.createObjectURL(file);
       const storagePath = `stories/${file.name}`;
-      enqueueImageUpload(`main.story_overviews.${key}.thumbnail.src`, storagePath, file);
+      enqueueImageUpload(`main_pages.story_overviews.${key}.thumbnail.src`, storagePath, file);
       setStoryOverviews((prev) => ({
         ...prev,
         [key]: {
@@ -83,7 +83,7 @@ function Story() {
       [newKey]: {
         title: "",
         abstract: "",
-        thumbnail: { src: "", alt: "", caption: "" },
+        thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
         posted_time: new Date().toISOString(),
       },
     }));
@@ -116,7 +116,7 @@ function Story() {
         id: key,
         title: story.title || "",
         description: story.abstract || "",
-        imageUrl: story.thumbnail?.src || "https://via.placeholder.com/144x144",
+        imageUrl: story.thumbnail?.src || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
         posted_time: formattedDate,
       };
     }),
@@ -127,7 +127,7 @@ function Story() {
       <HeroSection
         heroTitle={heroSections?.stories?.title || ""}
         heroDescription={heroSections?.stories?.description || ""}
-        heroImage={heroSections?.stories?.image || "https://via.placeholder.com/1200x600"}
+        heroImage={heroSections?.stories?.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}
         onFieldChange={updateHeroField}
         onImageUpload={updateHeroImage}
         buttonColor={secondaryBackgroundColor}
