@@ -1,10 +1,19 @@
 import React, { useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import { ImageInput } from "../../Inputs/ImageInput";
 import { TextInput } from "../../Inputs/TextInput";
 
-const HeroSection = ({ heroTitle, heroDescription, heroImage, onFieldChange, onImageUpload, buttonColor }) => {
-  const [localTitle, setLocalTitle] = useState(heroTitle);
-  const [localDescription, setLocalDescription] = useState(heroDescription);
+const HeroSection = ({
+  heroTitle,
+  heroDescription,
+  heroImage,
+  setHeroSections,
+  enqueueImageUpload,
+  setHasChanges,
+  buttonColor,
+}) => {
+  const [localTitle, setLocalTitle] = useState(heroTitle || "");
+  const [localDescription, setLocalDescription] = useState(heroDescription || "");
 
   const debounce = useCallback((func, wait) => {
     let timeout;
@@ -16,27 +25,50 @@ const HeroSection = ({ heroTitle, heroDescription, heroImage, onFieldChange, onI
 
   const handleChange = useCallback(
     (field, value) => {
-      const debouncedHandleFieldChange = debounce(onFieldChange, 500);
-      if (field === "title") {
-        setLocalTitle(value);
-      } else {
-        setLocalDescription(value);
-      }
-      debouncedHandleFieldChange(field, value);
+      console.log(`HeroSection: Updating ${field} to ${value}`);
+      const debouncedUpdate = debounce((field, value) => {
+        setHeroSections((prev) => ({
+          ...prev,
+          stories: { ...prev.stories, [field]: value },
+        }));
+        setHasChanges(true);
+      }, 500);
+      if (field === "title") setLocalTitle(value);
+      else setLocalDescription(value);
+      debouncedUpdate(field, value);
     },
-    [onFieldChange]
+    [setHeroSections, setHasChanges]
+  );
+
+  const handleImageUpload = useCallback(
+    (file) => {
+      if (file instanceof File || file instanceof Blob) {
+        console.log(`HeroSection: Enqueuing image for image`);
+        const blobUrl = URL.createObjectURL(file);
+        const storagePath = `hero/stories/${file.name}`;
+        enqueueImageUpload(`main_pages.hero_sections.stories.image`, storagePath, file);
+        setHeroSections((prev) => ({
+          ...prev,
+          stories: { ...prev.stories, image: blobUrl },
+        }));
+        setHasChanges(true);
+      } else {
+        console.error(`HeroSection: Invalid file for image:`, file);
+      }
+    },
+    [enqueueImageUpload, setHeroSections, setHasChanges]
   );
 
   return (
     <div>
       <ImageInput
-        handleImageUpload={(e) => onImageUpload("image", e.target.files[0])}
+        handleImageUpload={(e) => handleImageUpload(e.target.files[0])}
         section="hero"
         top="top-23"
         right="right-2"
         className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply hero_section"
         style={{
-          backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${heroImage})`,
+          backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${heroImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png"})`,
           height: "calc(100vh - 5rem)",
         }}
       >
@@ -66,6 +98,16 @@ const HeroSection = ({ heroTitle, heroDescription, heroImage, onFieldChange, onI
       </ImageInput>
     </div>
   );
+};
+
+HeroSection.propTypes = {
+  heroTitle: PropTypes.string,
+  heroDescription: PropTypes.string,
+  heroImage: PropTypes.string,
+  setHeroSections: PropTypes.func.isRequired,
+  enqueueImageUpload: PropTypes.func.isRequired,
+  setHasChanges: PropTypes.func.isRequired,
+  buttonColor: PropTypes.string.isRequired,
 };
 
 export default HeroSection;

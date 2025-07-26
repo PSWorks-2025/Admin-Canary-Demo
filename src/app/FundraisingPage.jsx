@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import useImagePreloader from "../hooks/useImagePreloader";
 import LoadingScreen from "../components/screens/LoadingScreen";
@@ -23,62 +23,7 @@ const FundraisingPage = () => {
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
-  const updateField = (field, value) => {
-    console.log(`Updating field ${field} with value ${value}`);
-    setFundraising((prev) => ({
-      ...prev,
-      [field]: field === "goal_amount" || field === "amount_raised" ? Number(value) || 0 : value,
-    }));
-  };
-
-  const updateImage = (field, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      console.log(`Enqueuing image for ${field}:`, file);
-      const blobUrl = URL.createObjectURL(file);
-      const storagePath = `fundraising/${file.name}`;
-      enqueueImageUpload(`Main pages.fundraising.${field}`, storagePath, file);
-      setFundraising((prev) => ({ ...prev, [field]: blobUrl }));
-    } else {
-      console.error(`Invalid file for ${field}:`, file);
-    }
-  };
-
-  const updateDonor = (index, field, value) => {
-    console.log(`Updating donor[${index}].${field} with value ${value}`);
-    setFundraising((prev) => {
-      const newDonors = [...prev.donors];
-      newDonors[index] = {
-        ...newDonors[index],
-        [field]: field === "amount" ? Number(value) || 0 : value,
-      };
-      return {
-        ...prev,
-        donors: newDonors,
-        amount_raised: newDonors.reduce((sum, donor) => sum + (Number(donor.amount) || 0), 0),
-      };
-    });
-  };
-
-  const addDonor = () => {
-    const newId = `donor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    console.log(`Adding donor with id ${newId}`);
-    setFundraising((prev) => ({
-      ...prev,
-      donors: [...prev.donors, { id: newId, name: "", amount: 0 }],
-    }));
-  };
-
-  const deleteDonor = (index) => {
-    console.log(`Deleting donor at index ${index}`);
-    setFundraising((prev) => {
-      const newDonors = prev.donors.filter((_, i) => i !== index);
-      return {
-        ...prev,
-        donors: newDonors,
-        amount_raised: newDonors.reduce((sum, donor) => sum + (Number(donor.amount) || 0), 0),
-      };
-    });
-  };
+  const [hasChanges, setHasChanges] = useState(false);
 
   const handleSupportClick = () => {
     alert("Cảm ơn bạn đã ủng hộ! 🎉");
@@ -100,21 +45,22 @@ const FundraisingPage = () => {
         goal_amount={fundraising?.goal_amount || 0}
         qr_code_url={fundraising?.qr_code_url || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}
         onSupportClick={handleSupportClick}
-        onFieldChange={updateField}
-        onImageUpload={updateImage}
+        setFundraising={setFundraising}
+        enqueueImageUpload={enqueueImageUpload}
+        setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
       />
       <CampaignDetails
         campaign_title={fundraising?.campaign_title || ""}
         campaign_description={fundraising?.campaign_description || ""}
-        onFieldChange={updateField}
+        setFundraising={setFundraising}
+        setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
       />
       <DonorList
         donors={fundraising?.donors || []}
-        onDonorChange={updateDonor}
-        onAddDonor={addDonor}
-        onDeleteDonor={deleteDonor}
+        setFundraising={setFundraising}
+        setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
       />
     </div>

@@ -3,7 +3,13 @@ import PropTypes from "prop-types";
 import { TextInput } from "../../Inputs/TextInput";
 import SectionWrap from "../../SectionWrap";
 
-const CampaignDetails = ({ campaign_title, campaign_description, onFieldChange, buttonColor }) => {
+const CampaignDetails = ({
+  campaign_title,
+  campaign_description,
+  setFundraising,
+  setHasChanges,
+  buttonColor,
+}) => {
   const [localTitle, setLocalTitle] = useState(campaign_title || "");
   const [localDescription, setLocalDescription] = useState(campaign_description || "");
 
@@ -17,15 +23,22 @@ const CampaignDetails = ({ campaign_title, campaign_description, onFieldChange, 
 
   const handleChange = useCallback(
     (field, value) => {
-      const debouncedHandleFieldChange = debounce(onFieldChange, 500);
+      console.log(`CampaignDetails: Updating ${field} to ${value}`);
+      const debouncedUpdate = debounce((field, value) => {
+        setFundraising((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
+        setHasChanges(true);
+      }, 500);
       if (field === "campaign_title") {
         setLocalTitle(value);
       } else {
         setLocalDescription(value);
       }
-      debouncedHandleFieldChange(field, value);
+      debouncedUpdate(field, value);
     },
-    [onFieldChange]
+    [setFundraising, setHasChanges]
   );
 
   return (
@@ -51,7 +64,8 @@ const CampaignDetails = ({ campaign_title, campaign_description, onFieldChange, 
 CampaignDetails.propTypes = {
   campaign_title: PropTypes.string,
   campaign_description: PropTypes.string,
-  onFieldChange: PropTypes.func.isRequired,
+  setFundraising: PropTypes.func.isRequired,
+  setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string,
 };
 

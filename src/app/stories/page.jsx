@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import HeroSection from "../../components/StoriesSection/HeroSection";
 import StoriesSection from "../../components/StoriesSection/StoriesSection";
@@ -15,6 +15,7 @@ function Story() {
     storyOverviews,
     setStoryOverviews,
     enqueueImageUpload,
+    handleGlobalSave,
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
@@ -25,78 +26,9 @@ function Story() {
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
-  const updateHeroField = (field, value) => {
-    setHeroSections((prev) => ({
-      ...prev,
-      stories: { ...prev.stories, [field]: value },
-    }));
-  };
+  // Hôm nay em thế nào? Có còn false không? Em hãy cứ luôn true nhé
+  const [hasChanges, setHasChanges] = useState(false);
 
-  const updateHeroImage = (field, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      const blobUrl = URL.createObjectURL(file);
-      const storagePath = `hero/stories/${file.name}`;
-      enqueueImageUpload(`main_pages.hero_sections.stories.${field}`, storagePath, file);
-      setHeroSections((prev) => ({
-        ...prev,
-        stories: { ...prev.stories, [field]: blobUrl },
-      }));
-    }
-  };
-
-  const updateStoryField = (key, field, value) => {
-    const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
-    const dateValue =
-      field === "posted_time" && value && isValidDate(value) ? value : value;
-    setStoryOverviews((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        [field === "description" ? "abstract" : field]: dateValue,
-        thumbnail: {
-          ...prev[key].thumbnail,
-          title: field === "title" ? value : prev[key].title,
-        },
-      },
-    }));
-  };
-
-  const updateStoryImage = (key, file) => {
-    if (file instanceof File || file instanceof Blob) {
-      const blobUrl = URL.createObjectURL(file);
-      const storagePath = `stories/${file.name}`;
-      enqueueImageUpload(`main_pages.story_overviews.${key}.thumbnail.src`, storagePath, file);
-      setStoryOverviews((prev) => ({
-        ...prev,
-        [key]: {
-          ...prev[key],
-          thumbnail: { ...prev[key].thumbnail, src: blobUrl },
-        },
-      }));
-    }
-  };
-
-  const addStory = () => {
-    const newKey = `Câu Chuyện_${Object.keys(storyOverviews).length}_${new Date().toISOString()}`;
-    setStoryOverviews((prev) => ({
-      ...prev,
-      [newKey]: {
-        title: "",
-        abstract: "",
-        thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
-        posted_time: new Date().toISOString(),
-      },
-    }));
-  };
-
-  const deleteStory = (key) => {
-    setStoryOverviews((prev) => {
-      const newStories = Object.keys(prev)
-        .filter((k) => k !== key)
-        .reduce((acc, k) => ({ ...acc, [k]: prev[k] }), {});
-      return newStories;
-    });
-  };
 
   if (!imagesLoaded) {
     return <LoadingScreen />;
@@ -128,17 +60,17 @@ function Story() {
         heroTitle={heroSections?.stories?.title || ""}
         heroDescription={heroSections?.stories?.description || ""}
         heroImage={heroSections?.stories?.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}
-        onFieldChange={updateHeroField}
-        onImageUpload={updateHeroImage}
+        setHeroSections={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
+        setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
       />
       <StoriesSection
         pageData={storiesData}
-        onFieldChange={updateHeroField}
-        onStoryFieldChange={updateStoryField}
-        onStoryImageUpload={updateStoryImage}
-        onAddStory={addStory}
-        onDeleteStory={deleteStory}
+        setHeroSections={setHeroSections}
+        setStoryOverviews={setStoryOverviews}
+        enqueueImageUpload={enqueueImageUpload}
+        setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
       />
     </div>

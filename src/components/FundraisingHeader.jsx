@@ -10,8 +10,9 @@ const FundraisingHeader = ({
   goal_amount,
   qr_code_url,
   onSupportClick,
-  onFieldChange,
-  onImageUpload,
+  setFundraising,
+  enqueueImageUpload,
+  setHasChanges,
   buttonColor,
 }) => {
   const [localFundraiserName, setLocalFundraiserName] = useState(fundraiser_name || "");
@@ -27,20 +28,43 @@ const FundraisingHeader = ({
 
   const handleChange = useCallback(
     (field, value) => {
-      console.log(`FundraisingHeader: Changing ${field} to ${value}`);
-      const debouncedHandleFieldChange = debounce(onFieldChange, 500);
+      console.log(`FundraisingHeader: Updating ${field} to ${value}`);
+      const debouncedUpdate = debounce((field, value) => {
+        setFundraising((prev) => ({
+          ...prev,
+          [field]: field === "goal_amount" ? Number(value) || 0 : value,
+        }));
+        setHasChanges(true);
+      }, 500);
       if (field === "fundraiser_name") {
         setLocalFundraiserName(value);
-        debouncedHandleFieldChange(field, value);
       } else if (field === "goal_amount") {
         const finalValue = value === "" ? "" : Number(value) >= 0 ? Number(value) : 0;
         setLocalGoalAmount(finalValue);
         if (value !== "") {
-          debouncedHandleFieldChange(field, Number(value) || 0);
+          debouncedUpdate(field, Number(value) || 0);
         }
+        return;
+      }
+      debouncedUpdate(field, value);
+    },
+    [setFundraising, setHasChanges]
+  );
+
+  const handleImageUpload = useCallback(
+    (field, file) => {
+      if (file instanceof File || file instanceof Blob) {
+        console.log(`FundraisingHeader: Enqueuing image for ${field}`);
+        const blobUrl = URL.createObjectURL(file);
+        const storagePath = `fundraising/${file.name}`;
+        enqueueImageUpload(`Main pages.fundraising.${field}`, storagePath, file);
+        setFundraising((prev) => ({ ...prev, [field]: blobUrl }));
+        setHasChanges(true);
+      } else {
+        console.error(`FundraisingHeader: Invalid file for ${field}:`, file);
       }
     },
-    [onFieldChange]
+    [enqueueImageUpload, setFundraising, setHasChanges]
   );
 
   const progressPercentage = localGoalAmount > 0 ? Math.min((amount_raised / localGoalAmount) * 100, 100) : 0;
@@ -48,10 +72,7 @@ const FundraisingHeader = ({
   return (
     <div>
       <ImageInput
-        handleImageUpload={(e) => {
-          console.log("Uploading image for image_url");
-          onImageUpload("image_url", e.target.files[0]);
-        }}
+        handleImageUpload={(e) => handleImageUpload("image_url", e.target.files[0])}
         section="fundraising-header"
         top="top-2"
         right="right-2"
@@ -103,8 +124,7 @@ const FundraisingHeader = ({
             <ImageInput
               handleImageUpload={(e) => {
                 e.stopPropagation();
-                console.log("Uploading image for qr_code_url");
-                onImageUpload("qr_code_url", e.target.files[0]);
+                handleImageUpload("qr_code_url", e.target.files[0]);
               }}
               section="qr-code"
               top="top-2"
@@ -136,8 +156,9 @@ FundraisingHeader.propTypes = {
   goal_amount: PropTypes.number,
   qr_code_url: PropTypes.string,
   onSupportClick: PropTypes.func.isRequired,
-  onFieldChange: PropTypes.func.isRequired,
-  onImageUpload: PropTypes.func.isRequired,
+  setFundraising: PropTypes.func.isRequired,
+  enqueueImageUpload: PropTypes.func.isRequired,
+  setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string,
 };
 

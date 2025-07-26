@@ -6,15 +6,14 @@ import SectionWrap from "../../SectionWrap";
 
 const StoriesSection = ({
   pageData,
-  onFieldChange,
-  onStoryFieldChange,
-  onStoryImageUpload,
-  onAddStory,
-  onDeleteStory,
+  setHeroSections,
+  setStoryOverviews,
+  enqueueImageUpload,
+  setHasChanges,
   buttonColor,
 }) => {
-  const [localHeading, setLocalHeading] = useState(pageData.heading);
-  const [localStories, setLocalStories] = useState(pageData.stories);
+  const [localHeading, setLocalHeading] = useState(pageData.heading || "");
+  const [localStories, setLocalStories] = useState(pageData.stories || []);
 
   useEffect(() => {
     setLocalHeading(pageData.heading);
@@ -31,21 +30,110 @@ const StoriesSection = ({
 
   const handleChange = useCallback(
     (field, value, id, index) => {
+      console.log(`StoriesSection[${id}]: Updating ${field} to ${value}`);
       if (field === "heading") {
-        const debouncedHandleFieldChange = debounce(onFieldChange, 500);
+        const debouncedUpdate = debounce((field, value) => {
+          setHeroSections((prev) => ({
+            ...prev,
+            stories: { ...prev.stories, title: value },
+          }));
+          setHasChanges(true);
+        }, 500);
         setLocalHeading(value);
-        debouncedHandleFieldChange(field, value);
+        debouncedUpdate(field, value);
       } else {
-        const debouncedHandleStoryFieldChange = debounce(onStoryFieldChange, 500);
+        const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
+        const dateValue = field === "posted_time" && value && isValidDate(value) ? value : value;
+        const debouncedUpdate = debounce((id, field, value) => {
+          setStoryOverviews((prev) => ({
+            ...prev,
+            [id]: {
+              ...prev[id],
+              [field === "description" ? "abstract" : field]: dateValue,
+              thumbnail: {
+                ...prev[id].thumbnail,
+                title: field === "title" ? value : prev[id].title,
+              },
+            },
+          }));
+          setHasChanges(true);
+        }, 500);
         setLocalStories((prev) => {
           const newStories = [...prev];
           newStories[index] = { ...newStories[index], [field]: value };
           return newStories;
         });
-        debouncedHandleStoryFieldChange(id, field, value);
+        debouncedUpdate(id, field, value);
       }
     },
-    [onFieldChange, onStoryFieldChange]
+    [setHeroSections, setStoryOverviews, setHasChanges]
+  );
+
+  const handleImageUpload = useCallback(
+    (id, file) => {
+      if (file instanceof File || file instanceof Blob) {
+        console.log(`StoriesSection[${id}]: Enqueuing image for thumbnail.src`);
+        const blobUrl = URL.createObjectURL(file);
+        const storagePath = `stories/${file.name}`;
+        enqueueImageUpload(`main_pages.story_overviews.${id}.thumbnail.src`, storagePath, file);
+        setStoryOverviews((prev) => ({
+          ...prev,
+          [id]: {
+            ...prev[id],
+            thumbnail: { ...prev[id].thumbnail, src: blobUrl },
+          },
+        }));
+        setLocalStories((prev) =>
+          prev.map((story) =>
+            story.id === id ? { ...story, imageUrl: blobUrl } : story
+          )
+        );
+        setHasChanges(true);
+      } else {
+        console.error(`StoriesSection[${id}]: Invalid file for thumbnail.src:`, file);
+      }
+    },
+    [enqueueImageUpload, setStoryOverviews, setHasChanges]
+  );
+
+  const handleAddStory = useCallback(() => {
+    console.log("StoriesSection: Adding new story");
+    const newKey = `Câu Chuyện_${Object.keys(pageData.stories).length}_${new Date().toISOString()}`;
+    setStoryOverviews((prev) => ({
+      ...prev,
+      [newKey]: {
+        title: "",
+        abstract: "",
+        thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
+        posted_time: new Date().toISOString(),
+      },
+    }));
+    setLocalStories((prev) => [
+      ...prev,
+      {
+        id: newKey,
+        title: "",
+        description: "",
+        imageUrl: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+        posted_time: new Date().toISOString().split("T")[0],
+      },
+    ]);
+    setHasChanges(true);
+  }, [pageData.stories, setStoryOverviews, setHasChanges]);
+
+  const handleDeleteStory = useCallback(
+    (id) => {
+      console.log(`StoriesSection[${id}]: Deleting story`);
+      setStoryOverviews((prev) => {
+        const newStories = Object.keys(prev)
+          .filter((k) => k !== id)
+          .reduce((acc, k) => ({ ...acc, [k]: prev[k] }), {});
+        return newStories;
+      });
+      setLocalStories((prev) => prev.filter((story) => story.id !== id));
+      setHasChanges(true);
+    },
+    [setStoryOverviews, setHasChanges]
   );
 
   return (
@@ -63,7 +151,7 @@ const StoriesSection = ({
           <div key={story.id} className="flex flex-col items-center mb-6">
             <div className="relative w-full max-w-[300px] h-[300px] overflow-hidden rounded-lg mb-4">
               <ImageInput
-                handleImageUpload={(e) => onStoryImageUpload(story.id, e.target.files[0])}
+                handleImageUpload={(e) => handleImageUpload(story.id, e.target.files[0])}
                 section={`story-${story.id}`}
                 top="top-2"
                 left="left-2"
@@ -72,7 +160,7 @@ const StoriesSection = ({
               />
               <button
                 className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-                onClick={() => onDeleteStory(story.id)}
+                onClick={() => handleDeleteStory(story.id)}
               >
                 <svg
                   className="w-5 h-5"
@@ -118,7 +206,7 @@ const StoriesSection = ({
           <button
             className="text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
             style={{ backgroundColor: buttonColor }}
-            onClick={onAddStory}
+            onClick={handleAddStory}
           >
             Thêm câu chuyện
           </button>
@@ -131,7 +219,7 @@ const StoriesSection = ({
           <div key={story.id} className="flex flex-row justify-center items-start mt-10">
             <div className="image-container w-full max-w-[40%] h-[400px] overflow-hidden rounded-lg mr-4 relative">
               <ImageInput
-                handleImageUpload={(e) => onStoryImageUpload(story.id, e.target.files[0])}
+                handleImageUpload={(e) => handleImageUpload(story.id, e.target.files[0])}
                 section={`story-${story.id}`}
                 top="top-2"
                 left="left-2"
@@ -140,7 +228,7 @@ const StoriesSection = ({
               />
               <button
                 className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-                onClick={() => onDeleteStory(story.id)}
+                onClick={() => handleDeleteStory(story.id)}
               >
                 <svg
                   className="w-5 h-5"
@@ -186,7 +274,7 @@ const StoriesSection = ({
           <button
             className="text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
             style={{ backgroundColor: buttonColor }}
-            onClick={onAddStory}
+            onClick={handleAddStory}
           >
             Thêm câu chuyện
           </button>
@@ -209,11 +297,10 @@ StoriesSection.propTypes = {
       })
     ),
   }).isRequired,
-  onFieldChange: PropTypes.func.isRequired,
-  onStoryFieldChange: PropTypes.func.isRequired,
-  onStoryImageUpload: PropTypes.func.isRequired,
-  onAddStory: PropTypes.func.isRequired,
-  onDeleteStory: PropTypes.func.isRequired,
+  setHeroSections: PropTypes.func.isRequired,
+  setStoryOverviews: PropTypes.func.isRequired,
+  enqueueImageUpload: PropTypes.func.isRequired,
+  setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
 };
 
