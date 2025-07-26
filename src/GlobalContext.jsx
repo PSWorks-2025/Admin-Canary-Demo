@@ -1,10 +1,11 @@
 // GlobalContext.jsx
-import { createContext, useState, useEffect, useCallback } from "react";
-import { doc, updateDoc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { db, storage } from "./service/firebaseConfig.jsx";
-import { readData } from "./service/readFirebase.jsx";
-import set from "lodash/set";
+import { createContext, useState, useEffect, useCallback } from 'react';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { db, storage } from './service/firebaseConfig.jsx';
+import { readData } from './service/readFirebase.jsx';
+import set from 'lodash/set';
+import { createFinalData } from './utils/deepMerge.js';
 
 const GlobalContext = createContext();
 
@@ -22,12 +23,12 @@ export const GlobalProvider = ({ children }) => {
   // Footer-specific states
   const [logoUrl, setLogoUrl] = useState('');
   const [logoFile, setLogoFile] = useState(null);
-  const [groupName, setGroupName] = useState("");
-  const [groupDescription, setGroupDescription] = useState("");
+  const [groupName, setGroupName] = useState('');
+  const [groupDescription, setGroupDescription] = useState('');
   const [contactInfoData, setContactInfoData] = useState({
-    hotline: "",
-    email: "",
-    address: "",
+    hotline: '',
+    email: '',
+    address: '',
   });
   const [socialLinksData, setSocialLinksData] = useState({});
 
@@ -45,6 +46,9 @@ export const GlobalProvider = ({ children }) => {
   const [statements, setStatements] = useState({});
   const [storyOverviews, setStoryOverviews] = useState({});
 
+  useEffect(() => {
+    console.log(groupName);
+  }, [groupName]);
 
   useEffect(() => {
     const handleGetData = async () => {
@@ -53,15 +57,21 @@ export const GlobalProvider = ({ children }) => {
         if (res?.global) {
           setGlobalData(res.global);
           setLogoUrl(res.global.logo || '');
-          setPrimaryBackgroundColor(res.global.primaryBackgroundColor || "#ffffff");
-          setSecondaryBackgroundColor(res.global.secondaryBackgroundColor || "#ffffff");
-          setTertiaryBackgroundColor(res.global.tertiaryBackgroundColor || "#4160df");
-          setGroupName(res.global.group_name || "");
-          setGroupDescription(res.global.description || "");
+          setPrimaryBackgroundColor(
+            res.global.primaryBackgroundColor || '#ffffff'
+          );
+          setSecondaryBackgroundColor(
+            res.global.secondaryBackgroundColor || '#ffffff'
+          );
+          setTertiaryBackgroundColor(
+            res.global.tertiaryBackgroundColor || '#4160df'
+          );
+          setGroupName(res.global.group_name || '');
+          setGroupDescription(res.global.description || '');
           setContactInfoData({
-            hotline: res.global.hotline || "",
-            email: res.global.email || "",
-            address: res.global.address || "",
+            hotline: res.global.hotline || '',
+            email: res.global.email || '',
+            address: res.global.address || '',
           });
           setSocialLinksData(res.global.social_media || {});
         }
@@ -79,7 +89,7 @@ export const GlobalProvider = ({ children }) => {
           setStoryOverviews(res.main.story_overviews || {});
         }
       } catch (error) {
-        console.error("Error in GlobalProvider useEffect:", error);
+        console.error('Error in GlobalProvider useEffect:', error);
       } finally {
         setLoading(false);
       }
@@ -88,101 +98,122 @@ export const GlobalProvider = ({ children }) => {
   }, []);
 
   // ✅ Enqueue image with unique key (dynamic field path in globalData)
-  const enqueueImageUpload = (key, path, file) => {
+  const enqueueImageUpload = ({ key, path, file }) => {
+    if (!key.startsWith('main_pages.') && !key.startsWith('global.')) {
+      console.warn(
+        `❗ enqueueImageUpload: Key should start with 'main_pages.' or 'global.' Got: ${key}`
+      );
+    }
+
     setImageUploadQueue((prev) => ({
       ...prev,
-      [key]: { key, path, file }
+      [key]: { key, path, file },
     }));
   };
 
   // ✅ Upload all queued images and update globalData
-  const uploadAllImagesInQueue = async () => {
-  const updatedGlobal = { ...globalData };
-  const updatedMain = { ...mainData };
+  const uploadAllImagesInQueue = async (baseGlobalUpdate, baseMainUpdate) => {
+    const updatedGlobal = { ...baseGlobalUpdate };
+    const updatedMain = { ...baseMainUpdate };
 
-  for (const key in imageUploadQueue) {
-    const { path, file } = imageUploadQueue[key];
-    try {
-      const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      const finalUrl = `${url}?v=${Date.now()}`;
+    for (const key in imageUploadQueue) {
+      const { path, file } = imageUploadQueue[key];
+      try {
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        const finalUrl = `${url}?v=${Date.now()}`;
 
-      if (key.startsWith("global.") || key.startsWith("globalData.") || key.startsWith("Global.")) {
-        const actualKey = key.replace("global.", "");
-        set(updatedGlobal, actualKey, finalUrl);
+        if (
+          key.startsWith('global.') ||
+          key.startsWith('globalData.') ||
+          key.startsWith('Global.')
+        ) {
+          let actualKey = key
+            .replace(/^globalData\./, '')
+            .replace(/^global\./, '')
+            .replace(/^mainData\./, '')
+            .replace(/^main_pages\./, '')
+            .replace(/^main\./, '')
+            .replace(/^Main pages\./, '');
 
-        // Optional: update local state (e.g., logo preview)
-        if (actualKey === "logo") {
-          setLogoUrl(finalUrl);
+          set(updatedGlobal, actualKey, finalUrl);
+        } else if (
+          key.startsWith('main.') ||
+          key.startsWith('mainData.') ||
+          key.startsWith('Main pages.') ||
+          key.startsWith('main_pages.')
+        ) {
+          let actualKey = key
+            .replace(/^globalData\./, '')
+            .replace(/^global\./, '')
+            .replace(/^mainData\./, '')
+            .replace(/^main_pages\./, '')
+            .replace(/^main\./, '')
+            .replace(/^Main pages\./, '');
+
+          set(updatedMain, actualKey, finalUrl);
+        } else {
+          console.warn(`❗ Unknown key prefix: ${key}`);
         }
-      } else if (key.startsWith("main.") || key.startsWith("mainData.") || key.startsWith("Main pages.")) {
-        const actualKey = key.replace("main.", "");
-        set(updatedMain, actualKey, finalUrl);
-      } else {
-        console.warn(`❗ Unknown key prefix: ${key}`);
+      } catch (error) {
+        console.error(`❌ Error uploading image at ${path}:`, error);
       }
-    } catch (error) {
-      console.error(`❌ Error uploading image at ${path}:`, error);
     }
-  }
 
-  setImageUploadQueue({});
-  return { updatedGlobal, updatedMain };
-};
-
+    setImageUploadQueue({});
+    return { updatedGlobal, updatedMain };
+  };
 
   const handleGlobalSave = async () => {
-  try {
-    // Global data
-    const baseGlobalUpdate = {
-      ...globalData,
-      primaryBackgroundColor,
-      secondaryBackgroundColor,
-      tertiaryBackgroundColor,
-      group_name: groupName,
-      description: groupDescription,
-      hotline: contactInfoData.hotline,
-      email: contactInfoData.email,
-      address: contactInfoData.address,
-      social_media: socialLinksData,
-    };
+    try {
+      const baseGlobalUpdate = {
+        ...globalData,
+        primaryBackgroundColor,
+        secondaryBackgroundColor,
+        tertiaryBackgroundColor,
+        group_name: groupName,
+        description: groupDescription,
+        hotline: contactInfoData.hotline,
+        email: contactInfoData.email,
+        address: contactInfoData.address,
+        social_media: socialLinksData,
+      };
+      const baseMainUpdate = {
+        ...mainData,
+        activity_history: activityHistory,
+        event_overviews: eventOverviews,
+        fundraising: fundraising,
+        hero_sections: heroSections,
+        highlights: highlights,
+        members: members,
+        org_stats: orgStats,
+        project_overviews: projectOverviews,
+        statements: statements,
+        story_overviews: storyOverviews,
+      };
+      const { updatedGlobal, updatedMain } = await uploadAllImagesInQueue(baseGlobalUpdate, baseMainUpdate);
 
-    const imageUpdatedGlobal = await uploadAllImagesInQueue();
-    const finalGlobalData = { ...baseGlobalUpdate, ...imageUpdatedGlobal };
+      const finalGlobalData = createFinalData(baseGlobalUpdate, updatedGlobal);
+      const finalMainData = createFinalData(baseMainUpdate, updatedMain)
 
-    // Main data
-    const finalMainData = {
-      activity_history: activityHistory,
-      event_overviews: eventOverviews,
-      fundraising: fundraising,
-      hero_sections: heroSections,
-      highlights: highlights,
-      members: members,
-      org_stats: orgStats,
-      project_overviews: projectOverviews,
-      statements: statements,
-      story_overviews: storyOverviews,
-    };
+      // Firestore writes
+      const globalRef = doc(db, 'global', 'components');
+      const mainRef = doc(db, 'main_pages', 'components');
 
-    // Firestore writes
-    const globalRef = doc(db, 'Global', 'components');
-    const mainRef = doc(db, 'Main pages', 'components');
+      await Promise.all([
+        setDoc(globalRef, finalGlobalData),
+        setDoc(mainRef, finalMainData),
+      ]);
 
-    await Promise.all([
-      updateDoc(globalRef, finalGlobalData),
-      updateDoc(mainRef, finalMainData),
-    ]);
+      setGlobalData(finalGlobalData);
+      setMainData(finalMainData); // if you're still using setMainData for backup
 
-    setGlobalData(finalGlobalData);
-    setMainData(finalMainData); // if you're still using setMainData for backup
-
-    console.log("✅ Global and Main data saved successfully!");
-  } catch (error) {
-    console.error("❌ Error saving global/main data:", error);
-  }
-};
-
+      console.log('✅ Global and Main data saved successfully!');
+    } catch (error) {
+      console.error('❌ Error saving global/main data:', error);
+    }
+  };
 
   const contextValue = {
     loading,
@@ -211,7 +242,7 @@ export const GlobalProvider = ({ children }) => {
     handleGlobalSave,
     enqueueImageUpload,
     imageUploadQueue,
-    
+
     // main data
     activityHistory,
     setActivityHistory,

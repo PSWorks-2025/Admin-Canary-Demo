@@ -12,6 +12,12 @@ export const ImageInput = ({
     inputRef.current?.click();
   };
 
+  // Fallback if preview is invalid or cannot be loaded
+  const isValidImageUrl = (url) => {
+    return typeof url === 'string' &&
+      (url.startsWith('blob:') || url.startsWith('http') || url.startsWith('/'));
+  };
+
   return (
     <>
       <input
@@ -22,16 +28,15 @@ export const ImageInput = ({
         onChange={handleImageUpload}
       />
       <div onClick={triggerFileInput} className={className} style={style}>
-        {
-          <img
-            src={
-              imagePreview ||
-              'https://blog.photobucket.com/hubfs/upload_pics_online.png'
-            }
-            alt="Preview"
-            className="w-full h-full object-cover"
-          />
-        }
+        <img
+          src={
+            isValidImageUrl(imagePreview)
+              ? imagePreview
+              : 'https://blog.photobucket.com/hubfs/upload_pics_online.png'
+          }
+          alt="Preview"
+          className="w-full h-full object-cover"
+        />
       </div>
     </>
   );

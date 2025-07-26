@@ -3,8 +3,8 @@ import { doc, getDoc } from "firebase/firestore";
 
 export const readData = async () => {
   try {
-    const docRef = doc(db, "Global", "components");
-    const mainRef = doc(db, "Main pages", "components");
+    const docRef = doc(db, "global", "components");
+    const mainRef = doc(db, "main_pages", "components");
     
     const docSnap = await getDoc(docRef);
     const mainSnap = await getDoc(mainRef);    

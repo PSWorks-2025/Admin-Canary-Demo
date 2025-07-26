@@ -22,18 +22,26 @@ const HomePage = () => {
     secondaryBackgroundColor,
     mainData,
     setMainData,
+    heroSections, 
+    setHeroSections,
+    orgStats, 
+    setOrgStats,
+    eventOverviews, 
+    setEventOverviews,
+    storyOverviews, 
+    setStoryOverviews,
   } = useContext(GlobalContext);
 
-  const [heroSections, setHeroSections] = useState(mainData.hero_sections);
-  const [orgStats, setOrgStats] = useState(mainData.org_stats);
-  const [eventOverviews, setEventOverviews] = useState(
-    mainData.event_overviews
-  );
-  const [storyOverviews, setStoryOverviews] = useState(
-    mainData.story_overviews
-  );
+  // const [heroSections, setHeroSections] = useState(mainData.hero_sections);
+  // const [orgStats, setOrgStats] = useState(mainData.org_stats);
+  // const [eventOverviews, setEventOverviews] = useState(
+  //   mainData.event_overviews
+  // );
+  // const [storyOverviews, setStoryOverviews] = useState(
+  //   mainData.story_overviews
+  // );
   const [storiesTitle, setStoriesTitle] = useState(
-    mainData.hero_sections.stories.title || ''
+    mainData.hero_sections?.stories?.title || ''
   );
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -42,7 +50,7 @@ const HomePage = () => {
   const enqueueImageUpload = ({ section, key, file, path }) => {
     const tempUrl = URL.createObjectURL(file);
 
-    if (section === 'hero') {
+    if (section === 'hero') { // todo: add path for firebase deletion
       setHeroSections((prev) => ({
         ...prev,
         home: { ...prev.home, image: tempUrl },
@@ -136,7 +144,7 @@ const HomePage = () => {
       <EventsSection
         data={eventOverviews}
         setData={setEventOverviews}
-        sectionTitle={heroSections.events.title}
+        sectionTitle={heroSections?.events?.title}
         setSectionTitle={handleFirstSectionChange}
         enqueueImageUpload={enqueueImageUpload}
         buttonColor={secondaryBackgroundColor}

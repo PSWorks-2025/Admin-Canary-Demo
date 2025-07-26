@@ -13,7 +13,11 @@ const HeaderLogo = () => {
     const tempUrl = URL.createObjectURL(file);
     setLogoUrl(tempUrl); // Hiển thị preview tạm thời
 
-    enqueueImageUpload("logo", "globaldata/logo", file);
+    enqueueImageUpload({
+      key: 'global.logo',
+      path: 'global/logo',
+      file,
+    });
   };
 
   return (
@@ -27,8 +31,8 @@ const HeaderLogo = () => {
   );
 };
 
-HeaderLogo.propTypes = {
-  logoUrl: PropTypes.string.isRequired,
-};
+// HeaderLogo.propTypes = {
+//   logoUrl: PropTypes.string.isRequired,
+// };
 
 export default HeaderLogo;

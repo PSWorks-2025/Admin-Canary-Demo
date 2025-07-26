@@ -1,32 +1,34 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useContext } from 'react';
 import { ImageInput } from '../../Inputs/ImageInput';
 import { TextInput } from '../../Inputs/TextInput';
+import { generateNextId } from '../../../utils/idUtils';
+import GlobalContext from '../../../GlobalContext';
 
 const EventsSection = ({
-  data,
-  setData,
-  sectionTitle,
-  setSectionTitle,
-  enqueueImageUpload,
   buttonColor,
 }) => {
   const eventImageRefs = useRef({});
+  const {
+    eventOverviews, 
+    setEventOverviews,
+    enqueueImageUpload,
+  } = useContext(GlobalContext);
 
   useEffect(() => {
-    Object.keys(data).forEach((key) => {
+    Object.keys(eventOverviews).forEach((key) => {
       if (!eventImageRefs.current[key]) {
         eventImageRefs.current[key] = React.createRef();
       }
     });
     Object.keys(eventImageRefs.current).forEach((key) => {
-      if (!data[key]) {
+      if (!eventOverviews[key]) {
         delete eventImageRefs.current[key];
       }
     });
-  }, [data]);
+  }, [eventOverviews]);
 
   const handleEventChange = (key, field, value) => {
-    setData((prev) => {
+    setEventOverviews((prev) => {
       const updated = { ...prev };
       updated[key] = {
         ...updated[key],
@@ -43,8 +45,8 @@ const EventsSection = ({
   const handleEventImageUpload = (key, file) => {
     if (!(file instanceof File)) return;
     const tempUrl = URL.createObjectURL(file);
-
-    setData((prev) => ({
+    console.log(file)
+    setEventOverviews((prev) => ({
       ...prev,
       [key]: {
         ...prev[key],
@@ -56,20 +58,19 @@ const EventsSection = ({
     }));
 
     enqueueImageUpload({
-      section: 'events',
-      key,
+      key: `main_pages.event_overviews.${key}.thumbnail.src`, // precise key path
       file,
-      path: 'events',
+      path: `main_pages/event_overviews/${key}/thumbnail.jpg`,
     });
   };
 
   const addEvent = () => {
-    const newKey = `Sự Kiện_${
-      Object.keys(data).length
-    }_${new Date().toISOString()}`;
-    setData((prev) => ({
+    const id = generateNextId(eventOverviews, "event");
+
+    setEventOverviews((prev) => ({
       ...prev,
-      [newKey]: {
+      [id]: {
+        id, // embed the ID in the object
         title: '',
         abstract: '',
         thumbnail: {
@@ -82,8 +83,10 @@ const EventsSection = ({
     }));
   };
 
+
+
   const deleteEvent = (key) => {
-    setData((prev) => {
+    setEventOverviews((prev) => {
       const updated = { ...prev };
       delete updated[key];
       return updated;
@@ -112,7 +115,7 @@ const EventsSection = ({
       </div>
 
       <div className="w-full">
-        {Object.entries(data)
+        {Object.entries(eventOverviews)
           .map(([key, event]) => ({
             key,
             title: event.title,

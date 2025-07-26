@@ -1,8 +1,8 @@
-import PropTypes from "prop-types";
-import { useContext } from "react";
-import GlobalContext from "../../../../../GlobalContext";
-import { ImageInput } from "../../../../Inputs/ImageInput";
-import { TextInput } from "../../../../Inputs/TextInput";
+import PropTypes from 'prop-types';
+import { useContext } from 'react';
+import GlobalContext from '../../../../../GlobalContext';
+import { ImageInput } from '../../../../Inputs/ImageInput';
+import { TextInput } from '../../../../Inputs/TextInput';
 
 const FooterLogoAndGroupInfo = ({
   groupName,
@@ -17,7 +17,11 @@ const FooterLogoAndGroupInfo = ({
 
     const tempUrl = URL.createObjectURL(file);
     setLogoUrl(tempUrl); // Preview ngay
-    enqueueImageUpload("logo", "globaldata/logo", file); // Thêm vào hàng đợi
+    enqueueImageUpload({
+      key: 'global.logo',
+      path: 'global/logo',
+      file,
+    }); // Thêm vào hàng đợi
   };
 
   return (
