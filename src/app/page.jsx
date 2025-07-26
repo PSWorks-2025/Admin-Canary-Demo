@@ -44,9 +44,6 @@ const HomePage = () => {
     mainData.hero_sections?.stories?.title || ''
   );
 
-  const [hasPendingChanges, setHasPendingChanges] = useState(false);
-  const [imageUploadQueue, setImageUploadQueue] = useState([]);
-
   // const enqueueImageUpload = ({ section, key, file, path }) => {
   //   const tempUrl = URL.createObjectURL(file);
 
