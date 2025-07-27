@@ -125,18 +125,18 @@ export function ActivityHistoryListItem({
             </div>
           </div>
         </div>
-        <div className="w-1/2 h-full px-4">
+        <div className="w-1/2 h-full">
           <div className="w-136 h-full">
             <div className="w-83 flex justify-between text-[1.6rem] font-bold text-primary-title">
               <TextInput
-                className="w-50 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
+                className="w-60 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
                 value={localStartDate}
                 type="date"
                 onChange={(e) => handleChange("started_time", e.target.value)}
                 placeholder="Start date"
               />
               <TextInput
-                className="w-50 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
+                className="w-60 text-[1.6rem] font-bold text-primary-title outline-none bg-transparent"
                 value={localEndDate}
                 type="date"
                 onChange={(e) => handleChange("ended_time", e.target.value)}
@@ -162,7 +162,7 @@ export function ActivityHistoryListItem({
         </div>
       </div>
       <button
-        className="absolute top-2 -right-2/2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+        className="absolute top-2 -right-4/3 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
         onClick={handleDelete}
       >
         <svg

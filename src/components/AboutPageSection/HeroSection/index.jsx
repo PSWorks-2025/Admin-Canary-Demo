@@ -78,6 +78,7 @@ const HeroSection = ({
             value={localTitle}
             onChange={(e) => handleChange("title", e.target.value)}
             placeholder="Nhập tiêu đề"
+            section="hero"
           />
           <TextInput
             type="textarea"
@@ -86,6 +87,7 @@ const HeroSection = ({
             onChange={(e) => handleChange("description", e.target.value)}
             placeholder="Nhập mô tả"
             rows="4"
+            section="hero"
           />
         </div>
       </ImageInput>

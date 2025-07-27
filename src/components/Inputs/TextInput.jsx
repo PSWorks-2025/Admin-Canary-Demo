@@ -1,7 +1,8 @@
-export const TextInput = ({ value, onChange, placeholder, className, type = "input", rows = "4" }) => {
+export const TextInput = ({ value, onChange, placeholder, className, type = "input", rows = "4",section="normal" }) => {
   return (
     <div className="relative w-full">
-      <svg
+      {/* {section === "normal" && type !== "date" && (
+         <svg
         className="absolute left-2 top-2 w-4 h-4 text-gray-500"
         fill="none"
         stroke="currentColor"
@@ -15,6 +16,8 @@ export const TextInput = ({ value, onChange, placeholder, className, type = "inp
           d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
         ></path>
       </svg>
+      )} */}
+     
 
       {type !== "textarea" ? (
         <input
@@ -23,6 +26,7 @@ export const TextInput = ({ value, onChange, placeholder, className, type = "inp
           type={type=="input" ? "text" : type}
           onChange={onChange}
           placeholder={placeholder}
+          onClick={e=> e.stopPropagation()}
         />
       ) : (
         <textarea
@@ -31,6 +35,7 @@ export const TextInput = ({ value, onChange, placeholder, className, type = "inp
           onChange={onChange}
           placeholder={placeholder}
           rows={rows}
+          onClick={e=> e.stopPropagation()} //Make me wanna kiss kiss shy shy kua yue le ban gi qiu zhao dao le sheng ming de li li
         />
       )}
     </div>
