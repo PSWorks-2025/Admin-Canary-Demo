@@ -3,7 +3,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Timestamp } from 'firebase/firestore';
 import { db, storage } from './service/firebaseConfig.jsx';
-import { readData } from './service/readFirebase.jsx';
+import { readData } from './service/firebaseRead.jsx';
 import set from 'lodash/set';
 import { createFinalData } from './utils/deepMerge.js';
 
@@ -47,9 +47,9 @@ export const GlobalProvider = ({ children }) => {
   const [statements, setStatements] = useState({});
   const [storyOverviews, setStoryOverviews] = useState({});
 
-  useEffect(() => {
-    console.log(groupName);
-  }, [groupName]);
+  // useEffect(() => {
+  //   console.log(groupName);
+  // }, [groupName]);
 
   useEffect(() => {
     const handleGetData = async () => {
