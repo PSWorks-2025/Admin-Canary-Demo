@@ -11,7 +11,7 @@ const HeaderLogo = () => {
     if (!file) return;
 
     const tempUrl = URL.createObjectURL(file);
-    setLogoUrl(tempUrl); // Hiển thị preview tạm thời
+    setLogoUrl(tempUrl); // Temporary preview
 
     enqueueImageUpload({
       key: 'global.logo',
@@ -23,16 +23,13 @@ const HeaderLogo = () => {
   return (
     <ImageInput
       handleImageUpload={handleImageUpload}
-      className="absolute left-5 sm:left-10 md:left-20 lg:left-36 w-20 h-20 bg-cover bg-center"
-      imagePreview={logoUrl}
+      className="absolute top-2 left-4 sm:left-6 md:left-8 lg:left-12 w-12 h-12 sm:w-16 sm:h-16 bg-cover bg-center rounded-full"
+      // imagePreview={logoUrl}
       section="logo"
-      top="-top-0.5"
+      top="top-2 sm:top-2"
+      style={{ backgroundImage: `url(${logoUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"})` }}
     />
   );
 };
-
-// HeaderLogo.propTypes = {
-//   logoUrl: PropTypes.string.isRequired,
-// };
 
 export default HeaderLogo;

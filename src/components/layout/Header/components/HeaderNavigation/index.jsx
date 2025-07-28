@@ -1,11 +1,7 @@
 import PropTypes from 'prop-types';
-import { useState, useCallback } from 'react';
-import { TextInput } from '../../../../Inputs/TextInput';
+import { useState } from 'react';
 
-const HeaderNavigation = ({
-  page,
-  globalData,
-}) => {
+const HeaderNavigation = ({ page, globalData }) => {
   const [navigation, setNavigation] = useState(
     globalData?.navigation
       ? globalData.navigation.map((nav, index) => ({
@@ -42,41 +38,25 @@ const HeaderNavigation = ({
         ]
   );
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
-  // const handleNavChange = useCallback((id, field, value) => {
-  //   const updated = navigation.map((nav) => (nav.id === id ? { ...nav, [field]: value } : nav));
-  //   setNavigation(updated);
-  //   debouncedUpdateGlobalData({ navigation: updated });
-  // }, [navigation]);
-
-  // const addNavLink = () => {
-  //   const newLink = { id: `page_${navigation.length}`, name: '', url: '' };
-  //   const updated = [...navigation, newLink];
-  //   setNavigation(updated);
-  //   updateGlobalData({ navigation: updated });
-  // };
-
-  // const deleteNavLink = (id) => {
-  //   const updated = navigation.filter((nav) => nav.id !== id);
-  //   setNavigation(updated);
-  //   updateGlobalData({ navigation: updated });
-  // };
 
   return (
-    <div className="flex justify-between items-center h-full px-4">
+    <nav className="flex items-center h-full">
+      {/* Desktop Navigation */}
       <div className="hidden md:block flex-grow">
-        <ul className="flex justify-center h-full">
+        <ul className="flex justify-center items-center h-full space-x-4 lg:space-x-8">
           {navigation.map((nav) => (
-            <li key={nav.id} className="w-28 h-full flex items-center">
+            <li key={nav.id} className="flex items-center">
               <a
                 href={nav.url}
                 className={
                   page === nav.url.split('#/')[1] ||
                   (page === 'home' && nav.url === '/Canary-Charity-Club/')
-                    ? 'text-secondary font-bold hover:text-secondary-hover'
-                    : 'hover:text-primary-hover'
+                    ? 'text-secondary font-bold hover:text-secondary-hover text-sm lg:text-base'
+                    : 'hover:text-primary-hover text-sm lg:text-base'
                 }
               >
                 {nav.name}
@@ -85,25 +65,46 @@ const HeaderNavigation = ({
           ))}
         </ul>
       </div>
-      <div className="md:hidden absolute right-10">
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden absolute right-4 sm:right-6">
         <button
           onClick={toggleDropdown}
-          className="text-primary-paragraph focus:outline-none"
+          className="text-primary-paragraph focus:outline-none text-lg"
+          aria-label="Toggle navigation menu"
         >
           <i className="fas fa-bars"></i>
         </button>
+        {isDropdownOpen && (
+          <div className="absolute top-16 right-0 w-48 bg-white shadow-lg rounded-lg py-2 z-50">
+            <ul className="flex flex-col">
+              {navigation.map((nav) => (
+                <li key={nav.id} className="px-4 py-2">
+                  <a
+                    href={nav.url}
+                    onClick={() => setIsDropdownOpen(false)}
+                    className={
+                      page === nav.url.split('#/')[1] ||
+                      (page === 'home' && nav.url === '/Canary-Charity-Club/')
+                        ? 'text-secondary font-bold hover:text-secondary-hover text-sm'
+                        : 'hover:text-primary-hover text-sm'
+                    }
+                  >
+                    {nav.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-    </div>
+    </nav>
   );
 };
 
 HeaderNavigation.propTypes = {
   page: PropTypes.string,
   globalData: PropTypes.object,
-  updateGlobalData: PropTypes.func,
-  debouncedUpdateGlobalData: PropTypes.func,
-  isDropdownOpen: PropTypes.bool,
-  toggleDropdown: PropTypes.func,
 };
 
 export default HeaderNavigation;

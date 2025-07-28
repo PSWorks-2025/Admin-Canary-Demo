@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { Link } from "react-router";
 import PropTypes from "prop-types";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
@@ -95,7 +96,7 @@ function EventsOverview({
 
   const handleAddEvent = useCallback(() => {
     console.log("EventsOverview: Adding new event");
-    const newId = `Sự Kiện_${Object.keys(pageData.events).length}_${new Date().toISOString()}`;
+    const newId = `event_${new Date().toISOString()}`;
     setEventOverviews((prev) => ({
       ...prev,
       [newId]: {
@@ -160,7 +161,16 @@ function EventsOverview({
         </button>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 h-64 overflow-hidden w-full">
           {displayedEvents.map((event, index) => (
-            <div key={`event_${event.id}`} className="relative">
+            <Link
+              key={`event_${event.id}`}
+              to="/edit-content"
+              state={{
+                id: event.id,
+                title: localTitles[index] || event.title || "",
+                thumbnail: event.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+              }}
+              className="relative block"
+            >
               <ImageInput
                 handleImageUpload={(e) => handleImageUpload(event.id, e.target.files[0])}
                 top="top-2"
@@ -180,7 +190,10 @@ function EventsOverview({
               </ImageInput>
               <button
                 className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-                onClick={() => handleDeleteEvent(event.id, index)}
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent Link navigation
+                  handleDeleteEvent(event.id, index);
+                }}
               >
                 <svg
                   className="w-5 h-5"
@@ -197,7 +210,7 @@ function EventsOverview({
                   />
                 </svg>
               </button>
-            </div>
+            </Link>
           ))}
         </div>
         <button

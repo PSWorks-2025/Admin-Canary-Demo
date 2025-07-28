@@ -11,7 +11,7 @@ const StorySection = ({ data, setData, title, setTitle, enqueueImageUpload, butt
   const itemsPerPage = 3;
 
   const handleAddStory = () => {
-    const newKey = `Câu Chuyện_${Object.keys(data).length}_${new Date().toISOString()}`;
+    const newKey = `story_${new Date().toISOString()}`;
     setData((prev) => ({
       ...prev,
       [newKey]: {

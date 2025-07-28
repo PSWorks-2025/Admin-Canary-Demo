@@ -98,7 +98,7 @@ const StoriesSection = ({
 
   const handleAddStory = useCallback(() => {
     console.log("StoriesSection: Adding new story");
-    const newKey = `Câu Chuyện_${Object.keys(pageData.stories).length}_${new Date().toISOString()}`;
+    const newKey = `story_${new Date().toISOString()}`;
     setStoryOverviews((prev) => ({
       ...prev,
       [newKey]: {
