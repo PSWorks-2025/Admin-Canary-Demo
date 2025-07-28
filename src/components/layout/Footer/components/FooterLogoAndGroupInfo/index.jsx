@@ -30,7 +30,8 @@ const FooterLogoAndGroupInfo = ({
         <ImageInput
           handleImageUpload={(e) => handleLogoUpload(e.target.files[0])}
           className="h-11 w-11 bg-primary rounded-full bg-cover bg-center overflow-hidden flex-shrink-0"
-          imagePreview={logoUrl}
+          // src={logoUrl}
+      style={{ backgroundImage: `url(${logoUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"})` }}
           section="logo"
         />
         <TextInput

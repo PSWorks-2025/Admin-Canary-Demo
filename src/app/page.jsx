@@ -151,7 +151,7 @@ const HomePage = () => {
           buttonColor={secondaryBackgroundColor}
         />
       </div>
-      <SaveFloatingButton onSave={saveUpdates} />
+      <SaveFloatingButton visible={false} onSave={saveUpdates} />
     </div>
   );
 };

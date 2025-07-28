@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const SaveFloatingButton = ({ visible, onSave }) => {
+const SaveFloatingButton = ({ visible = true, onClick }) => {
   const [expanded, setExpanded] = useState(true);
 
   if (!visible) return null;
@@ -14,7 +14,7 @@ const SaveFloatingButton = ({ visible, onSave }) => {
       >
         {expanded && (
           <button
-            onClick={onSave}
+            onClick={onClick}
             className="text-white font-semibold px-4 py-2 cursor-pointer"
           >
             Lưu thay đổi
