@@ -7,7 +7,7 @@ import SectionWrap from "../SectionWrap";
 function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setHasChanges, buttonColor }) {
   const handleAddProject = useCallback(() => {
     console.log("ProjectLayout: Adding new project");
-    const newId = `Dự Án_${Object.keys(projects).length}_${new Date().toISOString()}`;
+    const newId = `project_${new Date().toISOString()}`;
     setProjectOverviews((prev) => ({
       ...prev,
       [newId]: {

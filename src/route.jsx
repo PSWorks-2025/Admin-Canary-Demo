@@ -6,7 +6,7 @@ import Layout from './layout.jsx';
 
 import HomePage from './app/page.jsx';
 import AboutPage from './app/about/page.jsx';
-import EachStoryPage from './app/EachStoryPage.jsx';
+import EditContent from './app/EditContent.jsx';
 import FundraisingPage from './app/FundraisingPage.jsx';
 import Events from './app/events/page.jsx';
 import Story from './app/stories/page.jsx';
@@ -22,8 +22,8 @@ const AppRoutes = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route
-          path="/eachStory"
-          element={<EachStoryPage {...mockStory} />} // Inject props
+          path="/edit-content"
+          element={<EditContent />} // Inject props
         />
         <Route path="/events" element={<Events />} />
         <Route path="/stories" element={<Story />} />

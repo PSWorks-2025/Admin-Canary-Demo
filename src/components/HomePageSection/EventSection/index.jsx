@@ -65,9 +65,7 @@ const EventsSection = ({
   };
 
   const addEvent = () => {
-    const newKey = `Sự Kiện_${
-      Object.keys(data).length
-    }_${new Date().toISOString()}`;
+    const newKey = `event_${new Date().toISOString()}`;
     setData((prev) => ({
       ...prev,
       [newKey]: {
@@ -93,13 +91,6 @@ const EventsSection = ({
 
   return (
     <SectionWrap className="w-full" borderColor={buttonColor}>
-      {/* currently dont allow change title of sections */}
-      {/* <TextInput
-        className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
-        value={sectionTitle}
-        onChange={(e) => setSectionTitle(e.target.value)}
-        placeholder="Nhập tiêu đề mục sự kiện"
-      /> */}
       <div className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none">
         Các sự kiện nổi bật
       </div>

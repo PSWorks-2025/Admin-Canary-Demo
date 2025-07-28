@@ -9,6 +9,7 @@ import LoadingScreen from './components/screens/LoadingScreen';
 import GlobalContext from './GlobalContext.jsx';
 import { GlobalProvider } from './GlobalContext.jsx';
 import SaveFloatingButton from './globalComponent/SaveButton';
+import MainColorPicker from './components/layout/MainColorPicker/index.jsx';
 
 const Layout = ({ children }) => {
   return (
@@ -35,7 +36,10 @@ const LayoutContent = ({ children }) => {
       <Header page={page} {...globalProps} />
       {children}
       <Footer {...globalProps} />
-      <SaveFloatingButton visible onSave={handleGlobalSave} />
+      {location.pathname !== '/edit-content' && (
+        <SaveFloatingButton onClick={handleGlobalSave} />
+      )}
+      <MainColorPicker/>
     </>
   );
 };
