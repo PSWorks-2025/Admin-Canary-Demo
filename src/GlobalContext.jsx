@@ -166,6 +166,8 @@ export const GlobalProvider = ({ children }) => {
   };
 
   const handleGlobalSave = async () => {
+    console.log("hi");
+    
     try {
       // Prepare global data
       const baseGlobalUpdate = {

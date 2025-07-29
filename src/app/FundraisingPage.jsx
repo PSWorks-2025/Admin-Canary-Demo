@@ -15,11 +15,12 @@ const FundraisingPage = () => {
     fundraising,
     setFundraising,
     enqueueImageUpload,
+    handleGlobalSave,
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
-    fundraising?.image_url || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-    fundraising?.qr_code_url || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+    fundraising?.image_url || "https://via.placeholder.com/300",
+    fundraising?.qr_code_url || "https://via.placeholder.com/300",
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
@@ -27,6 +28,12 @@ const FundraisingPage = () => {
 
   const handleSupportClick = () => {
     alert("Cảm ơn bạn đã ủng hộ! 🎉");
+  };
+
+  const handleSave = () => {
+    console.log("FundraisingPage: Triggering handleGlobalSave");
+    handleGlobalSave();
+    setHasChanges(false); // Reset hasChanges after saving
   };
 
   if (!imagesLoaded) {
@@ -39,11 +46,11 @@ const FundraisingPage = () => {
       className="min-h-screen relative overflow-hidden p-6"
     >
       <FundraisingHeader
-        image_url={fundraising?.image_url || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}
+        image_url={fundraising?.image_url || "https://via.placeholder.com/300"}
         fundraiser_name={fundraising?.fundraiser_name || ""}
         amount_raised={fundraising?.amount_raised || 0}
         goal_amount={fundraising?.goal_amount || 0}
-        qr_code_url={fundraising?.qr_code_url || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}
+        qr_code_url={fundraising?.qr_code_url || "https://via.placeholder.com/300"}
         onSupportClick={handleSupportClick}
         setFundraising={setFundraising}
         enqueueImageUpload={enqueueImageUpload}
@@ -63,6 +70,18 @@ const FundraisingPage = () => {
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
       />
+      <div className="flex justify-center mt-6">
+        <button
+          className={`text-white font-medium px-4 py-2 rounded-full transition-opacity duration-200 ${
+            hasChanges ? "hover:opacity-80" : "opacity-50 cursor-not-allowed"
+          }`}
+          style={{ backgroundColor: secondaryBackgroundColor || "#4160DF" }}
+          onClick={handleSave}
+          disabled={!hasChanges}
+        >
+          Lưu thay đổi
+        </button>
+      </div>
     </div>
   );
 };

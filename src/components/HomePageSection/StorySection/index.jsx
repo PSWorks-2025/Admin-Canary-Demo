@@ -86,13 +86,13 @@ const StorySection = ({ data, setData, title, setTitle, enqueueImageUpload, butt
             onClick={() => setPage(Math.max(page - 1, 0))}
             className={`w-11 h-11 absolute -left-6 top-54 rounded-full bg-primary-darken flex justify-center items-center cursor-pointer z-10 ${numberOfPages <= 1 ? 'hidden' : ''} md:block`}
           >
-            <IoIosArrowBack className="w-5 h-5 md:w-6 md:h-6" />
+            <IoIosArrowBack className="w-5 h-5 md:w-6 md:h-6 ml-2" />
           </button>
           <button
             onClick={() => setPage(Math.min(page + 1, numberOfPages - 1))}
             className={`w-11 h-11 absolute -right-6 top-54 rounded-full bg-primary-darken flex justify-center items-center cursor-pointer z-10 ${numberOfPages <= 1 ? 'hidden' : ''} md:block`}
           >
-            <IoIosArrowForward className="w-5 h-5 md:w-6 md:h-6" />
+            <IoIosArrowForward className="w-5 h-5 md:w-6 md:h-6 ml-3" />
           </button>
 
           <div className="w-full h-full overflow-hidden">

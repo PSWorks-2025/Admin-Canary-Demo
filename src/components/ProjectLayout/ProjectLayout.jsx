@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
@@ -8,6 +8,11 @@ import { IoIosArrowForward } from "react-icons/io";
 
 function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setHasChanges, buttonColor }) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("ProjectLayout projects:", projects);
+  }, [projects]);
+
   const handleAddProject = useCallback(() => {
     const newId = `project_${new Date().toISOString()}`;
     setProjectOverviews((prev) => ({
@@ -15,7 +20,7 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
       [newId]: {
         title: "",
         abstract: "",
-        thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
+        thumbnail: { src: "https://via.placeholder.com/300", alt: "", caption: "" },
         started_time: null,
       },
     }));
@@ -78,6 +83,10 @@ function ProjectListItem({
   const [localTitle, setLocalTitle] = useState(title || "");
   const [localStartedTime, setLocalStartedTime] = useState(started_time || "");
 
+  useEffect(() => {
+    console.log("ProjectListItem props updated:", { id, imageUrl, title, started_time, localTitle, localStartedTime });
+  }, [id, imageUrl, title, started_time, localTitle, localStartedTime]);
+
   const debounce = useCallback((func, wait) => {
     let timeout;
     return (...args) => {
@@ -88,6 +97,7 @@ function ProjectListItem({
 
   const handleChange = useCallback(
     (field, value) => {
+      console.log(`TextInput changed: ${field} = ${value}`);
       const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
       const dateValue = field === "started_time" && value && isValidDate(value) ? value : value;
       const debouncedUpdate = debounce((field, value) => {
@@ -118,11 +128,35 @@ function ProjectListItem({
 
   const handleImageUpload = useCallback(
     (file) => {
-      if (file instanceof File || file instanceof Blob) {
-        const blobUrl = URL.createObjectURL(file);
-        const storagePath = `projects/${file.name}`;
-        enqueueImageUpload(`main_pages.project_overviews.${id}.thumbnail.src`, storagePath, file);
-        setProjectOverviews((prev) => ({
+      console.log("handleImageUpload called with file:", file);
+      if (!file) {
+        console.error("No file selected");
+        return;
+      }
+      if (!(file instanceof File || file instanceof Blob)) {
+        console.error("Invalid file type");
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        console.error("Selected file is not an image");
+        return;
+      }
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      if (file.size > MAX_FILE_SIZE) {
+        console.error("File size exceeds 5MB");
+        return;
+      }
+
+      const blobUrl = URL.createObjectURL(file);
+      console.log("Blob URL created:", blobUrl);
+      const storagePath = `projects/${id}/${file.name}`;
+
+      console.log("Enqueuing image upload:", { path: `main_pages.project_overviews.${id}.thumbnail.src`, storagePath });
+      enqueueImageUpload(`main_pages.project_overviews.${id}.thumbnail.src`, storagePath, file);
+
+      setProjectOverviews((prev) => {
+        console.log("Updating projectOverviews with new image:", blobUrl);
+        return {
           ...prev,
           [id]: {
             ...prev[id] || {
@@ -134,14 +168,24 @@ function ProjectListItem({
             thumbnail: {
               ...prev[id]?.thumbnail || { src: "", alt: "", caption: "" },
               src: blobUrl,
+              alt: prev[id]?.thumbnail?.alt || file.name,
             },
           },
-        }));
-        setHasChanges(true);
-      }
+        };
+      });
+      setHasChanges(true);
     },
     [id, enqueueImageUpload, setProjectOverviews, setHasChanges]
   );
+
+  useEffect(() => {
+    return () => {
+      if (imageUrl && imageUrl.startsWith("blob:")) {
+        console.log("Revoking blob URL:", imageUrl);
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+  }, [imageUrl]);
 
   const handleDelete = useCallback(() => {
     setProjectOverviews((prev) => {
@@ -155,19 +199,24 @@ function ProjectListItem({
 
   return (
     <div className="relative h-80 rounded-lg overflow-hidden shadow-md">
-      <div className="relative w-full h-full">
-        <ImageInput
-          handleImageUpload={(e) => handleImageUpload(e.target.files[0])}
-          top="top-2"
-          left="left-2"
-          section="project"
-          className="w-full h-full bg-cover bg-center"
-          style={{ backgroundImage: `url("${imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60"></div>
+      <ImageInput
+        handleImageUpload={(e) => {
+          console.log("ImageInput onChange triggered");
+          handleImageUpload(e.target.files[0]);
+        }}
+        top="top-2"
+        left="left-2"
+        section="project"
+        className="relative w-full h-full bg-cover bg-center"
+        style={{ backgroundImage: `url(${imageUrl || "https://via.placeholder.com/300"})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 z-10" />
         <button
-          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full cursor-pointer z-10"
-          onClick={handleDelete}
+          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full cursor-pointer z-15"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDelete();
+          }}
         >
           <svg
             className="w-4 h-4 md:w-5 md:h-5"
@@ -184,30 +233,37 @@ function ProjectListItem({
             />
           </svg>
         </button>
+        <div className="absolute bottom-0 z-20">
         <TextInput
-          className="absolute bottom-0 left-0 p-3 w-full text-sm md:text-base text-white font-semibold outline-none bg-transparent z-10"
+          className="p-3 w-full text-sm md:text-base text-white font-semibold rounded outline-none z-20"
           value={localTitle}
-          onChange={(e) => handleChange("title", e.target.value)}
+          onChange={(e) => {
+            handleChange("title", e.target.value);
+          }}
           placeholder="Nhập tiêu đề dự án"
         />
         <TextInput
           type="date"
-          className="absolute bottom-10 left-0 p-3 w-full text-sm md:text-base text-white outline-none bg-transparent z-10"
+          className="p-3 w-full text-sm md:text-base text-white font-semibold rounded outline-none z-20"
           value={localStartedTime}
-          onChange={(e) => handleChange("started_time", e.target.value)}
+          onChange={(e) => {
+            handleChange("started_time", e.target.value);
+          }}
           placeholder="Chọn ngày bắt đầu"
         />
+        </div>
         <button
-          className="absolute bottom-0 right-0 p-3 text-sm md:text-base text-white font-semibold z-10"
-          onClick={() =>
+          className="absolute bottom-0 right-0 p-3 text-sm md:text-base text-white font-semibold z-15"
+          onClick={(e) => {
+            e.stopPropagation();
             navigate('/edit-content', {
               state: { id, title: localTitle, thumbnailSrc: imageUrl },
-            })
-          }
+            });
+          }}
         >
           Chi tiết <IoIosArrowForward className="inline-block mb-0.5 ml-1 w-4 h-4 md:w-5 md:h-5" />
         </button>
-      </div>
+      </ImageInput>
     </div>
   );
 }

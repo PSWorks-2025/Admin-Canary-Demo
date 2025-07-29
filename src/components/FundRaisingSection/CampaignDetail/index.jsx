@@ -44,16 +44,22 @@ const CampaignDetails = ({
   return (
     <SectionWrap borderColor={buttonColor} className="mt-6 px-6 max-w-2xl mx-auto">
       <TextInput
-        className="text-4xl font-bold text-gray-900 outline-none bg-transparent w-full border rounded px-2 py-1"
+        className="text-4xl font-bold text-gray-900 bg-white/80 border border-gray-300 rounded px-2 py-1 outline-none w-full"
         value={localTitle}
-        onChange={(e) => handleChange("campaign_title", e.target.value)}
+        onChange={(e) => {
+          e.stopPropagation();
+          handleChange("campaign_title", e.target.value);
+        }}
         placeholder="Nhập tiêu đề chiến dịch"
       />
       <TextInput
         type="textarea"
-        className="text-gray-700 mt-2 outline-none bg-transparent resize-none w-full border rounded px-2 py-1"
+        className="text-gray-700 mt-2 bg-white/80 border border-gray-300 rounded px-2 py-1 outline-none resize-none w-full"
         value={localDescription}
-        onChange={(e) => handleChange("campaign_description", e.target.value)}
+        onChange={(e) => {
+          e.stopPropagation();
+          handleChange("campaign_description", e.target.value);
+        }}
         placeholder="Nhập mô tả chiến dịch"
         rows="4"
       />

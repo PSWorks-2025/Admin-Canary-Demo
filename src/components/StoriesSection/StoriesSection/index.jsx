@@ -139,7 +139,7 @@ const StoriesSection = ({
   return (
     <SectionWrap className="w-full" borderColor={buttonColor}>
       <TextInput
-        className="mt-5 text-center font-bold md:text-2xl text-xl ml-5 sm:ml-0 w-full max-w-[600px] mx-auto outline-none bg-transparent"
+        className="mt-5 w-full text-center font-bold text-4xl ml-5 sm:ml-0 mx-auto outline-none bg-transparent"
         value={localHeading}
         onChange={(e) => handleChange("heading", e.target.value)}
         placeholder="Nhập tiêu đề phần"

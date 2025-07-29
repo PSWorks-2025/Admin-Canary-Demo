@@ -69,12 +69,32 @@ function EventsOverview({
 
   const handleImageUpload = useCallback(
     (id, file) => {
-      if (file instanceof File || file instanceof Blob) {
-        console.log(`EventsOverview[${id}]: Enqueuing image for thumbnail.src`);
-        const blobUrl = URL.createObjectURL(file);
-        const storagePath = `events/${file.name}`;
-        enqueueImageUpload(`main_pages.event_overviews.${id}.thumbnail.src`, storagePath, file);
-        setEventOverviews((prev) => ({
+      console.log(`EventsOverview[${id}]: handleImageUpload called with file:`, file);
+      if (!file) {
+        console.error(`EventsOverview[${id}]: No file selected`);
+        return;
+      }
+      if (!(file instanceof File || file instanceof Blob)) {
+        console.error(`EventsOverview[${id}]: Invalid file type`);
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        console.error(`EventsOverview[${id}]: Selected file is not an image`);
+        return;
+      }
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      if (file.size > MAX_FILE_SIZE) {
+        console.error(`EventsOverview[${id}]: File size exceeds 5MB`);
+        return;
+      }
+
+      const blobUrl = URL.createObjectURL(file);
+      console.log(`EventsOverview[${id}]: Blob URL created:`, blobUrl);
+      const storagePath = `events/${id}/${file.name}`;
+      enqueueImageUpload(`main_pages.event_overviews.${id}.thumbnail.src`, storagePath, file);
+      setEventOverviews((prev) => {
+        console.log(`EventsOverview[${id}]: Updating eventOverviews with new image:`, blobUrl);
+        return {
           ...prev,
           [id]: {
             ...prev[id] || {
@@ -85,13 +105,12 @@ function EventsOverview({
             thumbnail: {
               ...prev[id]?.thumbnail || { src: "", alt: "", caption: "" },
               src: blobUrl,
+              alt: file.name,
             },
           },
-        }));
-        setHasChanges(true);
-      } else {
-        console.error(`EventsOverview[${id}]: Invalid file for thumbnail.src:`, file);
-      }
+        };
+      });
+      setHasChanges(true);
     },
     [enqueueImageUpload, setEventOverviews, setHasChanges]
   );
@@ -104,7 +123,7 @@ function EventsOverview({
       [newId]: {
         title: "",
         abstract: "",
-        thumbnail: { src: "https://blog.photobucket.com/hubfs/upload_pics_online.png", alt: "", caption: "" },
+        thumbnail: { src: "https://via.placeholder.com/300", alt: "", caption: "" },
       },
     }));
     setLocalTitles((prev) => [...prev, ""]);
@@ -177,56 +196,64 @@ function EventsOverview({
           </button>
           <div className="grid grid-cols-1 xxs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5 h-48 sm:h-64 overflow-hidden w-full">
             {displayedEvents.map((event, index) => (
-              <Link
-                key={`event_${event.id}`}
-                to="/edit-content"
-                state={{
-                  id: event.id,
-                  title: localTitles[index + currentIndex] || event.title || "",
-                  thumbnail: event.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-                }}
-                className="relative block"
-              >
+              <div key={`event_${event.id}`} className="relative h-48 sm:h-64 rounded-lg overflow-hidden shadow-md">
                 <ImageInput
-                  handleImageUpload={(e) => handleImageUpload(event.id, e.target.files[0])}
+                  handleImageUpload={(e) => {
+                    console.log(`EventsOverview[${event.id}]: ImageInput onChange triggered`);
+                    handleImageUpload(event.id, e.target.files[0]);
+                  }}
                   top="top-2"
                   left="left-2"
                   section={`event_${event.id}`}
-                  className="relative bg-cover bg-center h-48 sm:h-64 rounded-lg overflow-hidden shadow-md flex p-2 text-white items-end"
+                  className="relative bg-cover bg-center h-full rounded-lg flex p-2 text-white items-end z-0"
                   style={{
-                    backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url("${event.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
+                    backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.5)), url("${event.imageUrl || "https://via.placeholder.com/300"}")`,
                   }}
                 >
                   <TextInput
-                    className="w-full text-sm sm:text-base font-medium text-white outline-none bg-transparent"
+                    className="w-full text-sm sm:text-base font-medium text-white rounded outline-none z-10"
                     value={localTitles[index + currentIndex] || ""}
-                    onChange={(e) => handleChange(index + currentIndex, "title", e.target.value)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleChange(index + currentIndex, "title", e.target.value);
+                    }}
                     placeholder="Nhập tiêu đề sự kiện"
                   />
-                </ImageInput>
-                <button
-                  className="absolute top-2 right-2 p-1.5 sm:p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleDeleteEvent(event.id, index + currentIndex);
-                  }}
-                >
-                  <svg
-                    className="w-4 sm:w-5 h-4 sm:h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <Link
+                    to="/edit-content"
+                    state={{
+                      id: event.id,
+                      title: localTitles[index + currentIndex] || event.title || "",
+                      thumbnail: event.imageUrl || "https://via.placeholder.com/300",
+                    }}
+                    className="absolute bottom-2 right-2 text-sm sm:text-base text-white font-semibold z-10"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </Link>
+                    Chi tiết
+                  </Link>
+                  <button
+                    className="absolute top-2 right-2 p-1.5 sm:p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteEvent(event.id, index + currentIndex);
+                    }}
+                  >
+                    <svg
+                      className="w-4 sm:w-5 h-4 sm:h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </ImageInput>
+              </div>
             ))}
           </div>
           <button
