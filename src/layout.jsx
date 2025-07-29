@@ -30,7 +30,7 @@ const LayoutContent = ({ children }) => {
   if (loading) {
     return <LoadingScreen />;
   }
-
+  
   return (
     <div className='w-full max-w-full'>
       <Header page={page} {...globalProps} />
