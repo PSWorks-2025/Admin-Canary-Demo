@@ -30,6 +30,7 @@ const HomePage = () => {
     setEventOverviews,
     storyOverviews, 
     setStoryOverviews,
+    enqueueImageUpload
   } = useContext(GlobalContext);
 
   // const [heroSections, setHeroSections] = useState(mainData.hero_sections);
@@ -43,7 +44,9 @@ const HomePage = () => {
   const [storiesTitle, setStoriesTitle] = useState(
     mainData.hero_sections?.stories?.title || ''
   );
-
+  const setHasPendingChanges = () => {
+    console.log(true)
+  }
   // const enqueueImageUpload = ({ section, key, file, path }) => {
   //   const tempUrl = URL.createObjectURL(file);
 
@@ -128,12 +131,14 @@ const HomePage = () => {
       <HeroSection
         data={heroSections}
         setData={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
       />
 
       <StatsSection
         data={orgStats}
         setData={setOrgStats}
         setHasPendingChanges={setHasPendingChanges}
+        enqueueImageUpload={enqueueImageUpload}
       />
 
       <EventsSection
@@ -142,6 +147,7 @@ const HomePage = () => {
         sectionTitle={heroSections?.events?.title}
         setSectionTitle={handleFirstSectionChange}
         buttonColor={secondaryBackgroundColor}
+        enqueueImageUpload={enqueueImageUpload}
       />
 
       <div className="w-full">
@@ -151,9 +157,10 @@ const HomePage = () => {
           title={storiesTitle}
           setTitle={setStoriesTitle}
           buttonColor={secondaryBackgroundColor}
+          enqueueImageUpload={enqueueImageUpload}
         />
       </div>
-      <SaveFloatingButton visible={false} onSave={saveUpdates} />
+      {/* <SaveFloatingButton visible={false} onSave={saveUpdates} /> */}
     </div>
   );
 };
