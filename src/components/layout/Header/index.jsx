@@ -23,16 +23,8 @@ const Header = ({ page }) => {
       className="w-full h-16 sm:h-20 fixed top-0 z-50 shadow-md shadow-gray-200 text-primary-paragraph"
       style={{ backgroundColor: secondaryBackgroundColor }}
     >
-      <div className="relative w-full h-full flex flex-row justify-center px-4 sm:px-6 lg:px-8">
+      <div className="w-full h-full flex flex-row justify-center sm:px-6 lg:px-8">
         <HeaderLogo />
-        {/* <MainColorPicker
-          primaryBackgroundColor={primaryBackgroundColor}
-          setPrimaryBackgroundColor={setPrimaryBackgroundColor}
-          secondaryBackgroundColor={secondaryBackgroundColor}
-          setSecondaryBackgroundColor={setSecondaryBackgroundColor}
-          tertiaryBackgroundColor={tertiaryBackgroundColor}
-          setTertiaryBackgroundColor={setTertiaryBackgroundColor}
-        /> */}
         <HeaderNavigation page={page} globalData={globalData} />
       </div>
     </header>

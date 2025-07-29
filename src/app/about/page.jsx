@@ -17,6 +17,7 @@ import SectionWrap from "../../components/SectionWrap";
 import GlobalContext from "../../GlobalContext";
 import StorySection from "../../components/HomePageSection/StorySection";
 import ProjectLayout from "../../components/ProjectLayout/ProjectLayout";
+
 function Aboutpage() {
   const {
     primaryBackgroundColor,
@@ -51,9 +52,7 @@ function Aboutpage() {
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
-  // Xem thay đổi mà lỗi thì anh sửa
   const [hasChanges, setHasChanges] = useState(false);
-
 
   if (!imagesLoaded) {
     return <LoadingScreen />;
@@ -61,7 +60,7 @@ function Aboutpage() {
 
   return (
     <div
-      className="w-full max-w-[100vw] overflow-x-hidden"
+      className="w-full mx-auto overflow-x-hidden pt-20"
       style={{ backgroundColor: primaryBackgroundColor }}
     >
       <HeroSection
@@ -87,23 +86,21 @@ function Aboutpage() {
           setHasChanges={setHasChanges}
         />
       </SectionWrap>
-      
       <div className="w-full">
-              <StorySection
-                data={storyOverviews}
-                setData={setStoryOverviews}
-                title={storiesTitle}
-                setTitle={setStoriesTitle}
-                enqueueImageUpload={enqueueImageUpload}
-                buttonColor={secondaryBackgroundColor}
-              />
-        </div>
-
+        <StorySection
+          data={storyOverviews}
+          setData={setStoryOverviews}
+          title={storiesTitle}
+          setTitle={setStoriesTitle}
+          enqueueImageUpload={enqueueImageUpload}
+          buttonColor={secondaryBackgroundColor}
+        />
+      </div>
       <SectionWrap borderColor={tertiaryBackgroundColor} className="w-full">
-        <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center">
+        <div className="w-full pt-8 font-bold text-xl md:text-2xl text-primary-title text-center">
           Đội ngũ thành viên
         </div>
-        <div className="w-full flex justify-center my-4 md:mb-8">
+        <div className="w-full flex justify-center my-4">
           <button
             onClick={() => {
               setMembers((prev) => [
@@ -116,16 +113,16 @@ function Aboutpage() {
               ]);
               setHasChanges(true);
             }}
-            className="py-2 px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title"
+            className="py-2 px-4 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title text-sm md:text-base"
           >
             Thêm thành viên
           </button>
         </div>
-        <ScrollMemberList key={members.length}>
+        <ScrollMemberList>
           {members.map((member, index) => (
             <div
               key={`member_${index}`}
-              className="relative w-full max-w-[16rem] mx-auto"
+              className="relative w-full max-w-[12rem] md:max-w-[16rem] mx-auto"
             >
               <ScrollMemberListItem
                 index={index}
@@ -141,10 +138,10 @@ function Aboutpage() {
         </ScrollMemberList>
       </SectionWrap>
       <SectionWrap borderColor={tertiaryBackgroundColor}>
-        <div className="w-full pt-8 md:pt-20 font-bold text-2xl md:text-[2.5rem] text-primary-title text-center">
+        <div className="w-full pt-8 font-bold text-xl md:text-2xl text-primary-title text-center">
           Lịch sử hoạt động
         </div>
-        <div className="w-full flex justify-center my-4 md:mb-8">
+        <div className="w-full flex justify-center my-4">
           <button
             onClick={() => {
               setActivityHistory((prev) => [
@@ -159,7 +156,7 @@ function Aboutpage() {
               ]);
               setHasChanges(true);
             }}
-            className="py-2 px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title"
+            className="py-2 px-4 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title text-sm md:text-base"
           >
             Thêm hoạt động
           </button>
@@ -168,7 +165,7 @@ function Aboutpage() {
           {activityHistory.map((activity, index) => (
             <div
               key={`activity_${index}`}
-              className="relative w-full max-w-[20rem] mx-auto"
+              className="relative w-full max-w-[1152px] mx-auto"
             >
               <ActivityHistoryListItem
                 index={index}
@@ -186,15 +183,14 @@ function Aboutpage() {
           ))}
         </ActivityHistoryList>
       </SectionWrap>
-
       <ProjectLayout
-                projects={projectOverviews}
-                setProjectOverviews={setProjectOverviews}
-                enqueueImageUpload={enqueueImageUpload}
-                setHasChanges={setHasChanges}
-                buttonColor={secondaryBackgroundColor}
-              />
-      <div className="mt-8 md:mt-20" />
+        projects={projectOverviews}
+        setProjectOverviews={setProjectOverviews}
+        enqueueImageUpload={enqueueImageUpload}
+        setHasChanges={setHasChanges}
+        buttonColor={secondaryBackgroundColor}
+      />
+      <div className="mt-8 md:mt-16 pb-20" />
     </div>
   );
 }

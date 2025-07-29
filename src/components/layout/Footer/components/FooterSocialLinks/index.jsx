@@ -36,8 +36,7 @@ const FooterSocialLinks = ({ socialLinksData, setSocialLinksData }) => {
 
   const addSocialLink = useCallback(() => {
     const newId = `link_${socialLinks.length}`;
-    const newLink = { id: newId, name: "", url: "" };
-    const updatedLinks = [...socialLinks, newLink];
+    const updatedLinks = [...socialLinks, { id: newId, name: "", url: "" }];
 
     setSocialLinks(updatedLinks);
   }, [socialLinks]);
@@ -57,7 +56,7 @@ const FooterSocialLinks = ({ socialLinksData, setSocialLinksData }) => {
 
   return (
     <div className="w-full [&>a]:block [&>a]:hover:text-secondary-hover [&>a]:transition">
-      <div className="h-16 flex items-center font-bold">Truyền thông</div>
+      <div className="h-16 flex items-center font-bold text-sm md:text-base">Truyền thông</div>
       {socialLinks.map((link) => (
         <div key={link.id} className="flex gap-2 mb-2 items-center">
           <a
@@ -67,16 +66,16 @@ const FooterSocialLinks = ({ socialLinksData, setSocialLinksData }) => {
             className="text-secondary-paragraph hover:text-secondary-hover"
             aria-label={link.name}
           >
-            <i className={`fab fa-${link.name.toLowerCase()}`} />
+            <i className={`fab fa-${link.name.toLowerCase()} text-sm md:text-base`} />
           </a>
           <TextInput
-            className="text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
+            className="text-sm md:text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
             value={link.name}
             onChange={(e) => handleSocialLinkChange(link.id, "name", e.target.value)}
             placeholder="Tên mạng xã hội"
           />
           <TextInput
-            className="text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
+            className="text-sm md:text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
             value={link.url}
             onChange={(e) => handleSocialLinkChange(link.id, "url", e.target.value)}
             placeholder="Liên kết mạng xã hội"
@@ -86,7 +85,7 @@ const FooterSocialLinks = ({ socialLinksData, setSocialLinksData }) => {
             className="p-1 bg-red-500 text-white rounded-full cursor-pointer hover:bg-red-600"
           >
             <svg
-              className="w-4 h-4"
+              className="w-4 h-4 md:w-5 md:h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -104,7 +103,7 @@ const FooterSocialLinks = ({ socialLinksData, setSocialLinksData }) => {
       ))}
       <button
         onClick={addSocialLink}
-        className="py-2 px-5 rounded-full cursor-pointer font-semibold bg-secondary-darken text-secondary-title mt-2 hover:opacity-80"
+        className="py-2 px-5 rounded-full cursor-pointer font-semibold bg-secondary-darken text-secondary-title mt-2 hover:opacity-80 text-sm md:text-base"
       >
         Thêm liên kết
       </button>

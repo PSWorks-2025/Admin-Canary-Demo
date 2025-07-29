@@ -30,25 +30,27 @@ function EventsOverview({
       console.log(`EventsOverview[${index}]: Updating ${field} to ${value}`);
       const debouncedUpdate = debounce((index, field, value) => {
         if (field === "heading") {
-          // Heading updates are not stored in Firestore; log for clarity
           console.log("EventsOverview: Heading is UI-only, not saved to Firestore");
         } else {
-          setEventOverviews((prev) => ({
-            ...prev,
-            [pageData.events[index].id]: {
-              ...prev[pageData.events[index].id] || {
-                title: "",
-                abstract: "",
-                thumbnail: { src: "", alt: "", caption: "" },
+          const eventId = pageData.events[index]?.id;
+          if (eventId) {
+            setEventOverviews((prev) => ({
+              ...prev,
+              [eventId]: {
+                ...prev[eventId] || {
+                  title: "",
+                  abstract: "",
+                  thumbnail: { src: "", alt: "", caption: "" },
+                },
+                [field === "description" ? "abstract" : field]: value,
+                thumbnail: {
+                  ...prev[eventId]?.thumbnail || { src: "", alt: "", caption: "" },
+                  title: field === "title" ? value : prev[eventId]?.title || "",
+                },
               },
-              [field === "description" ? "abstract" : field]: value,
-              thumbnail: {
-                ...prev[pageData.events[index].id]?.thumbnail || { src: "", alt: "", caption: "" },
-                title: field === "title" ? value : prev[pageData.events[index].id]?.title || "",
-              },
-            },
-          }));
-          setHasChanges(true);
+            }));
+            setHasChanges(true);
+          }
         }
       }, 500);
       if (field === "heading") {
@@ -96,7 +98,7 @@ function EventsOverview({
 
   const handleAddEvent = useCallback(() => {
     console.log("EventsOverview: Adding new event");
-    const newId = `event_${new Date().toISOString()}`;
+    const newId = `event_${Date.now()}`;
     setEventOverviews((prev) => ({
       ...prev,
       [newId]: {
@@ -107,119 +109,135 @@ function EventsOverview({
     }));
     setLocalTitles((prev) => [...prev, ""]);
     setHasChanges(true);
-  }, [pageData.events, setEventOverviews, setHasChanges]);
+  }, [setEventOverviews, setHasChanges]);
 
   const handleDeleteEvent = useCallback(
     (id, index) => {
       console.log(`EventsOverview[${id}]: Deleting event`);
       setEventOverviews((prev) => {
-        const newEvents = Object.keys(prev)
-          .filter((key) => key !== id)
-          .reduce((acc, key) => ({ ...acc, [key]: prev[key] }), {});
+        const newEvents = { ...prev };
+        delete newEvents[id];
         return newEvents;
       });
       setLocalTitles((prev) => prev.filter((_, i) => i !== index));
+      setCurrentIndex((prev) => Math.max(0, Math.min(prev, pageData.events.length - 2)));
       setHasChanges(true);
     },
     [setEventOverviews, setHasChanges]
   );
 
-  const nextImage = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % pageData.events.length);
-  };
+  const nextImage = useCallback(() => {
+    if (pageData.events.length > 4) {
+      setCurrentIndex((prev) => (prev + 1) % pageData.events.length);
+      console.log("EventsOverview: Next image, currentIndex:", (currentIndex + 1) % pageData.events.length);
+    }
+  }, [pageData.events.length, currentIndex]);
 
-  const prevImage = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + pageData.events.length) % pageData.events.length);
-  };
+  const prevImage = useCallback(() => {
+    if (pageData.events.length > 4) {
+      setCurrentIndex((prev) => (prev - 1 + pageData.events.length) % pageData.events.length);
+      console.log("EventsOverview: Prev image, currentIndex:", (currentIndex - 1 + pageData.events.length) % pageData.events.length);
+    }
+  }, [pageData.events.length, currentIndex]);
 
-  const displayedEvents = pageData.events
-    .slice(currentIndex, currentIndex + 4)
-    .concat(pageData.events.slice(0, Math.max(0, currentIndex + 4 - pageData.events.length)));
+  const displayedEvents = pageData.events.length > 0
+    ? pageData.events
+        .slice(currentIndex, currentIndex + 4)
+        .concat(pageData.events.slice(0, Math.max(0, currentIndex + 4 - pageData.events.length)))
+    : [];
 
   return (
     <SectionWrap className="w-full" borderColor={buttonColor}>
       <TextInput
-        className="w-full text-2xl font-bold text-black outline-none bg-transparent text-center mb-4"
+        className="w-full text-xl sm:text-2xl font-bold text-black outline-none bg-transparent text-center mb-4"
         value={localHeading}
         onChange={(e) => handleChange(0, "heading", e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
-      <div className="w-full flex justify-center mb-8">
+      <div className="w-full flex justify-center mb-6 sm:mb-8">
         <button
           onClick={handleAddEvent}
-          className="py-2 px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title"
+          className="py-1.5 sm:py-2 px-4 sm:px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title text-sm sm:text-base"
         >
           Thêm sự kiện
         </button>
       </div>
-      <div className="flex items-center justify-between w-2/3 mx-auto mb-10">
-        <button
-          className="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200"
-          onClick={prevImage}
-        >
-          Previous
-        </button>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 h-64 overflow-hidden w-full">
-          {displayedEvents.map((event, index) => (
-            <Link
-              key={`event_${event.id}`}
-              to="/edit-content"
-              state={{
-                id: event.id,
-                title: localTitles[index] || event.title || "",
-                thumbnail: event.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-              }}
-              className="relative block"
-            >
-              <ImageInput
-                handleImageUpload={(e) => handleImageUpload(event.id, e.target.files[0])}
-                top="top-2"
-                left="left-2"
-                section={`event_${event.id}`}
-                className="relative bg-cover bg-center h-64 rounded-lg overflow-hidden shadow-md flex p-2 text-white items-end"
-                style={{
-                  backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url("${event.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
-                }}
-              >
-                <TextInput
-                  className="w-full text-base font-medium text-white outline-none bg-transparent"
-                  value={localTitles[index] || ""}
-                  onChange={(e) => handleChange(index, "title", e.target.value)}
-                  placeholder="Nhập tiêu đề sự kiện"
-                />
-              </ImageInput>
-              <button
-                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
-                onClick={(e) => {
-                  e.preventDefault(); // Prevent Link navigation
-                  handleDeleteEvent(event.id, index);
-                }}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </Link>
-          ))}
+      {pageData.events.length === 0 ? (
+        <div className="w-full text-center text-primary-paragraph">
+          Không có sự kiện nào để hiển thị
         </div>
-        <button
-          className="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200"
-          onClick={nextImage}
-        >
-          Next
-        </button>
-      </div>
+      ) : (
+        <div className="flex items-center justify-between w-full sm:w-2/3 mx-auto mb-8 sm:mb-10">
+          <button
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base ${pageData.events.length <= 4 ? "opacity-50 cursor-not-allowed" : ""}`}
+            onClick={prevImage}
+            disabled={pageData.events.length <= 4}
+          >
+            Previous
+          </button>
+          <div className="grid grid-cols-1 xxs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5 h-48 sm:h-64 overflow-hidden w-full">
+            {displayedEvents.map((event, index) => (
+              <Link
+                key={`event_${event.id}`}
+                to="/edit-content"
+                state={{
+                  id: event.id,
+                  title: localTitles[index + currentIndex] || event.title || "",
+                  thumbnail: event.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+                }}
+                className="relative block"
+              >
+                <ImageInput
+                  handleImageUpload={(e) => handleImageUpload(event.id, e.target.files[0])}
+                  top="top-2"
+                  left="left-2"
+                  section={`event_${event.id}`}
+                  className="relative bg-cover bg-center h-48 sm:h-64 rounded-lg overflow-hidden shadow-md flex p-2 text-white items-end"
+                  style={{
+                    backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url("${event.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
+                  }}
+                >
+                  <TextInput
+                    className="w-full text-sm sm:text-base font-medium text-white outline-none bg-transparent"
+                    value={localTitles[index + currentIndex] || ""}
+                    onChange={(e) => handleChange(index + currentIndex, "title", e.target.value)}
+                    placeholder="Nhập tiêu đề sự kiện"
+                  />
+                </ImageInput>
+                <button
+                  className="absolute top-2 right-2 p-1.5 sm:p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDeleteEvent(event.id, index + currentIndex);
+                  }}
+                >
+                  <svg
+                    className="w-4 sm:w-5 h-4 sm:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </Link>
+            ))}
+          </div>
+          <button
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base ${pageData.events.length <= 4 ? "opacity-50 cursor-not-allowed" : ""}`}
+            onClick={nextImage}
+            disabled={pageData.events.length <= 4}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </SectionWrap>
   );
 }

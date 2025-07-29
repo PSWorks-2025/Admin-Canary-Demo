@@ -2,29 +2,29 @@ import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 
 const StatsSection = ({ data, setData, setHasPendingChanges }) => {
-  const [primaryColorStat, setPrimaryColorStat] = useState(data.primaryColor || '#ffffff');
-  const [secondaryColorStat, setSecondaryColorStat] = useState(data.secondaryColor || '#000000');
+  const [primaryColorStat, setPrimaryColorStat] = useState(data?.primaryColor || '#ffffff');
+  const [secondaryColorStat, setSecondaryColorStat] = useState(data?.secondaryColor || '#000000');
 
   const stats = [
     {
       title: 'Số sự kiện',
       key: 'num_events',
-      value: String(data.num_events ?? ''),
+      value: String(data?.num_events ?? ''),
     },
     {
       title: 'Số người đã giúp đỡ',
       key: 'num_people_helped',
-      value: String(data.num_people_helped ?? ''),
+      value: String(data?.num_people_helped ?? ''),
     },
     {
       title: 'Số tiền quyên góp',
       key: 'total_money_donated',
-      value: String(data.total_money_donated ?? ''),
+      value: String(data?.total_money_donated ?? ''),
     },
     {
       title: 'Số dự án đã làm',
       key: 'num_projects',
-      value: String(data.num_projects ?? ''),
+      value: String(data?.num_projects ?? ''),
     },
   ];
 
@@ -44,15 +44,15 @@ const StatsSection = ({ data, setData, setHasPendingChanges }) => {
       secondaryColor: secondaryColorStat,
     }));
     setHasPendingChanges(true);
-  }, [primaryColorStat, secondaryColorStat]);
+  }, [primaryColorStat, secondaryColorStat, setData, setHasPendingChanges]);
 
   return (
     <>
-      <div className="w-full h-full md:h-64 flex flex-col md:flex-row justify-center items-center z-auto relative -mt-30">
+      <div className="w-full h-250 md:h-64 flex flex-col md:flex-row gap-4 justify-center items-center z-auto relative -mt-[120px] px-2 sm:px-4">
         {stats.map((stat, index) => (
           <div
             key={stat.key}
-            className="w-64 h-full mx-4 relative overflow-hidden rounded-xl"
+            className="w-64 h-full relative overflow-hidden rounded-xl"
             style={{
               backgroundColor: primaryColorStat,
               borderRadius: '1.5rem',
@@ -71,13 +71,13 @@ const StatsSection = ({ data, setData, setHasPendingChanges }) => {
                 animation: 'wave 10s infinite linear',
               }}
             />
-            <div className="relative z-10 w-full flex flex-col items-center justify-center">
-              <h3 className="w-full font-medium text-sm md:text-xl py-3 md:py-9 text-center outline-none text-white">
+            <div className="relative z-10 md:top-0 top-10 w-full flex flex-col items-center justify-center">
+              <h3 className="w-full font-medium text-xl py-3 md:py-9 text-center outline-none text-white">
                 {stat.title}
               </h3>
               <input
                 type="number"
-                className="w-full font-bold text-2xl md:text-6xl text-white text-center outline-none"
+                className="w-full font-bold text-6xl text-white text-center outline-none"
                 value={stat.value}
                 onChange={(e) => handleStatChange(stat.key, e.target.value)}
                 placeholder="..."
@@ -87,16 +87,18 @@ const StatsSection = ({ data, setData, setHasPendingChanges }) => {
         ))}
       </div>
 
-      <div className="w-full h-20 flex justify-center items-center gap-4">
+      <div className="w-full h-20 flex justify-center items-center gap-4 px-2 sm:px-4">
         <input
           type="color"
           value={primaryColorStat}
           onChange={(e) => setPrimaryColorStat(e.target.value)}
+          className="w-8 h-8 md:w-10 md:h-10 rounded-full cursor-pointer"
         />
         <input
           type="color"
           value={secondaryColorStat}
           onChange={(e) => setSecondaryColorStat(e.target.value)}
+          className="w-8 h-8 md:w-10 md:h-10 rounded-full cursor-pointer"
         />
       </div>
 

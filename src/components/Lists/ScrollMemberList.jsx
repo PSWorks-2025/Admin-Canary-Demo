@@ -15,11 +15,11 @@ export function ScrollMemberList({ children }) {
     const updateItemsPerPage = () => {
       const width = window.innerWidth;
       if (width < 640) {
-        setItemsPerPage(2); // Mobile: 2 items per page
+        setItemsPerPage(1); // Mobile: 2 items
       } else if (width < 1024) {
-        setItemsPerPage(3); // Tablet: 3 items per page
+        setItemsPerPage(3); // Tablet: 3 items
       } else {
-        setItemsPerPage(5); // Desktop: 5 items per page
+        setItemsPerPage(5); // Desktop: 5 items
       }
     };
 
@@ -34,8 +34,8 @@ export function ScrollMemberList({ children }) {
   const handleNext = () => setPage((prev) => Math.min(prev + 1, numberOfPages - 1));
 
   return (
-    <div className="w-full pt-12 flex justify-center">
-      <div className="w-full max-w-7xl relative px-6">
+    <div className="w-full pt-12 flex justify-center px-2 sm:px-4">
+      <div className="w-full max-w-[1152px] relative">
         <button
           onClick={handlePrev}
           className={`w-11 h-11 absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-primary-darken flex justify-center items-center cursor-pointer ${
@@ -58,8 +58,8 @@ export function ScrollMemberList({ children }) {
         </button>
         <div className="w-full overflow-hidden" ref={containerRef}>
           <div
-            className="flex transition-transform duration-500"
-            style={{ transform: `translateX(-${page * (100 / itemsPerPage)}%)` }}
+            className="flex transition-transform duration-500 gap-8"
+            style={{ transform: `translateX(-${page * (125 / itemsPerPage)}%)` }}
           >
             {React.Children.map(children, (child, index) =>
               React.cloneElement(child, { index })
@@ -152,7 +152,7 @@ export function ScrollMemberListItem({
   }, [index, setMembers, setHasChanges]);
 
   return (
-    <div className="w-64 mr-8 h-full relative flex-shrink-0">
+    <div className="w-64 h-full relative flex-shrink-0">
       <div className="relative">
         <ImageInput
           handleImageUpload={(e) => handleImageUpload(e.target.files[0])}

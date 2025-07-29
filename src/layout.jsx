@@ -32,15 +32,15 @@ const LayoutContent = ({ children }) => {
   }
 
   return (
-    <>
+    <div className='w-full max-w-full'>
       <Header page={page} {...globalProps} />
       {children}
       <Footer {...globalProps} />
       {location.pathname !== '/edit-content' && (
-        <SaveFloatingButton onClick={handleGlobalSave} />
+        <SaveFloatingButton visible={true} onClick={handleGlobalSave} />
       )}
       <MainColorPicker/>
-    </>
+    </div>
   );
 };
 

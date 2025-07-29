@@ -92,17 +92,17 @@ const EditContent = () => {
   }
 
   return (
-    <div className="flex justify-center min-h-screen">
+    <div className="flex justify-center min-h-screen mt-20">
       <div className="w-full max-w-4xl p-8 bg-white rounded-lg shadow-lg">
         {/* Thumbnail */}
         {thumbnail ? (
           <img
             src={thumbnail}
             alt="Thumbnail"
-            className="w-[70%] h-auto mx-auto mb-8 rounded-lg shadow-md"
+            className="w-full h-auto mx-auto mb-8 rounded-lg shadow-md"
           />
         ) : (
-          <div className="w-[70%] h-64 mx-auto mb-8 bg-green-100 flex items-center justify-center rounded-lg shadow-md">
+          <div className="w-full h-64 mx-auto mb-8 bg-green-100 flex items-center justify-center rounded-lg shadow-md">
             <span className="text-green-700 font-medium">No Thumbnail</span>
           </div>
         )}
@@ -137,10 +137,10 @@ const EditContent = () => {
           <div className="flex flex-row items-center">
             <label className="block font-medium">Date:</label>
             <input
-              type="text"
+              type="date"
               name="date"
               value={formData.date}
-              readOnly
+              onChange={handleInputChange}
               className="w-full p-3 outline-none rounded-lg"
             />
           </div>
@@ -189,7 +189,7 @@ const EditContent = () => {
         </div>
       </div>
 
-      <SaveFloatingButton onClick={handleSave} />
+      <SaveFloatingButton visible={true} onClick={handleSave} />
     </div>
   );
 };

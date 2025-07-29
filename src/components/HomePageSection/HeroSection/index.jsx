@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { ImageInput } from '../../Inputs/ImageInput';
 
 const HeroSection = ({ data, setData, enqueueImageUpload }) => {
-  const [localImage, setLocalImage] = useState(data.home?.image || '');
+  const [localImage, setLocalImage] = useState(data?.home?.image || '');
 
   // Keep local image in sync with props
   useEffect(() => {
-    setLocalImage(data.home?.image || '');
-  }, [data.home?.image]);
+    setLocalImage(data?.home?.image || '');
+  }, [data?.home?.image]);
 
   const handleLocalImageChange = (file) => {
     if (!file) return;
@@ -35,19 +35,16 @@ const HeroSection = ({ data, setData, enqueueImageUpload }) => {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <ImageInput
         handleImageUpload={(e) => handleLocalImageChange(e.target.files[0])}
         section="hero"
-        top="top-4"
-        right="right-4"
-        className="w-full h-178 bg-cover bg-center relative"
+        className="w-full h-96 md:h-128 lg:h-[calc(100vh-5rem)] bg-cover bg-center relative"
         style={{
           backgroundImage: `url("${
-            data.home?.image ||
+            data?.home?.image ||
             'https://blog.photobucket.com/hubfs/upload_pics_online.png'
           }")`,
-          height: 'calc(100vh - 5rem)',
         }}
       />
     </div>

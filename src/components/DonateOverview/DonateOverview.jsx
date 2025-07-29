@@ -61,16 +61,16 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
   return (
     <SectionWrap className="w-full" borderColor={buttonColor}>
       <TextInput
-        className="w-full text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-6"
+        className="w-full text-2xl sm:text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-4 sm:mb-6"
         value={localHeading}
         onChange={(e) => handleChange("heading", e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
-      <div className="flex flex-row justify-center items-start gap-10 text-center">
+      <div className="flex flex-col sm:flex-row justify-center items-start gap-6 sm:gap-10 text-center">
         <div className="flex flex-col flex-1 items-center">
-          <div className="w-full h-[40vh] bg-gray-600 relative flex flex-col justify-end">
+          <div className="w-full h-[30vh] sm:h-[40vh] bg-gray-600 relative flex flex-col justify-end">
             <TextInput
-              className="text-base font-semibold text-white outline-none bg-transparent mb-2"
+              className="text-sm sm:text-base font-semibold text-white outline-none bg-transparent mb-2"
               value={localTitle1}
               onChange={(e) => handleChange("title1", e.target.value)}
               placeholder="Nhập tiêu đề"
@@ -87,16 +87,16 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
             />
           </div>
           <button
-            className="mt-2 text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
+            className="mt-2 text-white font-medium px-2 sm:px-3 py-1.5 sm:py-2 rounded-full hover:opacity-50 transition-opacity duration-200 text-sm sm:text-base"
             style={{ backgroundColor: buttonColor }}
           >
             Mua ngay
           </button>
         </div>
         <div className="flex flex-col flex-1 items-center">
-          <div className="w-full h-[40vh] bg-gray-600 relative flex flex-col justify-end">
+          <div className="w-full h-[30vh] sm:h-[40vh] bg-gray-600 relative flex flex-col justify-end">
             <TextInput
-              className="text-base font-semibold text-white outline-none bg-transparent mb-2"
+              className="text-sm sm:text-base font-semibold text-white outline-none bg-transparent mb-2"
               value={localTitle2}
               onChange={(e) => handleChange("title2", e.target.value)}
               placeholder="Nhập tiêu đề"
@@ -113,7 +113,7 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
             />
           </div>
           <button
-            className="mt-2 text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200"
+            className="mt-2 text-white font-medium px-2 sm:px-3 py-1.5 sm:py-2 rounded-full hover:opacity-50 transition-opacity duration-200 text-sm sm:text-base"
             style={{ backgroundColor: buttonColor }}
           >
             Ủng hộ

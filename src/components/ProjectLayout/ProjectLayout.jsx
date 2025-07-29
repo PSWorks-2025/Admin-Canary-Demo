@@ -3,10 +3,12 @@ import PropTypes from "prop-types";
 import { ImageInput } from "../Inputs/ImageInput";
 import { TextInput } from "../Inputs/TextInput";
 import SectionWrap from "../SectionWrap";
+import { useNavigate } from "react-router";
+import { IoIosArrowForward } from "react-icons/io";
 
 function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setHasChanges, buttonColor }) {
+  const navigate = useNavigate();
   const handleAddProject = useCallback(() => {
-    console.log("ProjectLayout: Adding new project");
     const newId = `project_${new Date().toISOString()}`;
     setProjectOverviews((prev) => ({
       ...prev,
@@ -18,20 +20,22 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
       },
     }));
     setHasChanges(true);
-  }, [projects, setProjectOverviews, setHasChanges]);
+  }, [setProjectOverviews, setHasChanges]);
 
   return (
     <SectionWrap className="w-full flex flex-col items-center" borderColor={buttonColor}>
-      <h2 className="text-2xl font-bold mb-4">Dự án & hoạt động nổi bật đã thực hiện</h2>
-      <div className="w-full flex justify-center mb-8">
+      <h2 className="text-xl md:text-2xl font-bold mb-4 text-primary-title text-center">
+        Dự án & hoạt động nổi bật đã thực hiện
+      </h2>
+      <div className="w-full flex justify-center mb-4">
         <button
           onClick={handleAddProject}
-          className="py-2 px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title"
+          className="py-2 px-4 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title text-sm md:text-base"
         >
           Thêm dự án
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-3/5 max-w-6xl mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-[1152px] mb-8 px-2 sm:px-4">
         {Object.entries(projects)
           .map(([key, project]) => [key, project])
           .sort((a, b) => a[0].slice(8) - b[0].slice(8))
@@ -45,6 +49,7 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
               setProjectOverviews={setProjectOverviews}
               enqueueImageUpload={enqueueImageUpload}
               setHasChanges={setHasChanges}
+              navigate={navigate}
             />
           ))}
       </div>
@@ -68,6 +73,7 @@ function ProjectListItem({
   setProjectOverviews,
   enqueueImageUpload,
   setHasChanges,
+  navigate,
 }) {
   const [localTitle, setLocalTitle] = useState(title || "");
   const [localStartedTime, setLocalStartedTime] = useState(started_time || "");
@@ -82,7 +88,6 @@ function ProjectListItem({
 
   const handleChange = useCallback(
     (field, value) => {
-      console.log(`ProjectListItem[${id}]: Updating ${field} to ${value}`);
       const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
       const dateValue = field === "started_time" && value && isValidDate(value) ? value : value;
       const debouncedUpdate = debounce((field, value) => {
@@ -114,7 +119,6 @@ function ProjectListItem({
   const handleImageUpload = useCallback(
     (file) => {
       if (file instanceof File || file instanceof Blob) {
-        console.log(`ProjectListItem[${id}]: Enqueuing image for thumbnail.src`);
         const blobUrl = URL.createObjectURL(file);
         const storagePath = `projects/${file.name}`;
         enqueueImageUpload(`main_pages.project_overviews.${id}.thumbnail.src`, storagePath, file);
@@ -134,15 +138,12 @@ function ProjectListItem({
           },
         }));
         setHasChanges(true);
-      } else {
-        console.error(`ProjectListItem[${id}]: Invalid file for thumbnail.src:`, file);
       }
     },
     [id, enqueueImageUpload, setProjectOverviews, setHasChanges]
   );
 
   const handleDelete = useCallback(() => {
-    console.log(`ProjectListItem[${id}]: Deleting project`);
     setProjectOverviews((prev) => {
       const newProjects = Object.keys(prev)
         .filter((key) => key !== id)
@@ -153,23 +154,23 @@ function ProjectListItem({
   }, [id, setProjectOverviews, setHasChanges]);
 
   return (
-    <div className="relative h-96 rounded-lg overflow-hidden shadow-md">
+    <div className="relative h-80 rounded-lg overflow-hidden shadow-md">
       <div className="relative w-full h-full">
         <ImageInput
           handleImageUpload={(e) => handleImageUpload(e.target.files[0])}
           top="top-2"
           left="left-2"
           section="project"
-          className="w-full h-full object-contain bg-cover bg-center"
+          className="w-full h-full bg-cover bg-center"
           style={{ backgroundImage: `url("${imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60"></div>
         <button
-          className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
+          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full cursor-pointer z-10"
           onClick={handleDelete}
         >
           <svg
-            className="w-5 h-5"
+            className="w-4 h-4 md:w-5 md:h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -184,18 +185,28 @@ function ProjectListItem({
           </svg>
         </button>
         <TextInput
-          className="absolute bottom-0 left-0 p-4 w-full text-white font-semibold outline-none bg-transparent z-10"
+          className="absolute bottom-0 left-0 p-3 w-full text-sm md:text-base text-white font-semibold outline-none bg-transparent z-10"
           value={localTitle}
           onChange={(e) => handleChange("title", e.target.value)}
           placeholder="Nhập tiêu đề dự án"
         />
         <TextInput
           type="date"
-          className="absolute bottom-10 left-0 p-4 w-full text-white outline-none bg-transparent z-10"
+          className="absolute bottom-10 left-0 p-3 w-full text-sm md:text-base text-white outline-none bg-transparent z-10"
           value={localStartedTime}
           onChange={(e) => handleChange("started_time", e.target.value)}
           placeholder="Chọn ngày bắt đầu"
         />
+        <button
+          className="absolute bottom-0 right-0 p-3 text-sm md:text-base text-white font-semibold z-10"
+          onClick={() =>
+            navigate('/edit-content', {
+              state: { id, title: localTitle, thumbnailSrc: imageUrl },
+            })
+          }
+        >
+          Chi tiết <IoIosArrowForward className="inline-block mb-0.5 ml-1 w-4 h-4 md:w-5 md:h-5" />
+        </button>
       </div>
     </div>
   );
@@ -209,6 +220,7 @@ ProjectListItem.propTypes = {
   setProjectOverviews: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
+  navigate: PropTypes.func.isRequired,
 };
 
 export default ProjectLayout;

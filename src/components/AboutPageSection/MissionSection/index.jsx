@@ -17,7 +17,6 @@ const MissionSection = ({ mission, setStatements, enqueueImageUpload, setHasChan
 
   const handleChange = useCallback(
     (field, value) => {
-      console.log(`MissionSection: Updating ${field} to ${value}`);
       const debouncedUpdate = debounce((field, value) => {
         setStatements((prev) => ({
           ...prev,
@@ -35,7 +34,6 @@ const MissionSection = ({ mission, setStatements, enqueueImageUpload, setHasChan
   const handleImageUpload = useCallback(
     (field, file) => {
       if (file instanceof File || file instanceof Blob) {
-        console.log(`MissionSection: Enqueuing image for ${field}`);
         const blobUrl = URL.createObjectURL(file);
         const storagePath = `about/statements/mission/${file.name}`;
         enqueueImageUpload(`main_pages.statements.mission.${field}`, storagePath, file);
@@ -44,40 +42,37 @@ const MissionSection = ({ mission, setStatements, enqueueImageUpload, setHasChan
           mission: { ...prev.mission, [field]: blobUrl },
         }));
         setHasChanges(true);
-      } else {
-        console.error(`MissionSection: Invalid file for ${field}:`, file);
       }
     },
     [enqueueImageUpload, setStatements, setHasChanges]
   );
 
   return (
-    <div className="w-full pt-20 flex">
-      <div className="w-1/2 px-4 relative">
+    <div className="w-[80%] mx-auto pt-8 md:pt-12 flex flex-col md:flex-row">
+      <div className="w-full md:w-1/2 px-2 sm:px-4 relative mb-4 md:mb-0">
         <ImageInput
           handleImageUpload={(e) => handleImageUpload("imageUrl", e.target.files[0])}
           section="mission"
           top="top-2"
-          className="w-162 h-102 -mr-26 bg-cover bg-center float-right rounded-lg"
+          className="w-[90%] h-64 md:h-80 lg:h-120 bg-cover bg-center rounded-lg"
           style={{ backgroundImage: `url("${mission?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")` }}
-          left="left-1/2"
         />
       </div>
-      <div className="w-1/2 px-4 flex items-center">
-        <div className="w-136 h-62 rounded-lg bg-tag-2 text-primary-title shadow-[1.5rem_-1.5rem_#E6EBFB] z-20">
+      <div className="w-full md:w-1/2 px-2 sm:px-4 flex items-center">
+        <div className="w-full rounded-lg bg-tag-2 text-primary-title shadow-[1rem_-1rem_#E6EBFB] z-20 p-20">
           <TextInput
-            className="w-full font-bold text-[2.5rem] pt-12 text-center outline-none bg-transparent"
+            className="w-full font-bold text-xl md:text-2xl lg:text-[2.5rem] text-center outline-none bg-transparent"
             value={localTitle}
             onChange={(e) => handleChange("title", e.target.value)}
             placeholder="Nhập tiêu đề sứ mệnh"
           />
           <TextInput
             type="textarea"
-            className="w-full px-8 text-base/5 font-medium py-2 text-primary-paragraph text-center outline-none bg-transparent resize-none"
+            className="w-full px-4 text-sm md:text-base font-medium py-2 text-primary-paragraph text-center outline-none bg-transparent resize-none"
             value={localDescription}
             onChange={(e) => handleChange("description", e.target.value)}
             placeholder="Nhập mô tả sứ mệnh"
-            rows="4"
+            rows="3"
           />
         </div>
       </div>

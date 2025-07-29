@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { ImageInput } from '../../Inputs/ImageInput';
 import { TextInput } from '../../Inputs/TextInput';
 import SectionWrap from '../../SectionWrap';
@@ -11,10 +12,11 @@ const EventsSection = ({
   enqueueImageUpload,
   buttonColor,
 }) => {
+  const navigate = useNavigate();
   const eventImageRefs = useRef({});
 
   useEffect(() => {
-    Object.keys(data).forEach((key) => {
+    Object.keys(data || {}).forEach((key) => {
       if (!eventImageRefs.current[key]) {
         eventImageRefs.current[key] = React.createRef();
       }
@@ -97,14 +99,14 @@ const EventsSection = ({
       <div className="w-full flex justify-center mb-8">
         <button
           onClick={addEvent}
-          className="py-2 px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title"
+          className="py-2 px-6 rounded-full cursor-pointer font-semibold bg-secondary text-secondary-title text-base md:text-lg"
         >
           Thêm sự kiện
         </button>
       </div>
 
-      <div className="w-full">
-        {Object.entries(data)
+      <div className="w-full px-2 sm:px-4">
+        {Object.entries(data || {})
           .map(([key, event]) => ({
             key,
             title: event.title,
@@ -114,23 +116,23 @@ const EventsSection = ({
           }))
           .sort((a, b) => new Date(b.started_time) - new Date(a.started_time))
           .map(({ key, title, description, imageUrl }) => (
-            <div key={key} className="w-full h-84 mt-12 flex relative">
-              <div className="w-1/2 h-full px-4">
-              
-                  <ImageInput
-                    handleImageUpload={(e) =>
-                      handleEventImageUpload(key, e.target.files[0])
-                    }
-                    section="event"
-                    top="top-2"
-                    // ref={eventImageRefs.current[key]}
-                           className="w-136 h-full bg-cover bg-center float-right rounded-lg"
-                  style={{ backgroundImage: `url("${imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")` }}
-                  />
+            <div key={key} className="w-full mt-12 flex flex-col md:flex-row relative">
+              <div className="w-full md:w-1/2 h-80 md:h-84 px-2 md:px-4 mb-4 md:mb-0">
+                <ImageInput
+                  handleImageUpload={(e) =>
+                    handleEventImageUpload(key, e.target.files[0])
+                  }
+                  section="event"
+                  top="top-2"
+                  className="w-full h-full bg-cover bg-center rounded-lg"
+                  style={{
+                    backgroundImage: `url("${imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`,
+                  }}
+                />
               </div>
-              <div className="w-1/2 h-full px-4">
+              <div className="w-full md:w-1/2 h-auto px-2 md:px-4 flex flex-col">
                 <TextInput
-                  className="w-full font-bold text-2xl text-primary-title outline-none"
+                  className="w-full font-bold text-xl md:text-2xl text-primary-title outline-none"
                   value={title}
                   onChange={(e) =>
                     handleEventChange(key, 'title', e.target.value)
@@ -139,7 +141,7 @@ const EventsSection = ({
                 />
                 <TextInput
                   type="textarea"
-                  className="w-136 text-base/5 py-6 text-primary-paragraph outline-none resize-none"
+                  className="w-full text-base md:text-base/5 py-4 md:py-6 text-primary-paragraph outline-none resize-none"
                   value={description}
                   onChange={(e) =>
                     handleEventChange(key, 'description', e.target.value)
@@ -147,10 +149,12 @@ const EventsSection = ({
                   placeholder="Nhập mô tả sự kiện"
                   rows="5"
                 />
-                <br />
                 <button
-                  className="py-2 px-5 rounded-full cursor-pointer font-semibold text-secondary-title mt-2"
+                  className="py-2 px-5 rounded-full cursor-pointer font-semibold text-secondary-title mt-2 text-sm md:text-base w-fit"
                   style={{ backgroundColor: buttonColor }}
+                  onClick={() =>
+                    navigate('/edit-content', { state: { id: key, title, thumbnailSrc: imageUrl } })
+                  }
                 >
                   Tìm hiểu thêm
                 </button>
@@ -160,7 +164,7 @@ const EventsSection = ({
                 onClick={() => deleteEvent(key)}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-5 h-5 md:w-6 md:h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

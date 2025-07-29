@@ -25,7 +25,6 @@ const HeroSection = ({
 
   const handleChange = useCallback(
     (field, value) => {
-      console.log(`HeroSection: Updating ${field} to ${value}`);
       const debouncedUpdate = debounce((field, value) => {
         setHeroSections((prev) => ({
           ...prev,
@@ -43,7 +42,6 @@ const HeroSection = ({
   const handleImageUpload = useCallback(
     (field, file) => {
       if (file instanceof File || file instanceof Blob) {
-        console.log(`HeroSection: Enqueuing image for ${field}`);
         const blobUrl = URL.createObjectURL(file);
         const storagePath = `hero_sections/about/${file.name}`;
         enqueueImageUpload(`main_pages.hero_sections.about.${field}`, storagePath, file);
@@ -52,29 +50,24 @@ const HeroSection = ({
           about: { ...prev.about, [field]: blobUrl },
         }));
         setHasChanges(true);
-      } else {
-        console.error(`HeroSection: Invalid file for ${field}:`, file);
       }
     },
     [enqueueImageUpload, setHeroSections, setHasChanges]
   );
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <ImageInput
         handleImageUpload={(e) => handleImageUpload("coverImage", e.target.files[0])}
-        top="top-2"
-        right="right-2"
-        className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply"
+        className="w-full h-96 md:h-128 lg:h-[calc(100vh-5rem)] bg-cover bg-bottom flex justify-center items-end bg-blend-multiply"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url("${coverImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
-          height: "calc(100vh - 5rem)",
         }}
         section="hero"
       >
-        <div className="w-280">
+        <div className="w-full px-2 sm:px-4 pb-4">
           <TextInput
-            className="w-full text-[2.5rem] font-semibold text-secondary-title outline-none bg-transparent"
+            className="w-full text-xl md:text-2xl lg:text-[2.5rem] font-semibold text-secondary-title outline-none bg-transparent"
             value={localTitle}
             onChange={(e) => handleChange("title", e.target.value)}
             placeholder="Nhập tiêu đề"
@@ -82,11 +75,11 @@ const HeroSection = ({
           />
           <TextInput
             type="textarea"
-            className="w-full text-secondary-title mb-6 outline-none bg-transparent resize-none"
+            className="w-full text-sm md:text-base text-secondary-title mb-4 outline-none bg-transparent resize-none"
             value={localDescription}
             onChange={(e) => handleChange("description", e.target.value)}
             placeholder="Nhập mô tả"
-            rows="4"
+            rows="3"
             section="hero"
           />
         </div>

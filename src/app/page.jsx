@@ -33,7 +33,7 @@ const HomePage = () => {
     mainData.story_overviews
   );
   const [storiesTitle, setStoriesTitle] = useState(
-    mainData.hero_sections.stories?.title || ''
+    mainData?.hero_sections?.stories?.title || ''
   );
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -135,7 +135,7 @@ const HomePage = () => {
       <EventsSection
         data={eventOverviews}
         setData={setEventOverviews}
-        sectionTitle={heroSections.events?.title}
+        sectionTitle={heroSections?.events?.title}
         setSectionTitle={handleFirstSectionChange}
         enqueueImageUpload={enqueueImageUpload}
         buttonColor={secondaryBackgroundColor}
