@@ -58,16 +58,15 @@ const EventsSection = ({
       },
     }));
 
-    enqueueImageUpload({
-      section: 'events',
-      key,
+    enqueueImageUpload(
+      `main_pages.event_overviews.${key}.thumbnail.src`, // precise key path
+      `main_pages/event_overviews/${key}/thumbnail.jpg`,
       file,
-      path: 'events',
-    });
+    );
   };
 
   const addEvent = () => {
-    const newKey = `event_${new Date().toISOString()}`;
+    const newKey = `event_${new Date().getTime()}`;
     setData((prev) => ({
       ...prev,
       [newKey]: {
@@ -111,7 +110,7 @@ const EventsSection = ({
             key,
             title: event.title,
             description: event.abstract,
-            imageUrl: event.thumbnail.src,
+            imageUrl: event?.thumbnail?.src,
             started_time: event.started_time,
           }))
           .sort((a, b) => new Date(b.started_time) - new Date(a.started_time))

@@ -55,58 +55,30 @@ const FooterSocialLinks = ({ socialLinksData, setSocialLinksData }) => {
   }, [socialLinks, setSocialLinksData]);
 
   return (
-    <div className="w-full [&>a]:block [&>a]:hover:text-secondary-hover [&>a]:transition">
-      <div className="h-16 flex items-center font-bold text-sm md:text-base">Truyền thông</div>
-      {socialLinks.map((link) => (
-        <div key={link.id} className="flex gap-2 mb-2 items-center">
-          <a
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-secondary-paragraph hover:text-secondary-hover"
-            aria-label={link.name}
-          >
-            <i className={`fab fa-${link.name.toLowerCase()} text-sm md:text-base`} />
-          </a>
-          <TextInput
-            className="text-sm md:text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
-            value={link.name}
-            onChange={(e) => handleSocialLinkChange(link.id, "name", e.target.value)}
-            placeholder="Tên mạng xã hội"
-          />
-          <TextInput
-            className="text-sm md:text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
-            value={link.url}
-            onChange={(e) => handleSocialLinkChange(link.id, "url", e.target.value)}
-            placeholder="Liên kết mạng xã hội"
-          />
-          <button
-            onClick={() => deleteSocialLink(link.id)}
-            className="p-1 bg-red-500 text-white rounded-full cursor-pointer hover:bg-red-600"
-          >
-            <svg
-              className="w-4 h-4 md:w-5 md:h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-      ))}
-      <button
-        onClick={addSocialLink}
-        className="py-2 px-5 rounded-full cursor-pointer font-semibold bg-secondary-darken text-secondary-title mt-2 hover:opacity-80 text-sm md:text-base"
-      >
-        Thêm liên kết
-      </button>
+    <div className="w-full">
+      <div className="h-16 flex items-center relative">
+        <ImageInput
+          handleImageUpload={(e) => handleLogoUpload(e.target.files[0])}
+          className="h-11 w-11 bg-primary rounded-full bg-cover bg-center overflow-hidden flex-shrink-0"
+          // src={logoUrl}
+      style={{ backgroundImage: `url(${logoUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png"})` }}
+          section="logo"
+        />
+        <TextInput
+          className="ml-4 font-bold outline-none bg-transparent rounded px-2 py-1"
+          value={groupName}
+          onChange={(e) => setGroupName(e.target.value)}
+          placeholder="Nhập tên nhóm"
+        />
+      </div>
+      <TextInput
+        type="textarea"
+        className="w-full text-base text-secondary-paragraph outline-none bg-transparent resize-none rounded px-2 py-1"
+        value={groupDescription}
+        onChange={(e) => setGroupDescription(e.target.value)}
+        placeholder="Nhập mô tả"
+        rows="3"
+      />
     </div>
   );
 };

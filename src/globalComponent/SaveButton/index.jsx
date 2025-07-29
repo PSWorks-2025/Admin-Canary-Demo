@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const SaveFloatingButton = ({ visible, onClick }) => {
+const SaveFloatingButton = ({ visible = true, onClick }) => {
   const [expanded, setExpanded] = useState(true);
 
   if (!visible) return null;

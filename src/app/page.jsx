@@ -22,52 +22,60 @@ const HomePage = () => {
     secondaryBackgroundColor,
     mainData,
     setMainData,
+    heroSections, 
+    setHeroSections,
+    orgStats, 
+    setOrgStats,
+    eventOverviews, 
+    setEventOverviews,
+    storyOverviews, 
+    setStoryOverviews,
+    enqueueImageUpload
   } = useContext(GlobalContext);
 
-  const [heroSections, setHeroSections] = useState(mainData.hero_sections);
-  const [orgStats, setOrgStats] = useState(mainData.org_stats);
-  const [eventOverviews, setEventOverviews] = useState(
-    mainData.event_overviews
-  );
-  const [storyOverviews, setStoryOverviews] = useState(
-    mainData.story_overviews
-  );
+  // const [heroSections, setHeroSections] = useState(mainData.hero_sections);
+  // const [orgStats, setOrgStats] = useState(mainData.org_stats);
+  // const [eventOverviews, setEventOverviews] = useState(
+  //   mainData.event_overviews
+  // );
+  // const [storyOverviews, setStoryOverviews] = useState(
+  //   mainData.story_overviews
+  // );
   const [storiesTitle, setStoriesTitle] = useState(
     mainData?.hero_sections?.stories?.title || ''
   );
+  const setHasPendingChanges = () => {
+    console.log(true)
+  }
+  // const enqueueImageUpload = ({ section, key, file, path }) => {
+  //   const tempUrl = URL.createObjectURL(file);
 
-  const [hasPendingChanges, setHasPendingChanges] = useState(false);
-  const [imageUploadQueue, setImageUploadQueue] = useState([]);
+  //   if (section === 'hero') { // todo: add path for firebase deletion
+  //     setHeroSections((prev) => ({
+  //       ...prev,
+  //       home: { ...prev.home, image: tempUrl },
+  //     }));
+  //   } else if (section === 'events') {
+  //     setEventOverviews((prev) => ({
+  //       ...prev,
+  //       [key]: {
+  //         ...prev[key],
+  //         thumbnail: { ...prev[key].thumbnail, src: tempUrl },
+  //       },
+  //     }));
+  //   } else if (section === 'stories') {
+  //     setStoryOverviews((prev) => ({
+  //       ...prev,
+  //       [key]: {
+  //         ...prev[key],
+  //         thumbnail: { ...prev[key].thumbnail, src: tempUrl },
+  //       },
+  //     }));
+  //   }
 
-  const enqueueImageUpload = ({ section, key, file, path }) => {
-    const tempUrl = URL.createObjectURL(file);
-
-    if (section === 'hero') {
-      setHeroSections((prev) => ({
-        ...prev,
-        home: { ...prev.home, image: tempUrl },
-      }));
-    } else if (section === 'events') {
-      setEventOverviews((prev) => ({
-        ...prev,
-        [key]: {
-          ...prev[key],
-          thumbnail: { ...prev[key].thumbnail, src: tempUrl },
-        },
-      }));
-    } else if (section === 'stories') {
-      setStoryOverviews((prev) => ({
-        ...prev,
-        [key]: {
-          ...prev[key],
-          thumbnail: { ...prev[key].thumbnail, src: tempUrl },
-        },
-      }));
-    }
-
-    setImageUploadQueue((prev) => [...prev, { section, key, file, path }]);
-    setHasPendingChanges(true);
-  };
+  //   setImageUploadQueue((prev) => [...prev, { section, key, file, path }]);
+  //   setHasPendingChanges(true);
+  // };
 
   const handleFirstSectionChange = (value) => {
     setHeroSections((prev) => ({
@@ -77,43 +85,43 @@ const HomePage = () => {
     setHasPendingChanges(true);
   };
 
-  const saveUpdates = async () => {
-    try {
-      const updatedHeroSections = { ...heroSections };
+  // const saveUpdates = async () => {
+  //   try {
+  //     const updatedHeroSections = { ...heroSections };
 
-      for (const { section, key, file, path } of imageUploadQueue) {
-        const url = await uploadImageToStorage(path, file);
-        if (!url) continue;
+  //     for (const { section, key, file, path } of imageUploadQueue) {
+  //       const url = await uploadImageToStorage(path, file);
+  //       if (!url) continue;
 
-        if (section === 'hero') {
-          updatedHeroSections.home.image = url;
-        } else if (section === 'events') {
-          eventOverviews[key].thumbnail.src = url;
-        } else if (section === 'stories') {
-          storyOverviews[key].thumbnail.src = url;
-        }
-      }
+  //       if (section === 'hero') {
+  //         updatedHeroSections.home.image = url;
+  //       } else if (section === 'events') {
+  //         eventOverviews[key].thumbnail.src = url;
+  //       } else if (section === 'stories') {
+  //         storyOverviews[key].thumbnail.src = url;
+  //       }
+  //     }
 
-      const docRef = doc(db, 'Main pages', 'components');
-      const mergedData = {
-        org_stats: orgStats,
-        hero_sections: {
-          ...updatedHeroSections,
-          stories: { ...updatedHeroSections.stories, title: storiesTitle },
-        },
-        event_overviews: eventOverviews,
-        story_overviews: storyOverviews,
-      };
-      await updateDoc(docRef, mergedData);
-      setMainData(mergedData);
-      setHasPendingChanges(false);
-      setImageUploadQueue([]);
-    } catch (err) {
-      console.error('Save error:', err);
-    } finally {
-      console.log('Finished Saving');
-    }
-  };
+  //     const docRef = doc(db, 'Main pages', 'components');
+  //     const mergedData = {
+  //       org_stats: orgStats,
+  //       hero_sections: {
+  //         ...updatedHeroSections,
+  //         stories: { ...updatedHeroSections.stories, title: storiesTitle },
+  //       },
+  //       event_overviews: eventOverviews,
+  //       story_overviews: storyOverviews,
+  //     };
+  //     await updateDoc(docRef, mergedData);
+  //     setMainData(mergedData);
+  //     setHasPendingChanges(false);
+  //     setImageUploadQueue([]);
+  //   } catch (err) {
+  //     console.error('Save error:', err);
+  //   } finally {
+  //     console.log('Finished Saving');
+  //   }
+  // };
 
   return (
     <div
@@ -130,6 +138,7 @@ const HomePage = () => {
         data={orgStats}
         setData={setOrgStats}
         setHasPendingChanges={setHasPendingChanges}
+        enqueueImageUpload={enqueueImageUpload}
       />
 
       <EventsSection
@@ -137,8 +146,8 @@ const HomePage = () => {
         setData={setEventOverviews}
         sectionTitle={heroSections?.events?.title}
         setSectionTitle={handleFirstSectionChange}
-        enqueueImageUpload={enqueueImageUpload}
         buttonColor={secondaryBackgroundColor}
+        enqueueImageUpload={enqueueImageUpload}
       />
 
       <div className="w-full">
@@ -147,11 +156,11 @@ const HomePage = () => {
           setData={setStoryOverviews}
           title={storiesTitle}
           setTitle={setStoriesTitle}
-          enqueueImageUpload={enqueueImageUpload}
           buttonColor={secondaryBackgroundColor}
+          enqueueImageUpload={enqueueImageUpload}
         />
       </div>
-      <SaveFloatingButton onSave={saveUpdates} />
+      {/* <SaveFloatingButton visible={false} onSave={saveUpdates} /> */}
     </div>
   );
 };

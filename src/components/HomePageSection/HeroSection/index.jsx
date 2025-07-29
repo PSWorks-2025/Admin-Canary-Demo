@@ -1,23 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { ImageInput } from '../../Inputs/ImageInput';
+import GlobalContext from '../../../GlobalContext';
 
-const HeroSection = ({ data, setData, enqueueImageUpload }) => {
-  const [localImage, setLocalImage] = useState(data?.home?.image || '');
+// path: Main pages.heroSections.home
+
+const HeroSection = () => {
+  const { heroSections, setHeroSections, enqueueImageUpload } =
+    useContext(GlobalContext);
+  const [localImage, setLocalImage] = useState(heroSections.home?.image || '');
 
   // Keep local image in sync with props
   useEffect(() => {
-    setLocalImage(data?.home?.image || '');
-  }, [data?.home?.image]);
+    setLocalImage(heroSections.home?.image || '');
+  }, [heroSections.home?.image]);
 
   const handleLocalImageChange = (file) => {
     if (!file) return;
     const tempUrl = URL.createObjectURL(file);
-
+    console.log(tempUrl);
     // Update local preview
     setLocalImage(tempUrl);
 
-    // Update parent state through setData
-    setData((prev) => ({
+    // Update parent state through setHeroSections
+    setHeroSections((prev) => ({
       ...prev,
       home: {
         ...prev.home,
@@ -26,13 +31,20 @@ const HeroSection = ({ data, setData, enqueueImageUpload }) => {
     }));
 
     // Queue image upload
-    enqueueImageUpload({
-      section: 'hero',
-      key: 'home',
-      file,
-      path: 'hero_section/home',
-    });
+    enqueueImageUpload(
+      'main_pages.hero_sections.home.image',
+      'main_pages/hero_sections/home/image.jsx',
+      file
+    );
   };
+
+  useEffect(() => {
+    return () => {
+      if (localImage.startsWith('blob:')) {
+        URL.revokeObjectURL(localImage);
+      }
+    };
+  }, [localImage]);
 
   return (
     <div className="w-full">
@@ -42,7 +54,7 @@ const HeroSection = ({ data, setData, enqueueImageUpload }) => {
         className="w-full h-96 md:h-128 lg:h-[calc(100vh-5rem)] bg-cover bg-center relative"
         style={{
           backgroundImage: `url("${
-            data?.home?.image ||
+            heroSections?.home?.image ||
             'https://blog.photobucket.com/hubfs/upload_pics_online.png'
           }")`,
         }}
