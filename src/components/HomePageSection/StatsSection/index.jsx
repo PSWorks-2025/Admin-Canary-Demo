@@ -2,8 +2,12 @@ import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 
 const StatsSection = ({ data, setData, setHasPendingChanges }) => {
-  const [primaryColorStat, setPrimaryColorStat] = useState(data?.primaryColor || '#ffffff');
-  const [secondaryColorStat, setSecondaryColorStat] = useState(data?.secondaryColor || '#000000');
+  const [primaryColorStat, setPrimaryColorStat] = useState(
+    data?.primaryColor || '#ffffff'
+  );
+  const [secondaryColorStat, setSecondaryColorStat] = useState(
+    data?.secondaryColor || '#000000'
+  );
 
   const stats = [
     {
@@ -29,7 +33,8 @@ const StatsSection = ({ data, setData, setHasPendingChanges }) => {
   ];
 
   const handleStatChange = (key, value) => {
-    const numericValue = value === '' ? '' : Number(String(value).replace(/\D/g, '')) || 0;
+    const numericValue =
+      value === '' ? '' : Number(String(value).replace(/\D/g, '')) || 0;
     setData((prev) => ({
       ...prev,
       [key]: numericValue,
@@ -38,13 +43,22 @@ const StatsSection = ({ data, setData, setHasPendingChanges }) => {
   };
 
   useEffect(() => {
-    setData((prev) => ({
-      ...prev,
-      primaryColor: primaryColorStat,
-      secondaryColor: secondaryColorStat,
-    }));
-    setHasPendingChanges(true);
-  }, [primaryColorStat, secondaryColorStat, setData, setHasPendingChanges]);
+    setData((prev) => {
+      if (
+        prev.primaryColor === primaryColorStat &&
+        prev.secondaryColor === secondaryColorStat
+      ) {
+        return prev; // Avoid unnecessary update
+      }
+
+      setHasPendingChanges(true);
+      return {
+        ...prev,
+        primaryColor: primaryColorStat,
+        secondaryColor: secondaryColorStat,
+      };
+    });
+  }, [primaryColorStat, secondaryColorStat]);
 
   return (
     <>

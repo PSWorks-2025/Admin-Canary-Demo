@@ -1,58 +1,28 @@
-import { useCallback, useEffect, useState } from "react";
-import { TextInput } from "../../../../Inputs/TextInput";
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
+import { useContext } from 'react';
+import GlobalContext from '../../../../../GlobalContext';
+import { ImageInput } from '../../../../Inputs/ImageInput';
+import { TextInput } from '../../../../Inputs/TextInput';
 
-const FooterSocialLinks = ({ socialLinksData, setSocialLinksData }) => {
-  const [socialLinks, setSocialLinks] = useState([]);
+const FooterLogoAndGroupInfo = ({
+  groupName,
+  setGroupName,
+  groupDescription,
+  setGroupDescription,
+}) => {
+  const { logoUrl, setLogoUrl, enqueueImageUpload } = useContext(GlobalContext);
 
-  useEffect(() => {
-    const formatted = socialLinksData
-      ? Object.entries(socialLinksData).map(([name, url], index) => ({
-          id: `link_${index}`,
-          name: name.charAt(0).toUpperCase() + name.slice(1),
-          url,
-        }))
-      : [];
-    setSocialLinks(formatted);
-  }, [socialLinksData]);
+  const handleLogoUpload = (file) => {
+    if (!file) return;
 
-  const handleSocialLinkChange = useCallback((id, field, value) => {
-    setSocialLinks((prevLinks) => {
-      const newSocialLinks = prevLinks.map((link) =>
-        link.id === id ? { ...link, [field]: value } : link
-      );
-
-      const updatedObject = newSocialLinks.reduce((acc, link) => {
-        if (link.name.trim()) {
-          acc[link.name.toLowerCase()] = link.url;
-        }
-        return acc;
-      }, {});
-
-      setSocialLinksData(updatedObject);
-      return newSocialLinks;
-    });
-  }, [setSocialLinksData]);
-
-  const addSocialLink = useCallback(() => {
-    const newId = `link_${socialLinks.length}`;
-    const updatedLinks = [...socialLinks, { id: newId, name: "", url: "" }];
-
-    setSocialLinks(updatedLinks);
-  }, [socialLinks]);
-
-  const deleteSocialLink = useCallback((id) => {
-    const newSocialLinks = socialLinks.filter((link) => link.id !== id);
-    const updatedObject = newSocialLinks.reduce((acc, link) => {
-      if (link.name.trim()) {
-        acc[link.name.toLowerCase()] = link.url;
-      }
-      return acc;
-    }, {});
-
-    setSocialLinks(newSocialLinks);
-    setSocialLinksData(updatedObject);
-  }, [socialLinks, setSocialLinksData]);
+    const tempUrl = URL.createObjectURL(file);
+    setLogoUrl(tempUrl); // Preview ngay
+    enqueueImageUpload({
+      key: 'global.logo',
+      path: 'global/logo',
+      file,
+    }); // Thêm vào hàng đợi
+  };
 
   return (
     <div className="w-full">
@@ -83,9 +53,11 @@ const FooterSocialLinks = ({ socialLinksData, setSocialLinksData }) => {
   );
 };
 
-FooterSocialLinks.propTypes = {
-  socialLinksData: PropTypes.object.isRequired,
-  setSocialLinksData: PropTypes.func.isRequired,
+FooterLogoAndGroupInfo.propTypes = {
+  groupName: PropTypes.string.isRequired,
+  setGroupName: PropTypes.func.isRequired,
+  groupDescription: PropTypes.string.isRequired,
+  setGroupDescription: PropTypes.func.isRequired,
 };
 
-export default FooterSocialLinks;
+export default FooterLogoAndGroupInfo;

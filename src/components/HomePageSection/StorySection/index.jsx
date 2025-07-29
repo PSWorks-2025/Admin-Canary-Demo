@@ -143,10 +143,10 @@ const StorySection = ({
                       handleImageUpload={(e) =>
                         handleImageUpload(id, e.target.files[0])
                       }
-                      className="w-full h-60 bg-cover bg-center rounded-sm"
-                      style={{
-                        backgroundImage: `url("${story.thumbnail?.src}")`,
-                      }}
+                      // className="w-full h-60 bg-cover bg-center rounded-sm"
+                      // style={{
+                      //   backgroundImage: `url("${story.thumbnail?.src}")`,
+                      // }}
                       section="story"
                       top="top-2"
                       left="left-2"
