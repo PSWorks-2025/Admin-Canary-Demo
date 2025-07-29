@@ -122,6 +122,7 @@ export const GlobalProvider = ({ children }) => {
 
     for (const key in imageUploadQueue) {
       const { path, file } = imageUploadQueue[key];
+      console.log(path)
       try {
         const storageRef = ref(storage, path);
         await uploadBytes(storageRef, file);
