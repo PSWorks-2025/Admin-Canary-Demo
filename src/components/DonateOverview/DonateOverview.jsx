@@ -1,13 +1,22 @@
-import React, { useState, useCallback } from "react";
-import PropTypes from "prop-types";
-import { ImageInput } from "../Inputs/ImageInput";
-import { TextInput } from "../Inputs/TextInput";
-import SectionWrap from "../SectionWrap";
+import React, { useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import { ImageInput } from '../Inputs/ImageInput';
+import { TextInput } from '../Inputs/TextInput';
+import SectionWrap from '../SectionWrap';
+import { useNavigate } from 'react-router';
 
-function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasChanges, buttonColor }) {
-  const [localHeading, setLocalHeading] = useState(pageData.heading || "");
-  const [localTitle1, setLocalTitle1] = useState(pageData.title1 || "");
-  const [localTitle2, setLocalTitle2] = useState(pageData.title2 || "");
+function DonateOverview({
+  pageData,
+  setHeroSections,
+  enqueueImageUpload,
+  setHasChanges,
+  buttonColor,
+}) {
+  const [localHeading, setLocalHeading] = useState(pageData.heading || '');
+  const [localTitle1, setLocalTitle1] = useState(pageData.title1 || '');
+  const [localTitle2, setLocalTitle2] = useState(pageData.title2 || '');
+
+  const navigate = useNavigate();
 
   const debounce = useCallback((func, wait) => {
     let timeout;
@@ -27,8 +36,8 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
         }));
         setHasChanges(true);
       }, 500);
-      if (field === "heading") setLocalHeading(value);
-      else if (field === "title1") setLocalTitle1(value);
+      if (field === 'heading') setLocalHeading(value);
+      else if (field === 'title1') setLocalTitle1(value);
       else setLocalTitle2(value);
       debouncedUpdate(field, value);
     },
@@ -41,9 +50,13 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
         console.log(`DonateOverview: Enqueuing image for images[${index}]`);
         const blobUrl = URL.createObjectURL(file);
         const storagePath = `hero/donate/${file.name}`;
-        enqueueImageUpload(`main_pages.hero_sections.donate.images.${index}`, storagePath, file);
+        enqueueImageUpload(
+          `main_pages.hero_sections.donate.images.${index}`,
+          storagePath,
+          file
+        );
         setHeroSections((prev) => {
-          const newImages = [...(prev.donate?.images || ["", ""])];
+          const newImages = [...(prev.donate?.images || ['', ''])];
           newImages[index] = blobUrl;
           return {
             ...prev,
@@ -52,7 +65,10 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
         });
         setHasChanges(true);
       } else {
-        console.error(`DonateOverview: Invalid file for images[${index}]:`, file);
+        console.error(
+          `DonateOverview: Invalid file for images[${index}]:`,
+          file
+        );
       }
     },
     [enqueueImageUpload, setHeroSections, setHasChanges]
@@ -63,7 +79,7 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
       <TextInput
         className="w-full text-2xl sm:text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-4 sm:mb-6"
         value={localHeading}
-        onChange={(e) => handleChange("heading", e.target.value)}
+        onChange={(e) => handleChange('heading', e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
       <div className="flex flex-col sm:flex-row justify-center items-start gap-6 sm:gap-10 text-center">
@@ -72,16 +88,19 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
             <TextInput
               className="text-sm sm:text-base font-semibold text-white outline-none bg-transparent mb-2"
               value={localTitle1}
-              onChange={(e) => handleChange("title1", e.target.value)}
+              onChange={(e) => handleChange('title1', e.target.value)}
               placeholder="Nhập tiêu đề"
             />
             <ImageInput
               handleImageUpload={(e) => handleImageUpload(0, e.target.files[0])}
               className="bg-cover bg-center rounded-lg flex justify-center items-center"
               style={{
-                backgroundImage: `url("${pageData.images[0] || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
-                height: "100%",
-                width: "100%",
+                backgroundImage: `url("${
+                  pageData.images[0] ||
+                  'https://blog.photobucket.com/hubfs/upload_pics_online.png'
+                }")`,
+                height: '100%',
+                width: '100%',
               }}
               section="donate_0"
             />
@@ -89,6 +108,7 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
           <button
             className="mt-2 text-white font-medium px-2 sm:px-3 py-1.5 sm:py-2 rounded-full hover:opacity-50 transition-opacity duration-200 text-sm sm:text-base"
             style={{ backgroundColor: buttonColor }}
+            onClick={() => navigate('/donate')}
           >
             Mua ngay
           </button>
@@ -98,16 +118,19 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
             <TextInput
               className="text-sm sm:text-base font-semibold text-white outline-none bg-transparent mb-2"
               value={localTitle2}
-              onChange={(e) => handleChange("title2", e.target.value)}
+              onChange={(e) => handleChange('title2', e.target.value)}
               placeholder="Nhập tiêu đề"
             />
             <ImageInput
               handleImageUpload={(e) => handleImageUpload(1, e.target.files[0])}
               className="bg-cover bg-center rounded-lg flex justify-center items-center"
               style={{
-                backgroundImage: `url("${pageData.images[1] || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}")`,
-                height: "100%",
-                width: "100%",
+                backgroundImage: `url("${
+                  pageData.images[1] ||
+                  'https://blog.photobucket.com/hubfs/upload_pics_online.png'
+                }")`,
+                height: '100%',
+                width: '100%',
               }}
               section="donate_1"
             />
@@ -115,6 +138,7 @@ function DonateOverview({ pageData, setHeroSections, enqueueImageUpload, setHasC
           <button
             className="mt-2 text-white font-medium px-2 sm:px-3 py-1.5 sm:py-2 rounded-full hover:opacity-50 transition-opacity duration-200 text-sm sm:text-base"
             style={{ backgroundColor: buttonColor }}
+            onClick={() => navigate('/donate')}
           >
             Ủng hộ
           </button>

@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from "react";
-import PropTypes from "prop-types";
-import { ImageInput } from "./Inputs/ImageInput";
-import { TextInput } from "./Inputs/TextInput";
+import React, { useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import { ImageInput } from './Inputs/ImageInput';
+import { TextInput } from './Inputs/TextInput';
 
 const FundraisingHeader = ({
   image_url,
@@ -15,7 +15,9 @@ const FundraisingHeader = ({
   setHasChanges,
   buttonColor,
 }) => {
-  const [localFundraiserName, setLocalFundraiserName] = useState(fundraiser_name || "");
+  const [localFundraiserName, setLocalFundraiserName] = useState(
+    fundraiser_name || ''
+  );
   const [localGoalAmount, setLocalGoalAmount] = useState(goal_amount || 0);
 
   const debounce = useCallback((func, wait) => {
@@ -32,16 +34,17 @@ const FundraisingHeader = ({
       const debouncedUpdate = debounce((field, value) => {
         setFundraising((prev) => ({
           ...prev,
-          [field]: field === "goal_amount" ? Number(value) || 0 : value,
+          [field]: field === 'goal_amount' ? Number(value) || 0 : value,
         }));
         setHasChanges(true);
       }, 500);
-      if (field === "fundraiser_name") {
+      if (field === 'fundraiser_name') {
         setLocalFundraiserName(value);
-      } else if (field === "goal_amount") {
-        const finalValue = value === "" ? "" : Number(value) >= 0 ? Number(value) : 0;
+      } else if (field === 'goal_amount') {
+        const finalValue =
+          value === '' ? '' : Number(value) >= 0 ? Number(value) : 0;
         setLocalGoalAmount(finalValue);
-        if (value !== "") {
+        if (value !== '') {
           debouncedUpdate(field, Number(value) || 0);
         }
         return;
@@ -53,17 +56,25 @@ const FundraisingHeader = ({
 
   const handleImageUpload = useCallback(
     (field, file) => {
-      console.log(`FundraisingHeader: handleImageUpload called for ${field} with file:`, file);
+      console.log(
+        `FundraisingHeader: handleImageUpload called for ${field} with file:`,
+        file
+      );
       if (!file) {
         console.error(`FundraisingHeader: No file selected for ${field}`);
         return;
       }
       if (!(file instanceof File || file instanceof Blob)) {
-        console.error(`FundraisingHeader: Invalid file type for ${field}:`, file);
+        console.error(
+          `FundraisingHeader: Invalid file type for ${field}:`,
+          file
+        );
         return;
       }
-      if (!file.type.startsWith("image/")) {
-        console.error(`FundraisingHeader: Selected file is not an image for ${field}`);
+      if (!file.type.startsWith('image/')) {
+        console.error(
+          `FundraisingHeader: Selected file is not an image for ${field}`
+        );
         return;
       }
       const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -82,21 +93,28 @@ const FundraisingHeader = ({
     [enqueueImageUpload, setFundraising, setHasChanges]
   );
 
-  const progressPercentage = localGoalAmount > 0 ? Math.min((amount_raised / localGoalAmount) * 100, 100) : 0;
+  const progressPercentage =
+    localGoalAmount > 0
+      ? Math.min((amount_raised / localGoalAmount) * 100, 100)
+      : 0;
 
   return (
     <div>
       <ImageInput
         handleImageUpload={(e) => {
-          console.log("FundraisingHeader: ImageInput onChange triggered for image_url");
-          handleImageUpload("image_url", e.target.files[0]);
+          console.log(
+            'FundraisingHeader: ImageInput onChange triggered for image_url'
+          );
+          handleImageUpload('image_url', e.target.files[0]);
         }}
         section="fundraising-header"
         top="top-2"
         right="right-2"
         className="relative w-full h-[400px] bg-cover bg-center bg-blend-multiply"
         style={{
-          backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.5)), url(${image_url || "https://via.placeholder.com/300"})`,
+          backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.5)), url(${
+            image_url || 'https://via.placeholder.com/300'
+          })`,
         }}
       >
         <div className="absolute bottom-4 left-4 right-4 event">
@@ -105,7 +123,7 @@ const FundraisingHeader = ({
             value={localFundraiserName}
             onChange={(e) => {
               e.stopPropagation();
-              handleChange("fundraiser_name", e.target.value);
+              handleChange('fundraiser_name', e.target.value);
             }}
             onClick={(e) => e.stopPropagation()}
             placeholder="Nhập tên quỹ"
@@ -118,9 +136,30 @@ const FundraisingHeader = ({
               ></div>
             </div>
             <div className="flex items-center mt-1">
-              <p className="text-white whitespace-nowrap">
-                Đã quyên góp: {amount_raised.toLocaleString()} /
-              </p>
+              <span
+                className="text-white mx-2"
+                style={{ textShadow: 'rgba(0, 0, 0, 0.6) 0px 3px 3px' }}
+              >
+                Số tiền cần đạt được:{' '}
+              </span>
+              <TextInput
+                type="number"
+                className="text-white inline-block bg-black/50 border border-white/30 rounded px-2 py-1 outline-none w-32 z-10"
+                value={amount_raised}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleChange('amount_raised', e.target.value);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                placeholder="Nhập số đã quyên góp"
+                min="0"
+              />
+              <span
+                className="text-white mx-2"
+                style={{ textShadow: 'rgba(0, 0, 0, 0.6) 0px 3px 3px' }}
+              >
+                Số tiền cần đạt được:{' '}
+              </span>
               <div className="flex flex-row items-center">
                 <TextInput
                   type="number"
@@ -128,7 +167,7 @@ const FundraisingHeader = ({
                   value={localGoalAmount}
                   onChange={(e) => {
                     e.stopPropagation();
-                    handleChange("goal_amount", e.target.value);
+                    handleChange('goal_amount', e.target.value);
                   }}
                   onClick={(e) => e.stopPropagation()}
                   placeholder="Nhập mục tiêu"
@@ -141,19 +180,25 @@ const FundraisingHeader = ({
           <div className="mt-4 flex items-center">
             <ImageInput
               handleImageUpload={(e) => {
-                console.log("FundraisingHeader: ImageInput onChange triggered for qr_code_url");
+                console.log(
+                  'FundraisingHeader: ImageInput onChange triggered for qr_code_url'
+                );
                 e.stopPropagation();
-                handleImageUpload("qr_code_url", e.target.files[0]);
+                handleImageUpload('qr_code_url', e.target.files[0]);
               }}
               section="qr-code"
               top="top-2"
               left="left-2"
               className="w-24 h-24 object-cover z-10"
-              style={{ backgroundImage: `url("${qr_code_url || "https://via.placeholder.com/300"}")` }}
+              style={{
+                backgroundImage: `url("${
+                  qr_code_url || 'https://via.placeholder.com/300'
+                }")`,
+              }}
             />
             <button
               className="ml-4 text-white font-medium px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200 z-10"
-              style={{ backgroundColor: buttonColor || "#4160DF" }}
+              style={{ backgroundColor: buttonColor || '#4160DF' }}
               onClick={(e) => {
                 e.stopPropagation();
                 onSupportClick();

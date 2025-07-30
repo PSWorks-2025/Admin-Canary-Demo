@@ -29,7 +29,7 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
 
   return (
     <SectionWrap className="w-full flex flex-col items-center" borderColor={buttonColor}>
-      <h2 className="text-xl md:text-2xl font-bold mb-4 text-primary-title text-center">
+      <h2 className="text-2xl md:text-[2.5rem] font-bold mb-4 text-primary-title text-center">
         Dự án & hoạt động nổi bật đã thực hiện
       </h2>
       <div className="w-full flex justify-center mb-4">
@@ -235,7 +235,7 @@ function ProjectListItem({
         </button>
         <div className="absolute bottom-0 z-20">
         <TextInput
-          className="p-3 w-full text-sm md:text-base text-white font-semibold rounded outline-none z-20"
+          className="px-3 pb-3 ml-2 w-full text-sm md:text-base text-white font-semibold rounded outline-none z-20"
           value={localTitle}
           onChange={(e) => {
             handleChange("title", e.target.value);
@@ -244,7 +244,7 @@ function ProjectListItem({
         />
         <TextInput
           type="date"
-          className="p-3 w-full text-sm md:text-base text-white font-semibold rounded outline-none z-20"
+          className="px-3 pb-3 ml-2 w-full text-sm md:text-base text-white font-semibold rounded outline-none z-20"
           value={localStartedTime}
           onChange={(e) => {
             handleChange("started_time", e.target.value);

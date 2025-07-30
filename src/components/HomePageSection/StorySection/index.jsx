@@ -5,6 +5,7 @@ import { ImageInput } from '../../Inputs/ImageInput';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { MdCircle } from 'react-icons/md';
 import SectionWrap from '../../SectionWrap';
+import { useNavigate } from 'react-router';
 
 const StorySection = ({
   data,
@@ -14,6 +15,7 @@ const StorySection = ({
   enqueueImageUpload,
   buttonColor,
 }) => {
+  const navigate = useNavigate()
   const [page, setPage] = useState(0);
   const itemsPerPage = 3; // Desktop: 3 items per page
 

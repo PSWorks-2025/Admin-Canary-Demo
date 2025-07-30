@@ -13,6 +13,7 @@ function Events() {
   const {
     primaryBackgroundColor,
     secondaryBackgroundColor,
+    tertiaryBackgroundColor,
     heroSections,
     setHeroSections,
     projectOverviews,
@@ -111,6 +112,7 @@ function Events() {
           enqueueImageUpload={enqueueImageUpload}
           setHasChanges={setHasChanges}
           buttonColor={secondaryBackgroundColor}
+          tertiaryBackgroundColor={tertiaryBackgroundColor}
         />
       </div>
     </div>

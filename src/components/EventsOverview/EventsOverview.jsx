@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from "react";
-import { Link } from "react-router";
-import PropTypes from "prop-types";
-import { ImageInput } from "../Inputs/ImageInput";
-import { TextInput } from "../Inputs/TextInput";
-import SectionWrap from "../SectionWrap";
-import "./styles.css";
+import React, { useState, useCallback } from 'react';
+import { Link } from 'react-router';
+import PropTypes from 'prop-types';
+import { ImageInput } from '../Inputs/ImageInput';
+import { TextInput } from '../Inputs/TextInput';
+import SectionWrap from '../SectionWrap';
+import './styles.css';
+import { IoIosArrowForward } from 'react-icons/io';
 
 function EventsOverview({
   pageData,
@@ -12,10 +13,13 @@ function EventsOverview({
   enqueueImageUpload,
   setHasChanges,
   buttonColor,
+  tertiaryBackgroundColor,
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [localHeading, setLocalHeading] = useState(pageData.heading || "");
-  const [localTitles, setLocalTitles] = useState(pageData.events.map((event) => event.title || ""));
+  const [localHeading, setLocalHeading] = useState(pageData.heading || '');
+  const [localTitles, setLocalTitles] = useState(
+    pageData.events.map((event) => event.title || '')
+  );
 
   const debounce = useCallback((func, wait) => {
     let timeout;
@@ -29,23 +33,29 @@ function EventsOverview({
     (index, field, value) => {
       console.log(`EventsOverview[${index}]: Updating ${field} to ${value}`);
       const debouncedUpdate = debounce((index, field, value) => {
-        if (field === "heading") {
-          console.log("EventsOverview: Heading is UI-only, not saved to Firestore");
+        if (field === 'heading') {
+          console.log(
+            'EventsOverview: Heading is UI-only, not saved to Firestore'
+          );
         } else {
           const eventId = pageData.events[index]?.id;
           if (eventId) {
             setEventOverviews((prev) => ({
               ...prev,
               [eventId]: {
-                ...prev[eventId] || {
-                  title: "",
-                  abstract: "",
-                  thumbnail: { src: "", alt: "", caption: "" },
-                },
-                [field === "description" ? "abstract" : field]: value,
+                ...(prev[eventId] || {
+                  title: '',
+                  abstract: '',
+                  thumbnail: { src: '', alt: '', caption: '' },
+                }),
+                [field === 'description' ? 'abstract' : field]: value,
                 thumbnail: {
-                  ...prev[eventId]?.thumbnail || { src: "", alt: "", caption: "" },
-                  title: field === "title" ? value : prev[eventId]?.title || "",
+                  ...(prev[eventId]?.thumbnail || {
+                    src: '',
+                    alt: '',
+                    caption: '',
+                  }),
+                  title: field === 'title' ? value : prev[eventId]?.title || '',
                 },
               },
             }));
@@ -53,7 +63,7 @@ function EventsOverview({
           }
         }
       }, 500);
-      if (field === "heading") {
+      if (field === 'heading') {
         setLocalHeading(value);
       } else {
         setLocalTitles((prev) => {
@@ -69,7 +79,10 @@ function EventsOverview({
 
   const handleImageUpload = useCallback(
     (id, file) => {
-      console.log(`EventsOverview[${id}]: handleImageUpload called with file:`, file);
+      console.log(
+        `EventsOverview[${id}]: handleImageUpload called with file:`,
+        file
+      );
       if (!file) {
         console.error(`EventsOverview[${id}]: No file selected`);
         return;
@@ -78,7 +91,7 @@ function EventsOverview({
         console.error(`EventsOverview[${id}]: Invalid file type`);
         return;
       }
-      if (!file.type.startsWith("image/")) {
+      if (!file.type.startsWith('image/')) {
         console.error(`EventsOverview[${id}]: Selected file is not an image`);
         return;
       }
@@ -91,19 +104,26 @@ function EventsOverview({
       const blobUrl = URL.createObjectURL(file);
       console.log(`EventsOverview[${id}]: Blob URL created:`, blobUrl);
       const storagePath = `events/${id}/${file.name}`;
-      enqueueImageUpload(`main_pages.event_overviews.${id}.thumbnail.src`, storagePath, file);
+      enqueueImageUpload(
+        `main_pages.event_overviews.${id}.thumbnail.src`,
+        storagePath,
+        file
+      );
       setEventOverviews((prev) => {
-        console.log(`EventsOverview[${id}]: Updating eventOverviews with new image:`, blobUrl);
+        console.log(
+          `EventsOverview[${id}]: Updating eventOverviews with new image:`,
+          blobUrl
+        );
         return {
           ...prev,
           [id]: {
-            ...prev[id] || {
-              title: "",
-              abstract: "",
-              thumbnail: { src: "", alt: "", caption: "" },
-            },
+            ...(prev[id] || {
+              title: '',
+              abstract: '',
+              thumbnail: { src: '', alt: '', caption: '' },
+            }),
             thumbnail: {
-              ...prev[id]?.thumbnail || { src: "", alt: "", caption: "" },
+              ...(prev[id]?.thumbnail || { src: '', alt: '', caption: '' }),
               src: blobUrl,
               alt: file.name,
             },
@@ -116,17 +136,21 @@ function EventsOverview({
   );
 
   const handleAddEvent = useCallback(() => {
-    console.log("EventsOverview: Adding new event");
+    console.log('EventsOverview: Adding new event');
     const newId = `event_${Date.now()}`;
     setEventOverviews((prev) => ({
       ...prev,
       [newId]: {
-        title: "",
-        abstract: "",
-        thumbnail: { src: "https://via.placeholder.com/300", alt: "", caption: "" },
+        title: '',
+        abstract: '',
+        thumbnail: {
+          src: 'https://via.placeholder.com/300',
+          alt: '',
+          caption: '',
+        },
       },
     }));
-    setLocalTitles((prev) => [...prev, ""]);
+    setLocalTitles((prev) => [...prev, '']);
     setHasChanges(true);
   }, [setEventOverviews, setHasChanges]);
 
@@ -139,7 +163,9 @@ function EventsOverview({
         return newEvents;
       });
       setLocalTitles((prev) => prev.filter((_, i) => i !== index));
-      setCurrentIndex((prev) => Math.max(0, Math.min(prev, pageData.events.length - 2)));
+      setCurrentIndex((prev) =>
+        Math.max(0, Math.min(prev, pageData.events.length - 2))
+      );
       setHasChanges(true);
     },
     [setEventOverviews, setHasChanges]
@@ -148,29 +174,43 @@ function EventsOverview({
   const nextImage = useCallback(() => {
     if (pageData.events.length > 4) {
       setCurrentIndex((prev) => (prev + 1) % pageData.events.length);
-      console.log("EventsOverview: Next image, currentIndex:", (currentIndex + 1) % pageData.events.length);
+      console.log(
+        'EventsOverview: Next image, currentIndex:',
+        (currentIndex + 1) % pageData.events.length
+      );
     }
   }, [pageData.events.length, currentIndex]);
 
   const prevImage = useCallback(() => {
     if (pageData.events.length > 4) {
-      setCurrentIndex((prev) => (prev - 1 + pageData.events.length) % pageData.events.length);
-      console.log("EventsOverview: Prev image, currentIndex:", (currentIndex - 1 + pageData.events.length) % pageData.events.length);
+      setCurrentIndex(
+        (prev) => (prev - 1 + pageData.events.length) % pageData.events.length
+      );
+      console.log(
+        'EventsOverview: Prev image, currentIndex:',
+        (currentIndex - 1 + pageData.events.length) % pageData.events.length
+      );
     }
   }, [pageData.events.length, currentIndex]);
 
-  const displayedEvents = pageData.events.length > 0
-    ? pageData.events
-        .slice(currentIndex, currentIndex + 4)
-        .concat(pageData.events.slice(0, Math.max(0, currentIndex + 4 - pageData.events.length)))
-    : [];
+  const displayedEvents =
+    pageData.events.length > 0
+      ? pageData.events
+          .slice(currentIndex, currentIndex + 4)
+          .concat(
+            pageData.events.slice(
+              0,
+              Math.max(0, currentIndex + 4 - pageData.events.length)
+            )
+          )
+      : [];
 
   return (
     <SectionWrap className="w-full" borderColor={buttonColor}>
       <TextInput
-        className="w-full text-xl sm:text-2xl font-bold text-black outline-none bg-transparent text-center mb-4"
+        className="w-full text-2xl sm:text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-4"
         value={localHeading}
-        onChange={(e) => handleChange(0, "heading", e.target.value)}
+        onChange={(e) => handleChange(0, 'heading', e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
       <div className="w-full flex justify-center mb-6 sm:mb-8">
@@ -188,7 +228,9 @@ function EventsOverview({
       ) : (
         <div className="flex items-center justify-between w-full sm:w-2/3 mx-auto mb-8 sm:mb-10">
           <button
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base ${pageData.events.length <= 4 ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base ${
+              pageData.events.length <= 4 ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
             onClick={prevImage}
             disabled={pageData.events.length <= 4}
           >
@@ -196,40 +238,73 @@ function EventsOverview({
           </button>
           <div className="grid grid-cols-1 xxs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5 h-48 sm:h-64 overflow-hidden w-full">
             {displayedEvents.map((event, index) => (
-              <div key={`event_${event.id}`} className="relative h-48 sm:h-64 rounded-lg overflow-hidden shadow-md">
+              <div
+                key={`event_${event.id}`}
+                className="relative h-48 sm:h-64 rounded-lg overflow-hidden shadow-md"
+              >
                 <ImageInput
                   handleImageUpload={(e) => {
-                    console.log(`EventsOverview[${event.id}]: ImageInput onChange triggered`);
+                    console.log(
+                      `EventsOverview[${event.id}]: ImageInput onChange triggered`
+                    );
                     handleImageUpload(event.id, e.target.files[0]);
                   }}
                   top="top-2"
                   left="left-2"
                   section={`event_${event.id}`}
-                  className="relative bg-cover bg-center h-full rounded-lg flex p-2 text-white items-end z-0"
+                  className="relative bg-cover bg-center h-full rounded-lg flex p-2 text-white items-end z-0 cursor-pointer"
                   style={{
-                    backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.5)), url("${event.imageUrl || "https://via.placeholder.com/300"}")`,
+                    backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.5)), url("${
+                      event.imageUrl || 'https://via.placeholder.com/300'
+                    }")`,
                   }}
                 >
-                  <TextInput
-                    className="w-full text-sm sm:text-base font-medium text-white rounded outline-none z-10"
-                    value={localTitles[index + currentIndex] || ""}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      handleChange(index + currentIndex, "title", e.target.value);
-                    }}
-                    placeholder="Nhập tiêu đề sự kiện"
-                  />
-                  <Link
-                    to="/edit-content"
-                    state={{
-                      id: event.id,
-                      title: localTitles[index + currentIndex] || event.title || "",
-                      thumbnail: event.imageUrl || "https://via.placeholder.com/300",
-                    }}
-                    className="absolute bottom-2 right-2 text-sm sm:text-base text-white font-semibold z-10"
-                  >
-                    Chi tiết
-                  </Link>
+                  <div className="w-full flex flex-row items-center justify-end z-10">
+                    <TextInput
+                      className="w-full pl-2 pb-2 text-sm sm:text-base font-medium text-white rounded outline-none bg-transparent z-10"
+                      value={localTitles[index + currentIndex] || ''}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleChange(
+                          index + currentIndex,
+                          'title',
+                          e.target.value
+                        );
+                      }}
+                      placeholder="Nhập tiêu đề sự kiện"
+                    />
+                    <Link
+                      to="/edit-content"
+                      state={{
+                        id: event.id,
+                        title:
+                          localTitles[index + currentIndex] ||
+                          event.title ||
+                          '',
+                        thumbnail:
+                          event.imageUrl || 'https://via.placeholder.com/300',
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute bottom-2 right-2 z-10"
+                    >
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="group flex items-center justify-center whitespace-nowrap overflow-hidden transition-all duration-500 ease-in-out text-white text-sm font-semibold rounded-full w-9 h-9 hover:w-auto hover:px-4 hover:brightness-90"
+                        style={{
+                          backgroundColor: tertiaryBackgroundColor,
+                          minWidth: '2rem',
+                          minHeight: '2rem',
+                        }} // Ensures it's always circular when collapsed
+                      >
+                        <span className="block group-hover:hidden mx-auto text-base leading-none">
+                          <IoIosArrowForward className="inline-block w-4 h-4 md:w-5 md:h-5" />
+                        </span>
+                        <span className="hidden group-hover:inline">
+                          Edit Chi Tiết
+                        </span>
+                      </button>
+                    </Link>
+                  </div>
                   <button
                     className="absolute top-2 right-2 p-1.5 sm:p-2 bg-red-500 text-white rounded-full cursor-pointer z-10"
                     onClick={(e) => {
@@ -257,7 +332,9 @@ function EventsOverview({
             ))}
           </div>
           <button
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base ${pageData.events.length <= 4 ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base ${
+              pageData.events.length <= 4 ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
             onClick={nextImage}
             disabled={pageData.events.length <= 4}
           >

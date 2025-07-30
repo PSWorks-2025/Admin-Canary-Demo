@@ -22,7 +22,6 @@ const HeroSection = ({ backgroundImage, setBackgroundImage, color, setColor }) =
         className="w-full h-178 bg-cover bg-center relative"
         style={{
           backgroundImage: `url("${backgroundImage}")`,
-          height: "calc(100vh - 5rem)",
         }}
       >
       <ImageInput

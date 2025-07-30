@@ -51,7 +51,7 @@ const HeroSection = () => {
       <ImageInput
         handleImageUpload={(e) => handleLocalImageChange(e.target.files[0])}
         section="hero"
-        className="w-full h-96 md:h-128 lg:h-[calc(100vh-5rem)] bg-cover bg-center relative"
+        className="w-full h-96 md:h-128 lg:h-[80vh] bg-cover bg-center relative"
         style={{
           backgroundImage: `url("${
             heroSections?.home?.image ||

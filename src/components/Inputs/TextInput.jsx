@@ -1,43 +1,35 @@
-export const TextInput = ({ value, onChange, placeholder, className, type = "input", rows = "4",section="normal" }) => {
+export const TextInput = ({
+  value,
+  onChange,
+  placeholder,
+  className,
+  type = 'input',
+  rows = '4',
+  style
+}) => {
   return (
-    <div className="relative w-full">
-      {/* {section === "normal" && type !== "date" && (
-         <svg
-        className="absolute left-2 top-2 w-4 h-4 text-gray-500"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-        ></path>
-      </svg>
-      )} */}
-     
-
-      {type !== "textarea" ? (
+    <>
+      {type !== 'textarea' ? (
         <input
-          className={`pl-8 ${className}`} 
+          className={className}
           value={value}
-          type={type=="input" ? "text" : type}
+          type={type == 'input' ? 'text' : type}
           onChange={onChange}
           placeholder={placeholder}
-          onClick={e=> e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          style={style}
         />
       ) : (
         <textarea
-          className={`pl-8 pt-6 ${className}`} 
+          className={className}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
           rows={rows}
-          onClick={e=> e.stopPropagation()} //Make me wanna kiss kiss shy shy kua yue le ban gi qiu zhao dao le sheng ming de li li
+          onClick={(e) => e.stopPropagation()} //Make me wanna kiss kiss shy shy kua yue le ban gi qiu zhao dao le sheng ming de li li !AYOO
+          style={style}
         />
       )}
-    </div>
+    </>
   );
 };
