@@ -1,19 +1,19 @@
 import PropTypes from 'prop-types';
 import { useState, useContext } from 'react';
-import HeroSection from '../components/HomePageSection/HeroSection';
-import StatsSection from '../components/HomePageSection/StatsSection';
-import EventsSection from '../components/HomePageSection/EventSection';
+import HeroSection from '../../components/HomePageSection/HeroSection/index.jsx';
+import StatsSection from '../../components/HomePageSection/StatsSection/index.jsx';
+import EventsSection from '../../components/HomePageSection/EventSection/index.jsx';
 import {
   ScrollStoryList,
   ScrollStoryListItem,
-} from '../components/Lists/ScrollStoryList.jsx';
-import { TextInput } from '../components/Inputs/TextInput.jsx';
-import { db } from '../service/firebaseConfig.jsx';
+} from '../../components/Lists/ScrollStoryList.jsx';
+import { TextInput } from '../../components/Inputs/TextInput.jsx';
+import { db } from '../../service/firebaseConfig.jsx';
 import { doc, updateDoc } from 'firebase/firestore';
-import { uploadImageToStorage } from '../service/firebaseWrite.jsx';
-import SaveFloatingButton from '../globalComponent/SaveButton/index.jsx';
-import StorySection from '../components/HomePageSection/StorySection/index.jsx';
-import GlobalContext from '../GlobalContext';
+import { uploadImageToStorage } from '../../service/firebaseWrite.jsx';
+import SaveFloatingButton from '../../globalComponent/SaveButton/index.jsx';
+import StorySection from '../../components/HomePageSection/StorySection/index.jsx';
+import GlobalContext from '../../GlobalContext.jsx';
 import { FaLessThan } from 'react-icons/fa';
 
 const HomePage = () => {

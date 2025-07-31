@@ -4,12 +4,12 @@ import './global.css';
 
 import Layout from './layout.jsx';
 
-import HomePage from './app/page.jsx';
-import AboutPage from './app/about/page.jsx';
-import EditContent from './app/EditContent.jsx';
-import FundraisingPage from './app/FundraisingPage.jsx';
-import Events from './app/events/page.jsx';
-import Story from './app/stories/page.jsx';
+import HomePage from './app/homes';
+import AboutPage from './app/about';
+import EditContent from './app/EditContent.jsx'; //change later
+import FundraisingPage from './app/donates';
+import Events from './app/events';
+import Story from './app/stories';
 
 import { mockStory } from './MockData/page56MockData';
 

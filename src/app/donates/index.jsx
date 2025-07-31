@@ -1,12 +1,12 @@
 import React, { useContext, useState } from "react";
 import PropTypes from "prop-types";
-import useImagePreloader from "../hooks/useImagePreloader";
-import LoadingScreen from "../components/screens/LoadingScreen";
-import FundraisingHeader from "../components/FundraisingHeader";
-import DonorList from "../components/DonorList";
-import CampaignDetails from "../components/FundRaisingSection/CampaignDetail";
+import useImagePreloader from "../../hooks/useImagePreloader";
+import LoadingScreen from "../../components/screens/LoadingScreen";
+import FundraisingHeader from "../../components/FundraisingHeader";
+import DonorList from "../../components/DonorList";
+import CampaignDetails from "../../components/FundRaisingSection/CampaignDetail";
 import { motion } from "framer-motion";
-import GlobalContext from "../GlobalContext";
+import GlobalContext from "../../GlobalContext";
 
 const FundraisingPage = () => {
   const {

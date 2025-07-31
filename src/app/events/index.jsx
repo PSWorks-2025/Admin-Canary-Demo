@@ -1,12 +1,12 @@
 import React, { useContext, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import HeroSection from "../../components/EventsSection/HeroSection/index.jsx";
-import DonateOverview from "../../components/DonateOverview/DonateOverview";
-import ProjectLayout from "../../components/ProjectLayout/ProjectLayout";
-import EventsOverview from "../../components/EventsOverview/EventsOverview";
+import DonateOverview from "../../components/DonateOverview/DonateOverview.jsx";
+import ProjectLayout from "../../components/ProjectLayout/ProjectLayout.jsx";
+import EventsOverview from "../../components/EventsOverview/EventsOverview.jsx";
 import "./styles.css";
-import useImagePreloader from "../../hooks/useImagePreloader";
-import LoadingScreen from "../../components/screens/LoadingScreen";
+import useImagePreloader from "../../hooks/useImagePreloader.js";
+import LoadingScreen from "../../components/screens/LoadingScreen.jsx";
 import GlobalContext from "../../GlobalContext.jsx";
 
 function Events() {
