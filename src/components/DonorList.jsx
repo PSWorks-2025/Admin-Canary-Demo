@@ -10,6 +10,11 @@ const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor }) => {
     setLocalDonors(donors || []);
   }, [donors]);
 
+  const currencyFormatter = new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  });
+
   const handleDonorChange = useCallback(
     (index, field, value) => {
       console.log(`DonorList: Updating donor[${index}].${field} to ${value}`);
@@ -80,25 +85,29 @@ const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor }) => {
 
   return (
     <SectionWrap borderColor={buttonColor} className="mt-8 max-w-lg mx-auto">
-      <h3 className="text-2xl font-bold">Danh sách ủng hộ</h3>
+      <div className="text-2xl sm:text-[2.5rem] font-bold text-center">
+        Danh sách ủng hộ
+      </div>
+
       <div className="flex justify-center mt-4">
         <button
-          className="text-white font-medium px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200"
+          className="text-white font-medium px-5 py-2 rounded-full hover:opacity-80 transition-opacity duration-200"
           style={{ backgroundColor: buttonColor || '#4160DF' }}
           onClick={handleAddDonor}
         >
           Thêm người ủng hộ
         </button>
       </div>
-      <ul className="mt-4">
+
+      <ul className="mt-6 space-y-4">
         {localDonors.map((donor, index) => (
           <li
             key={donor.id || index}
-            className="border-b py-2 flex items-center"
+            className="border border-gray-200 rounded-xl p-4 flex justify-between items-start bg-white shadow-sm"
           >
-            <div className="flex-1 space-y-2">
+            <div className="flex-1 pr-4 space-y-2">
               <TextInput
-                className="text-base font-semibold text-black outline-none bg-transparent w-full border rounded px-2 py-1"
+                className="text-base font-semibold text-black w-full px-3 py-2 border rounded focus:outline-none"
                 value={donor.name || ''}
                 onChange={(e) =>
                   handleDonorChange(index, 'name', e.target.value)
@@ -107,7 +116,7 @@ const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor }) => {
               />
               <TextInput
                 type="number"
-                className="text-base text-black outline-none bg-transparent w-full border rounded px-2 py-1"
+                className="text-base text-black w-full px-3 py-2 border rounded focus:outline-none"
                 value={donor.amount !== undefined ? donor.amount : ''}
                 onChange={(e) =>
                   handleDonorChange(index, 'amount', e.target.value)
@@ -115,10 +124,18 @@ const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor }) => {
                 placeholder="Nhập số tiền"
                 min="0"
               />
+              <div className="px-1 pt-1 flex items-center gap-2 text-sm font-medium">
+                <div className="text-gray-800">{donor.name}:</div>
+                <div className="text-green-600">
+                  {currencyFormatter.format(donor.amount || 0)}
+                </div>
+              </div>
             </div>
+
             <button
-              className="ml-4 p-2 bg-red-500 text-white rounded-full cursor-pointer hover:bg-red-600"
+              className="mt-1 shrink-0 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
               onClick={() => handleDeleteDonor(index)}
+              aria-label="Xoá người ủng hộ"
             >
               <svg
                 className="w-5 h-5"

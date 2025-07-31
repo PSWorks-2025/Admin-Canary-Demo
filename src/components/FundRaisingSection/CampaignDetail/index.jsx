@@ -44,7 +44,7 @@ const CampaignDetails = ({
   return (
     <SectionWrap borderColor={buttonColor} className="mt-6 px-6 max-w-2xl mx-auto">
       <TextInput
-        className="text-4xl font-bold text-gray-900 bg-white/80 border border-gray-300 rounded px-2 py-1 outline-none w-full"
+        className="text-2xl sm:text-[2.5rem] font-bold text-gray-900 bg-white/80 border border-gray-300 rounded px-2 py-1 outline-none w-full"
         value={localTitle}
         onChange={(e) => {
           e.stopPropagation();

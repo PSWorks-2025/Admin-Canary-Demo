@@ -70,18 +70,6 @@ const FundraisingPage = () => {
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
       />
-      <div className="flex justify-center mt-6">
-        <button
-          className={`text-white font-medium px-4 py-2 rounded-full transition-opacity duration-200 ${
-            hasChanges ? "hover:opacity-80" : "opacity-50 cursor-not-allowed"
-          }`}
-          style={{ backgroundColor: secondaryBackgroundColor || "#4160DF" }}
-          onClick={handleSave}
-          disabled={!hasChanges}
-        >
-          Lưu thay đổi
-        </button>
-      </div>
     </div>
   );
 };
