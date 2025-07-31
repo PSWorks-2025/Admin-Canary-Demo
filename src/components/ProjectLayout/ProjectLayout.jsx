@@ -28,7 +28,7 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
   }, [setProjectOverviews, setHasChanges]);
 
   return (
-    <SectionWrap className="w-full flex flex-col items-center" borderColor={buttonColor}>
+    <SectionWrap className="py-10 w-full flex flex-col items-center" borderColor={buttonColor}>
       <h2 className="text-2xl md:text-[2.5rem] font-bold mb-4 text-primary-title text-center">
         Dự án & hoạt động nổi bật đã thực hiện
       </h2>
@@ -244,7 +244,7 @@ function ProjectListItem({
         />
         <TextInput
           type="date"
-          className="px-3 pb-3 ml-2 w-full text-sm md:text-base text-white font-semibold rounded outline-none z-20"
+          className="px-3 pb-3 ml-2 text-sm md:text-base text-white font-semibold rounded outline-none z-20"
           value={localStartedTime}
           onChange={(e) => {
             handleChange("started_time", e.target.value);

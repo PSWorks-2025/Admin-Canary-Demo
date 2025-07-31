@@ -82,11 +82,11 @@ function DonateOverview({
         onChange={(e) => handleChange('heading', e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
-      <div className="flex flex-col sm:flex-row justify-center items-start gap-6 sm:gap-10 text-center">
+      <div className="flex flex-col sm:flex-row justify-center items-start gap-6 sm:gap-10 text-center max-w-[1600px] mx-auto">
         <div className="flex flex-col flex-1 items-center">
           <div className="w-full h-[30vh] sm:h-[40vh] bg-gray-600 relative flex flex-col justify-end">
             <TextInput
-              className="text-sm sm:text-base font-semibold text-white outline-none bg-transparent mb-2"
+              className="text-sm sm:text-base text-center font-semibold text-white outline-none bg-transparent mb-2"
               value={localTitle1}
               onChange={(e) => handleChange('title1', e.target.value)}
               placeholder="Nhập tiêu đề"
@@ -116,7 +116,7 @@ function DonateOverview({
         <div className="flex flex-col flex-1 items-center">
           <div className="w-full h-[30vh] sm:h-[40vh] bg-gray-600 relative flex flex-col justify-end">
             <TextInput
-              className="text-sm sm:text-base font-semibold text-white outline-none bg-transparent mb-2"
+              className="text-sm sm:text-base font-semibold text-center text-white outline-none bg-transparent mb-2"
               value={localTitle2}
               onChange={(e) => handleChange('title2', e.target.value)}
               placeholder="Nhập tiêu đề"

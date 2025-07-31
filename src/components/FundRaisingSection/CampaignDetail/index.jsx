@@ -50,7 +50,7 @@ const CampaignDetails = ({
           e.stopPropagation();
           handleChange("campaign_title", e.target.value);
         }}
-        placeholder="Nhập tiêu đề chiến dịch"
+        placeholder="Nhập tiêu đề của quỹ"
       />
       <TextInput
         type="textarea"
@@ -60,7 +60,7 @@ const CampaignDetails = ({
           e.stopPropagation();
           handleChange("campaign_description", e.target.value);
         }}
-        placeholder="Nhập mô tả chiến dịch"
+        placeholder="Nhập mô tả của quỹ"
         rows="4"
       />
     </SectionWrap>

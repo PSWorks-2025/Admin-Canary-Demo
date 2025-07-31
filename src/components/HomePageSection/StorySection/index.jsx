@@ -85,7 +85,7 @@ const StorySection = ({
   return (
     <SectionWrap borderColor={buttonColor} className="w-full">
       <TextInput
-        className="w-full pt-20 font-bold text-xl md:text-2xl text-primary-title text-center outline-none"
+        className="w-full pt-20 font-bold text-2xl sm:text-[2.5rem] text-primary-title text-center outline-none"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Nhập tiêu đề mục câu chuyện"

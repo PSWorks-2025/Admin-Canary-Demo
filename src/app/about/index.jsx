@@ -110,7 +110,7 @@ function Aboutpage() {
         />
       </div>
       <SectionWrap borderColor={tertiaryBackgroundColor} className="w-full">
-        <div className="w-full pt-8 font-bold text-xl md:text-2xl text-primary-title text-center">
+        <div className="w-full pt-8 font-bold text-2xl sm:text-[2.5rem]  text-primary-title text-center">
           Đội ngũ thành viên
         </div>
         <div className="w-full flex justify-center my-4">
@@ -152,7 +152,7 @@ function Aboutpage() {
         </ScrollMemberList>
       </SectionWrap>
       <SectionWrap borderColor={tertiaryBackgroundColor}>
-        <div className="w-full pt-8 font-bold text-xl md:text-2xl text-primary-title text-center">
+        <div className="w-full pt-8 font-bold text-2xl sm:text-[2.5rem] text-primary-title text-center">
           Lịch sử hoạt động
         </div>
         <div className="w-full flex justify-center my-4">

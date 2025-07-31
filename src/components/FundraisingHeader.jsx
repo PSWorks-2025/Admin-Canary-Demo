@@ -18,6 +18,7 @@ const FundraisingHeader = ({
   const [localFundraiserName, setLocalFundraiserName] = useState(
     fundraiser_name || ''
   );
+  const [showQRModal, setShowQRModal] = useState(false);
   const [localGoalAmount, setLocalGoalAmount] = useState(goal_amount || 0);
 
   const handleChange = useCallback(
@@ -97,9 +98,6 @@ const FundraisingHeader = ({
     <div>
       <ImageInput
         handleImageUpload={(e) => {
-          console.log(
-            'FundraisingHeader: ImageInput onChange triggered for image_url'
-          );
           handleImageUpload('image_url', e.target.files[0]);
         }}
         section="fundraising-header"
@@ -113,6 +111,7 @@ const FundraisingHeader = ({
         }}
       >
         <div className="absolute bottom-4 left-4 right-4 event">
+          {/* Tên quỹ */}
           <TextInput
             className="text-2xl font-bold text-white bg-black/50 border border-white/30 rounded px-2 py-1 outline-none w-full z-10"
             value={localFundraiserName}
@@ -123,6 +122,8 @@ const FundraisingHeader = ({
             onClick={(e) => e.stopPropagation()}
             placeholder="Nhập tên quỹ"
           />
+
+          {/* Progress bar + Tiền */}
           <div className="mt-2">
             <div className="w-full bg-gray-200 rounded-full h-2.5">
               <div
@@ -130,16 +131,14 @@ const FundraisingHeader = ({
                 style={{ width: `${progressPercentage}%` }}
               ></div>
             </div>
-            <div className="flex items-center mt-1">
-              <span
-                className="text-white mx-2"
-                style={{ textShadow: 'rgba(0, 0, 0, 0.6) 0px 3px 3px' }}
-              >
-                Số tiền cần đạt được:{' '}
+
+            <div className="flex items-center mt-1 flex-wrap gap-2">
+              <span className="text-white mx-2" style={{ textShadow: 'rgba(0, 0, 0, 0.6) 0px 3px 3px' }}>
+                Đã quyên góp:
               </span>
               <TextInput
                 type="number"
-                className="text-white inline-block bg-black/50 border border-white/30 rounded px-2 py-1 outline-none w-32 z-10"
+                className="text-white bg-black/50 border border-white/30 rounded px-2 py-1 outline-none w-32 z-10"
                 value={amount_raised}
                 onChange={(e) => {
                   e.stopPropagation();
@@ -149,16 +148,13 @@ const FundraisingHeader = ({
                 placeholder="Nhập số đã quyên góp"
                 min="0"
               />
-              <span
-                className="text-white mx-2"
-                style={{ textShadow: 'rgba(0, 0, 0, 0.6) 0px 3px 3px' }}
-              >
-                Số tiền cần đạt được:{' '}
+              <span className="text-white mx-2" style={{ textShadow: 'rgba(0, 0, 0, 0.6) 0px 3px 3px' }}>
+                Mục tiêu:
               </span>
               <div className="flex flex-row items-center">
                 <TextInput
                   type="number"
-                  className="text-white ml-2 bg-black/50 border border-white/30 rounded px-2 py-1 outline-none w-32 z-10"
+                  className="text-white bg-black/50 border border-white/30 rounded px-2 py-1 outline-none w-32 z-10"
                   value={localGoalAmount}
                   onChange={(e) => {
                     e.stopPropagation();
@@ -172,19 +168,18 @@ const FundraisingHeader = ({
               </div>
             </div>
           </div>
-          <div className="mt-4 flex items-center">
+
+          {/* QR + Button */}
+          <div className="mt-4 flex items-center" onClick={(e) => e.stopPropagation()}>
             <ImageInput
               handleImageUpload={(e) => {
-                console.log(
-                  'FundraisingHeader: ImageInput onChange triggered for qr_code_url'
-                );
                 e.stopPropagation();
                 handleImageUpload('qr_code_url', e.target.files[0]);
               }}
               section="qr-code"
               top="top-2"
               left="left-2"
-              className="w-24 h-24 object-cover z-10"
+              className="w-24 h-24 object-cover z-10 border-2 border-white rounded bg-black/40"
               style={{
                 backgroundImage: `url("${
                   qr_code_url || 'https://via.placeholder.com/300'
@@ -196,7 +191,7 @@ const FundraisingHeader = ({
               style={{ backgroundColor: buttonColor || '#4160DF' }}
               onClick={(e) => {
                 e.stopPropagation();
-                onSupportClick();
+                setShowQRModal(true);
               }}
             >
               Ủng hộ ngay
@@ -204,6 +199,32 @@ const FundraisingHeader = ({
           </div>
         </div>
       </ImageInput>
+
+      {/* QR Modal */}
+      {showQRModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+          onClick={() => setShowQRModal(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-lg max-w-sm w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold text-center mb-4">Cảm ơn bạn đã ủng hộ</h2>
+            <img
+              src={qr_code_url || 'https://via.placeholder.com/300'}
+              alt="QR Code"
+              className="w-full h-auto object-contain"
+            />
+            <button
+              className="mt-4 w-full text-white bg-blue-600 py-2 rounded hover:bg-blue-700"
+              onClick={() => setShowQRModal(false)}
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
