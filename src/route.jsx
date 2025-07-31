@@ -4,10 +4,10 @@ import './global.css';
 
 import Layout from './layout.jsx';
 
-import HomePage from './app/homes';
+import HomePage from './app/home/index.js';
 import AboutPage from './app/about';
 import EditContent from './app/EditContent.jsx'; //change later
-import FundraisingPage from './app/donates';
+import FundraisingPage from './app/donate/index.js';
 import Events from './app/events';
 import Story from './app/stories';
 
