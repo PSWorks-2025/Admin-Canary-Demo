@@ -82,7 +82,7 @@ function Events() {
   };
 
   return (
-    <div style={{ backgroundColor: primaryBackgroundColor }} className="w-full px-2 sm:px-4 pt-20 pb-20">
+    <div style={{ backgroundColor: primaryBackgroundColor }} className="w-full pt-20 pb-20">
       <HeroSection
         title={heroSections?.events?.title}
         description={heroSections?.events?.description}
