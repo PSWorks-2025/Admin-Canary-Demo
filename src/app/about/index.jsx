@@ -1,22 +1,22 @@
-import React, { useContext, useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import HeroSection from "../../components/AboutPageSection/HeroSection";
-import MissionSection from "../../components/AboutPageSection/MissionSection";
-import VisionSection from "../../components/AboutPageSection/VisionSection";
+import React, { useContext, useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
   ScrollMemberList,
   ScrollMemberListItem,
-} from "../../components/Lists/ScrollMemberList";
+} from '../../components/Lists/ScrollMemberList';
 import {
   ActivityHistoryList,
   ActivityHistoryListItem,
-} from "../../components/Lists/ActivityHistoryList";
-import useImagePreloader from "../../hooks/useImagePreloader";
-import LoadingScreen from "../../components/screens/LoadingScreen";
-import SectionWrap from "../../components/SectionWrap";
-import GlobalContext from "../../GlobalContext";
-import StorySection from "../../components/HomePageSection/StorySection";
-import ProjectLayout from "../../components/ProjectLayout/ProjectLayout";
+} from '../../components/Lists/ActivityHistoryList';
+import useImagePreloader from '../../hooks/useImagePreloader';
+import LoadingScreen from '../../components/screens/LoadingScreen';
+import SectionWrap from '../../components/SectionWrap';
+import GlobalContext from '../../GlobalContext';
+import StorySection from '../../components/HomePageSection/StorySection';
+import ProjectLayout from '../../components/ProjectLayout/ProjectLayout';
+import HeroSection from '../../components/sections/AboutCanary/HeroSection';
+import MissionSection from '../../components/sections/AboutCanary/MissionSection';
+import VisionSection from '../../components/sections/AboutCanary/VisionSection';
 
 function Aboutpage() {
   const {
@@ -41,13 +41,22 @@ function Aboutpage() {
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
-    heroSections?.about?.coverImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-    statements?.mission?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-    statements?.vision?.imageUrl || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-    ...members.map((member) => member.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png"),
+    heroSections?.about?.coverImage ||
+      'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+    statements?.mission?.imageUrl ||
+      'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+    statements?.vision?.imageUrl ||
+      'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+    ...members.map(
+      (member) =>
+        member.image ||
+        'https://blog.photobucket.com/hubfs/upload_pics_online.png'
+    ),
     ...activityHistory.flatMap((activity) => [
-      activity.image1 || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-      activity.image2 || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+      activity.image1 ||
+        'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+      activity.image2 ||
+        'https://blog.photobucket.com/hubfs/upload_pics_online.png',
     ]),
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
@@ -74,13 +83,17 @@ function Aboutpage() {
       />
       <SectionWrap className="w-full" borderColor={secondaryBackgroundColor}>
         <MissionSection
-          mission={statements?.mission || { title: "", description: "", imageUrl: "" }}
+          mission={
+            statements?.mission || { title: '', description: '', imageUrl: '' }
+          }
           setStatements={setStatements}
           enqueueImageUpload={enqueueImageUpload}
           setHasChanges={setHasChanges}
         />
         <VisionSection
-          vision={statements?.vision || { title: "", description: "", imageUrl: "" }}
+          vision={
+            statements?.vision || { title: '', description: '', imageUrl: '' }
+          }
           setStatements={setStatements}
           enqueueImageUpload={enqueueImageUpload}
           setHasChanges={setHasChanges}
@@ -106,9 +119,10 @@ function Aboutpage() {
               setMembers((prev) => [
                 ...prev,
                 {
-                  name: "",
-                  role: "",
-                  image: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+                  name: '',
+                  role: '',
+                  image:
+                    'https://blog.photobucket.com/hubfs/upload_pics_online.png',
                 },
               ]);
               setHasChanges(true);
@@ -149,9 +163,11 @@ function Aboutpage() {
                 {
                   started_time: null,
                   ended_time: null,
-                  text: "",
-                  image1: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-                  image2: "https://blog.photobucket.com/hubfs/upload_pics_online.png",
+                  text: '',
+                  image1:
+                    'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+                  image2:
+                    'https://blog.photobucket.com/hubfs/upload_pics_online.png',
                 },
               ]);
               setHasChanges(true);
@@ -169,8 +185,8 @@ function Aboutpage() {
             >
               <ActivityHistoryListItem
                 index={index}
-                startDate={activity.started_time || ""}
-                endDate={activity.ended_time || ""}
+                startDate={activity.started_time || ''}
+                endDate={activity.ended_time || ''}
                 imageUrl1={activity.image1}
                 imageUrl2={activity.image2}
                 description={activity.text}

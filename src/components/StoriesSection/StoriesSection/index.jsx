@@ -22,53 +22,42 @@ const StoriesSection = ({
     setLocalStories(pageData.stories);
   }, [pageData]);
 
-  const debounce = useCallback((func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  }, []);
-
   const handleChange = useCallback(
     (field, value, id, index) => {
       console.log(`StoriesSection[${id}]: Updating ${field} to ${value}`);
+
       if (field === 'heading') {
-        const debouncedUpdate = debounce((field, value) => {
-          setHeroSections((prev) => ({
-            ...prev,
-            stories: { ...prev.stories, title: value },
-          }));
-          setHasChanges(true);
-        }, 500);
         setLocalHeading(value);
-        debouncedUpdate(field, value);
+        setHeroSections((prev) => ({
+          ...prev,
+          stories: { ...prev.stories, title: value },
+        }));
+        setHasChanges(true);
       } else {
         const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
         const dateValue =
           field === 'posted_time' && value && isValidDate(value)
             ? value
             : value;
-        const debouncedUpdate = debounce((id, field, value) => {
-          setStoryOverviews((prev) => ({
-            ...prev,
-            [id]: {
-              ...prev[id],
-              [field === 'description' ? 'abstract' : field]: dateValue,
-              thumbnail: {
-                ...prev[id].thumbnail,
-                title: field === 'title' ? value : prev[id].title,
-              },
-            },
-          }));
-          setHasChanges(true);
-        }, 500);
+
         setLocalStories((prev) => {
           const newStories = [...prev];
           newStories[index] = { ...newStories[index], [field]: value };
           return newStories;
         });
-        debouncedUpdate(id, field, value);
+
+        setStoryOverviews((prev) => ({
+          ...prev,
+          [id]: {
+            ...prev[id],
+            [field === 'description' ? 'abstract' : field]: dateValue,
+            thumbnail: {
+              ...prev[id].thumbnail,
+              title: field === 'title' ? value : prev[id].title,
+            },
+          },
+        }));
+        setHasChanges(true);
       }
     },
     [setHeroSections, setStoryOverviews, setHasChanges]

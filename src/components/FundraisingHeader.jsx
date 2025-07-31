@@ -20,36 +20,31 @@ const FundraisingHeader = ({
   );
   const [localGoalAmount, setLocalGoalAmount] = useState(goal_amount || 0);
 
-  const debounce = useCallback((func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  }, []);
-
   const handleChange = useCallback(
     (field, value) => {
       console.log(`FundraisingHeader: Updating ${field} to ${value}`);
-      const debouncedUpdate = debounce((field, value) => {
-        setFundraising((prev) => ({
-          ...prev,
-          [field]: field === 'goal_amount' ? Number(value) || 0 : value,
-        }));
-        setHasChanges(true);
-      }, 500);
+
       if (field === 'fundraiser_name') {
         setLocalFundraiserName(value);
+        setFundraising((prev) => ({ ...prev, [field]: value }));
       } else if (field === 'goal_amount') {
         const finalValue =
           value === '' ? '' : Number(value) >= 0 ? Number(value) : 0;
         setLocalGoalAmount(finalValue);
         if (value !== '') {
-          debouncedUpdate(field, Number(value) || 0);
+          setFundraising((prev) => ({
+            ...prev,
+            [field]: finalValue,
+          }));
         }
-        return;
+      } else {
+        setFundraising((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
       }
-      debouncedUpdate(field, value);
+
+      setHasChanges(true);
     },
     [setFundraising, setHasChanges]
   );

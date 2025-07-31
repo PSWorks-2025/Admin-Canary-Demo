@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
-import PropTypes from "prop-types";
-import { TextInput } from "./Inputs/TextInput";
-import SectionWrap from "./SectionWrap";
+import React, { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import { TextInput } from './Inputs/TextInput';
+import SectionWrap from './SectionWrap';
 
 const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor }) => {
   const [localDonors, setLocalDonors] = useState(donors || []);
@@ -10,53 +10,51 @@ const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor }) => {
     setLocalDonors(donors || []);
   }, [donors]);
 
-  const debounce = useCallback((func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  }, []);
-
   const handleDonorChange = useCallback(
     (index, field, value) => {
       console.log(`DonorList: Updating donor[${index}].${field} to ${value}`);
-      const debouncedUpdate = debounce((index, field, value) => {
-        setFundraising((prev) => {
-          const newDonors = [...prev.donors];
-          newDonors[index] = {
-            ...newDonors[index],
-            [field]: field === "amount" ? Number(value) || 0 : value,
-          };
-          return {
-            ...prev,
-            donors: newDonors,
-            amount_raised: newDonors.reduce((sum, donor) => sum + (Number(donor.amount) || 0), 0),
-          };
-        });
-        setHasChanges(true);
-      }, 1000);
+      const updatedValue = field === 'amount' ? Number(value) || 0 : value;
+
       setLocalDonors((prev) => {
         const newDonors = [...prev];
         newDonors[index] = {
           ...newDonors[index],
-          [field]: field === "amount" ? Number(value) || 0 : value,
+          [field]: updatedValue,
         };
         return newDonors;
       });
-      debouncedUpdate(index, field, field === "amount" ? Number(value) || 0 : value);
+
+      setFundraising((prev) => {
+        const newDonors = [...prev.donors];
+        newDonors[index] = {
+          ...newDonors[index],
+          [field]: updatedValue,
+        };
+        return {
+          ...prev,
+          donors: newDonors,
+          amount_raised: newDonors.reduce(
+            (sum, donor) => sum + (Number(donor.amount) || 0),
+            0
+          ),
+        };
+      });
+
+      setHasChanges(true);
     },
     [setFundraising, setHasChanges]
   );
 
   const handleAddDonor = useCallback(() => {
-    const newId = `donor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newId = `donor_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
     console.log(`DonorList: Adding donor with id ${newId}`);
     setFundraising((prev) => ({
       ...prev,
-      donors: [...prev.donors, { id: newId, name: "", amount: 0 }],
+      donors: [...prev.donors, { id: newId, name: '', amount: 0 }],
     }));
-    setLocalDonors((prev) => [...prev, { id: newId, name: "", amount: 0 }]);
+    setLocalDonors((prev) => [...prev, { id: newId, name: '', amount: 0 }]);
     setHasChanges(true);
   }, [setFundraising, setHasChanges]);
 
@@ -68,7 +66,10 @@ const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor }) => {
         return {
           ...prev,
           donors: newDonors,
-          amount_raised: newDonors.reduce((sum, donor) => sum + (Number(donor.amount) || 0), 0),
+          amount_raised: newDonors.reduce(
+            (sum, donor) => sum + (Number(donor.amount) || 0),
+            0
+          ),
         };
       });
       setLocalDonors((prev) => prev.filter((_, i) => i !== index));
@@ -83,7 +84,7 @@ const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor }) => {
       <div className="flex justify-center mt-4">
         <button
           className="text-white font-medium px-4 py-2 rounded-full hover:opacity-80 transition-opacity duration-200"
-          style={{ backgroundColor: buttonColor || "#4160DF" }}
+          style={{ backgroundColor: buttonColor || '#4160DF' }}
           onClick={handleAddDonor}
         >
           Thêm người ủng hộ
@@ -91,19 +92,26 @@ const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor }) => {
       </div>
       <ul className="mt-4">
         {localDonors.map((donor, index) => (
-          <li key={donor.id || index} className="border-b py-2 flex items-center">
+          <li
+            key={donor.id || index}
+            className="border-b py-2 flex items-center"
+          >
             <div className="flex-1 space-y-2">
               <TextInput
                 className="text-base font-semibold text-black outline-none bg-transparent w-full border rounded px-2 py-1"
-                value={donor.name || ""}
-                onChange={(e) => handleDonorChange(index, "name", e.target.value)}
+                value={donor.name || ''}
+                onChange={(e) =>
+                  handleDonorChange(index, 'name', e.target.value)
+                }
                 placeholder="Nhập tên người ủng hộ"
               />
               <TextInput
                 type="number"
                 className="text-base text-black outline-none bg-transparent w-full border rounded px-2 py-1"
-                value={donor.amount !== undefined ? donor.amount : ""}
-                onChange={(e) => handleDonorChange(index, "amount", e.target.value)}
+                value={donor.amount !== undefined ? donor.amount : ''}
+                onChange={(e) =>
+                  handleDonorChange(index, 'amount', e.target.value)
+                }
                 placeholder="Nhập số tiền"
                 min="0"
               />
