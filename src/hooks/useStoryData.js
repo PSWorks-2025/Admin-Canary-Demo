@@ -127,7 +127,7 @@ const useStoryData = (mainData, setMainData) => {
   }, [mainData.story_overviews]);
 
   const addStory = useCallback(async () => {
-    const newKey = `Câu Chuyện_${Object.keys(mainData.story_overviews).length}_${new Date().toISOString()}`;
+    const newKey = `story_${Object.keys(mainData.story_overviews).length}_${new Date().getTime()}`;
     await updateMainData({
       story_overviews: {
         ...mainData.story_overviews,

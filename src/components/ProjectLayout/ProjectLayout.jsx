@@ -14,7 +14,7 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
   }, [projects]);
 
   const handleAddProject = useCallback(() => {
-    const newId = `project_${new Date().toISOString()}`;
+    const newId = `project_${new Date().getTime()}`;
     setProjectOverviews((prev) => ({
       ...prev,
       [newId]: {

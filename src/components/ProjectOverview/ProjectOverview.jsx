@@ -30,7 +30,7 @@ function ProjectOverview({ pageData, onFieldChange, onImageUpload, buttonColor }
         setLocalDescription(value);
       }
       debouncedHandleFieldChange(
-        Object.keys(pageData.project_overviews || {})[0] || `Dự Án_0_${new Date().toISOString()}`,
+        Object.keys(pageData.project_overviews || {})[0] || `project_0_${new Date().getTime()}`,
         field,
         value
       );
@@ -54,7 +54,7 @@ function ProjectOverview({ pageData, onFieldChange, onImageUpload, buttonColor }
                 <ImageInput
                   handleImageUpload={(file) =>
                     onImageUpload(
-                      Object.keys(pageData.project_overviews || {})[index] || `Dự Án_${index}_${new Date().toISOString()}`,
+                      Object.keys(pageData.project_overviews || {})[index] || `project_${index}_${new Date().getTime()}`,
                       file
                     )
                   }

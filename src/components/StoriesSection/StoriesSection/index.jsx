@@ -99,7 +99,7 @@ const StoriesSection = ({
 
   const handleAddStory = useCallback(() => {
     console.log('StoriesSection: Adding new story');
-    const newKey = `story_${new Date().toISOString()}`;
+    const newKey = `story_${new Date().getTime()}`;
     setStoryOverviews((prev) => ({
       ...prev,
       [newKey]: {
