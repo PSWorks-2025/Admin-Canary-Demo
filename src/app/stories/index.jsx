@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import HeroSection from "../../components/StoriesSection/HeroSection";
 import StoriesSection from "../../components/StoriesSection/StoriesSection";
@@ -14,32 +14,34 @@ function Story() {
     setHeroSections,
     storyOverviews,
     setStoryOverviews,
+    sectionTitles,
+    setSectionTitles,
     enqueueImageUpload,
-    handleGlobalSave,
+    handleGlobalSave
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
     heroSections?.stories?.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
     ...Object.values(storyOverviews || {}).map(
-      (story) => story.thumbnail?.src || "https://blog.photobucket.com/hubfs/upload_pics_online.png"
-    ),
+      story => story.thumbnail?.src || "https://blog.photobucket.com/hubfs/upload_pics_online.png"
+    )
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
-  // Hôm nay em thế nào? Có còn false không? Em hãy cứ luôn true nhé
   const [hasChanges, setHasChanges] = useState(false);
-
 
   if (!imagesLoaded) {
     return <LoadingScreen />;
   }
 
   const storiesData = {
-    heading: heroSections?.stories?.title || "Câu chuyện",
+    heading: sectionTitles.stories || "Câu chuyện",
     stories: Object.entries(storyOverviews || {}).map(([key, story]) => {
       let formattedDate = "";
       if (story.posted_time) {
-        const date = new Date(story.posted_time);
+        const date = story.posted_time.toDate
+          ? story.posted_time.toDate()
+          : new Date(story.posted_time);
         if (!isNaN(date.getTime())) {
           formattedDate = date.toISOString().split("T")[0];
         }
@@ -49,9 +51,9 @@ function Story() {
         title: story.title || "",
         description: story.abstract || "",
         imageUrl: story.thumbnail?.src || "https://blog.photobucket.com/hubfs/upload_pics_online.png",
-        posted_time: formattedDate,
+        posted_time: formattedDate
       };
-    }),
+    })
   };
 
   return (
@@ -67,11 +69,12 @@ function Story() {
       />
       <StoriesSection
         pageData={storiesData}
-        setHeroSections={setHeroSections}
         setStoryOverviews={setStoryOverviews}
         enqueueImageUpload={enqueueImageUpload}
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
+        sectionTitles={sectionTitles}
+        setSectionTitles={setSectionTitles}
       />
     </div>
   );

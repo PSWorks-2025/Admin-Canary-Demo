@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { doc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Timestamp } from 'firebase/firestore';
@@ -10,17 +11,12 @@ import { createFinalData } from './utils/deepMerge.js';
 const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
-  // Global and main data
   const [globalData, setGlobalData] = useState({});
   const [mainData, setMainData] = useState({});
   const [loading, setLoading] = useState(true);
-
-  // Theme colors
   const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState('#ffffff');
   const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState('#ffffff');
   const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState('#4160df');
-
-  // Footer-specific states
   const [logoUrl, setLogoUrl] = useState('');
   const [logoFile, setLogoFile] = useState(null);
   const [groupName, setGroupName] = useState('');
@@ -28,14 +24,10 @@ export const GlobalProvider = ({ children }) => {
   const [contactInfoData, setContactInfoData] = useState({
     hotline: null,
     email: null,
-    address: null,
+    address: null
   });
   const [socialLinksData, setSocialLinksData] = useState({});
-
-  // Image upload queue
   const [imageUploadQueue, setImageUploadQueue] = useState({});
-
-  // Main data states for the main pages
   const [activityHistory, setActivityHistory] = useState([]);
   const [eventOverviews, setEventOverviews] = useState({});
   const [fundraising, setFundraising] = useState({});
@@ -46,10 +38,15 @@ export const GlobalProvider = ({ children }) => {
   const [projectOverviews, setProjectOverviews] = useState({});
   const [statements, setStatements] = useState({});
   const [storyOverviews, setStoryOverviews] = useState({});
-
-  // useEffect(() => {
-  //   console.log(groupName);
-  // }, [groupName]);
+  const [sectionTitles, setSectionTitles] = useState({
+    members: 'Thành viên',
+    activity_history: 'Lịch sử hoạt động',
+    stories: 'Câu chuyện',
+    projects: 'Dự án & hoạt động nổi bật đã thực hiện',
+    fundraising_header: 'Quỹ Gây Quỹ',
+    campaign_details: 'Chi Tiết Chiến Dịch',
+    donor_list: 'Danh Sách Ủng Hộ'
+  });
 
   useEffect(() => {
     const handleGetData = async () => {
@@ -66,7 +63,7 @@ export const GlobalProvider = ({ children }) => {
           setContactInfoData({
             hotline: res.global.hotline || null,
             email: res.global.email || null,
-            address: res.global.address || null,
+            address: res.global.address || null
           });
           setSocialLinksData(res.global.social_media || {});
         }
@@ -82,6 +79,15 @@ export const GlobalProvider = ({ children }) => {
           setProjectOverviews(res.main.project_overviews || {});
           setStatements(res.main.statements || {});
           setStoryOverviews(res.main.story_overviews || {});
+          setSectionTitles({
+            members: res.main.section_titles?.members || 'Thành viên',
+            activity_history: res.main.section_titles?.activity_history || 'Lịch sử hoạt động',
+            stories: res.main.section_titles?.stories || 'Câu chuyện',
+            projects: res.main.section_titles?.projects || 'Dự án & hoạt động nổi bật đã thực hiện',
+            fundraising_header: res.main.section_titles?.fundraising_header || 'Quỹ Gây Quỹ',
+            campaign_details: res.main.section_titles?.campaign_details || 'Chi Tiết Chiến Dịch',
+            donor_list: res.main.section_titles?.donor_list || 'Danh Sách Ủng Hộ'
+          });
         }
       } catch (error) {
         console.error('Error in GlobalProvider useEffect:', error);
@@ -92,7 +98,6 @@ export const GlobalProvider = ({ children }) => {
     handleGetData();
   }, []);
 
-  // Enqueue image with unique key (supports both object and string key signatures)
   const enqueueImageUpload = useCallback((keyOrObj, path, file) => {
     let key;
     if (typeof keyOrObj === 'object' && keyOrObj.key) {
@@ -109,26 +114,24 @@ export const GlobalProvider = ({ children }) => {
       );
     }
 
-    setImageUploadQueue((prev) => ({
+    setImageUploadQueue(prev => ({
       ...prev,
-      [key]: { key, path, file },
+      [key]: { key, path, file }
     }));
   }, []);
 
-  // Upload all queued images and update globalData/mainData
   const uploadAllImagesInQueue = async (baseGlobalUpdate, baseMainUpdate) => {
     const updatedGlobal = { ...baseGlobalUpdate };
     const updatedMain = { ...baseMainUpdate };
 
     for (const key in imageUploadQueue) {
       const { path, file } = imageUploadQueue[key];
-      console.log(path)
       try {
         const storageRef = ref(storage, path);
         await uploadBytes(storageRef, file);
         const url = await getDownloadURL(storageRef);
         const finalUrl = `${url}?v=${Date.now()}`;
-        URL.revokeObjectURL(file); // Clean up blob URL
+        URL.revokeObjectURL(file);
 
         let actualKey = key
           .replace(/^globalData\./, '')
@@ -138,21 +141,12 @@ export const GlobalProvider = ({ children }) => {
           .replace(/^main\./, '')
           .replace(/^Main pages\./, '');
 
-        if (
-          key.startsWith('global.') ||
-          key.startsWith('globalData.') ||
-          key.startsWith('Global.')
-        ) {
+        if (key.startsWith('global.') || key.startsWith('globalData.')) {
           set(updatedGlobal, actualKey, finalUrl);
           if (actualKey === 'logo') {
             setLogoUrl(finalUrl);
           }
-        } else if (
-          key.startsWith('main.') ||
-          key.startsWith('mainData.') ||
-          key.startsWith('Main pages.') ||
-          key.startsWith('main_pages.')
-        ) {
+        } else if (key.startsWith('main.') || key.startsWith('main_pages.')) {
           set(updatedMain, actualKey, finalUrl);
         } else {
           console.warn(`❗ Unknown key prefix: ${key}`);
@@ -168,7 +162,6 @@ export const GlobalProvider = ({ children }) => {
 
   const handleGlobalSave = async () => {
     try {
-      // Prepare global data
       const baseGlobalUpdate = {
         ...globalData,
         primaryBackgroundColor,
@@ -179,73 +172,110 @@ export const GlobalProvider = ({ children }) => {
         hotline: contactInfoData.hotline,
         email: contactInfoData.email,
         address: contactInfoData.address,
-        social_media: socialLinksData,
+        social_media: socialLinksData
       };
 
-      // Prepare main data with date conversions
       const baseMainUpdate = {
-        activity_history: activityHistory.map((activity) => ({
+        activity_history: activityHistory.map(activity => ({
           ...activity,
-          started_time:
-            activity.started_time && !isNaN(new Date(activity.started_time).getTime())
-              ? Timestamp.fromDate(new Date(activity.started_time))
-              : null,
-          ended_time:
-            activity.ended_time && !isNaN(new Date(activity.ended_time).getTime())
-              ? Timestamp.fromDate(new Date(activity.ended_time))
-              : null,
+          started_time: activity.started_time && !isNaN(new Date(activity.started_time).getTime())
+            ? Timestamp.fromDate(new Date(activity.started_time))
+            : null,
+          ended_time: activity.ended_time && !isNaN(new Date(activity.ended_time).getTime())
+            ? Timestamp.fromDate(new Date(activity.ended_time))
+            : null
         })),
-        event_overviews: eventOverviews,
+        event_overviews: Object.entries(eventOverviews).reduce((acc, [key, event]) => {
+          acc[key] = {
+            ...event,
+            title: event.title || '',
+            abstract: event.abstract || '',
+            thumbnail: {
+              src: event.thumbnail?.src || 'https://via.placeholder.com/300',
+              alt: event.thumbnail?.alt || '',
+              caption: event.thumbnail?.caption || ''
+            },
+            started_time: event.started_time && !isNaN(new Date(event.started_time).getTime())
+              ? Timestamp.fromDate(new Date(event.started_time))
+              : null
+          };
+          return acc;
+        }, {}),
         fundraising: {
           ...fundraising,
-          amount_raised: fundraising.donors
-            ? fundraising.donors.reduce((sum, donor) => sum + (donor.amount || 0), 0)
-            : 0,
+          fundraiser_name: fundraising.fundraiser_name || '',
+          campaign_title: fundraising.campaign_title || '',
+          campaign_description: fundraising.campaign_description || '',
+          image_url: fundraising.image_url || 'https://via.placeholder.com/300',
+          qr_code_url: fundraising.qr_code_url || 'https://via.placeholder.com/300',
+          goal_amount: Number(fundraising.goal_amount) || 0,
+          amount_raised: Number(fundraising.amount_raised) || 0,
+          donors: Array.isArray(fundraising.donors) ? fundraising.donors.map(donor => ({
+            id: donor.id || `donor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name: donor.name || '',
+            amount: Number(donor.amount) || 0
+          })) : []
         },
         hero_sections: heroSections,
         highlights: highlights,
         members: members,
         org_stats: orgStats,
-        project_overviews: Object.entries(projectOverviews).reduce((acc, [key, project]) => ({
-          ...acc,
-          [key]: {
+        project_overviews: Object.entries(projectOverviews).reduce((acc, [key, project]) => {
+          acc[key] = {
             ...project,
-            started_time:
-              project.started_time && !isNaN(new Date(project.started_time).getTime())
-                ? Timestamp.fromDate(new Date(project.started_time))
-                : null,
-          },
-        }), {}),
+            title: project.title || '',
+            abstract: project.abstract || '',
+            thumbnail: {
+              src: project.thumbnail?.src || 'https://via.placeholder.com/300',
+              alt: project.thumbnail?.alt || '',
+              caption: project.thumbnail?.caption || ''
+            },
+            started_time: project.started_time && !isNaN(new Date(project.started_time).getTime())
+              ? Timestamp.fromDate(new Date(project.started_time))
+              : null
+          };
+          return acc;
+        }, {}),
         statements: statements,
-        story_overviews: Object.entries(storyOverviews).reduce((acc, [key, story]) => ({
-          ...acc,
-          [key]: {
+        story_overviews: Object.entries(storyOverviews).reduce((acc, [key, story]) => {
+          acc[key] = {
             ...story,
-            posted_time:
-              story.posted_time && !isNaN(new Date(story.posted_time).getTime())
+            title: story.title || '',
+            abstract: story.abstract || '',
+            thumbnail: {
+              src: story.thumbnail?.src || 'https://via.placeholder.com/300',
+              alt: story.thumbnail?.alt || '',
+              caption: story.thumbnail?.caption || ''
+            },
+            posted_time: story.posted_time && !isNaN(new Date(story.posted_time).getTime())
               ? Timestamp.fromDate(new Date(story.posted_time))
-              : null,
-          },
-        }), {}),
+              : null
+          };
+          return acc;
+        }, {}),
+        section_titles: {
+          members: sectionTitles.members || 'Thành viên',
+          activity_history: sectionTitles.activity_history || 'Lịch sử hoạt động',
+          stories: sectionTitles.stories || 'Câu chuyện',
+          projects: sectionTitles.projects || 'Dự án & hoạt động nổi bật đã thực hiện',
+          fundraising_header: sectionTitles.fundraising_header || 'Quỹ Gây Quỹ',
+          campaign_details: sectionTitles.campaign_details || 'Chi Tiết Chiến Dịch',
+          donor_list: sectionTitles.donor_list || 'Danh Sách Ủng Hộ'
+        }
       };
 
-      // Upload images and get updated data
       const { updatedGlobal, updatedMain } = await uploadAllImagesInQueue(baseGlobalUpdate, baseMainUpdate);
-
-      // Merge updates
       const finalGlobalData = createFinalData(baseGlobalUpdate, updatedGlobal);
       const finalMainData = createFinalData(baseMainUpdate, updatedMain);
 
-      // Firestore writes
       const globalRef = doc(db, 'Global', 'components');
       const mainRef = doc(db, 'Main pages', 'components');
 
       await Promise.all([
         setDoc(globalRef, finalGlobalData),
-        setDoc(mainRef, finalMainData),
+        setDoc(mainRef, finalMainData)
       ]);
 
-      // Update local state
       setGlobalData(finalGlobalData);
       setMainData(finalMainData);
       setActivityHistory(finalMainData.activity_history);
@@ -258,6 +288,7 @@ export const GlobalProvider = ({ children }) => {
       setProjectOverviews(finalMainData.project_overviews);
       setStatements(finalMainData.statements);
       setStoryOverviews(finalMainData.story_overviews);
+      setSectionTitles(finalMainData.section_titles);
 
       console.log('✅ Global and Main data saved successfully!');
     } catch (error) {
@@ -292,7 +323,6 @@ export const GlobalProvider = ({ children }) => {
     handleGlobalSave,
     enqueueImageUpload,
     imageUploadQueue,
-    // Main data
     activityHistory,
     setActivityHistory,
     eventOverviews,
@@ -313,6 +343,8 @@ export const GlobalProvider = ({ children }) => {
     setStatements,
     storyOverviews,
     setStoryOverviews,
+    sectionTitles,
+    setSectionTitles
   };
 
   return (
@@ -320,6 +352,10 @@ export const GlobalProvider = ({ children }) => {
       {children}
     </GlobalContext.Provider>
   );
+};
+
+GlobalProvider.propTypes = {
+  children: PropTypes.node.isRequired
 };
 
 export default GlobalContext;

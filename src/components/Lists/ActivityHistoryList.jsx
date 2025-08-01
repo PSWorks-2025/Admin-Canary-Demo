@@ -36,8 +36,32 @@ export function ActivityHistoryListItem({
   setHasChanges,
   buttonColor,
 }) {
-  const [localStartDate, setLocalStartDate] = useState(startDate || "");
-  const [localEndDate, setLocalEndDate] = useState(endDate || "");
+  const [localStartDate, setLocalStartDate] = useState(() => {
+    if (!startDate) return "";
+    try {
+      const date = startDate?.toDate ? startDate.toDate() : new Date(startDate);
+      if (date instanceof Date && !isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+      return "";
+    } catch (error) {
+      console.error(`Invalid startDate for activity ${index}:`, startDate, error);
+      return "";
+    }
+  });
+  const [localEndDate, setLocalEndDate] = useState(() => {
+    if (!endDate) return "";
+    try {
+      const date = endDate?.toDate ? endDate.toDate() : new Date(endDate);
+      if (date instanceof Date && !isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+      return "";
+    } catch (error) {
+      console.error(`Invalid endDate for activity ${index}:`, endDate, error);
+      return "";
+    }
+  });
   const [localDescription, setLocalDescription] = useState(description || "");
 
   const debounce = useCallback((func, wait) => {
@@ -51,15 +75,17 @@ export function ActivityHistoryListItem({
   const handleChange = useCallback(
     (field, value) => {
       console.log(`ActivityHistoryListItem[${index}]: Updating ${field} to ${value}`);
-      const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
-      const dateValue =
-        (field === "started_time" || field === "ended_time") && value && isValidDate(value)
-          ? value
-          : value;
+      if ((field === "started_time" || field === "ended_time") && value) {
+        const date = new Date(value);
+        if (isNaN(date.getTime())) {
+          console.error(`Invalid date for ${field}: ${value}`);
+          return;
+        }
+      }
       const debouncedUpdate = debounce((field, value) => {
         setActivityHistory((prev) =>
           prev.map((activity, i) =>
-            i === index ? { ...activity, [field]: dateValue } : activity
+            i === index ? { ...activity, [field]: value } : activity
           )
         );
         setHasChanges(true);
@@ -186,8 +212,16 @@ export function ActivityHistoryListItem({
 
 ActivityHistoryListItem.propTypes = {
   index: PropTypes.number.isRequired,
-  startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-  endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  startDate: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.instanceOf(Date),
+    PropTypes.shape({ toDate: PropTypes.func }), // Firebase Timestamp
+  ]),
+  endDate: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.instanceOf(Date),
+    PropTypes.shape({ toDate: PropTypes.func }), // Firebase Timestamp
+  ]),
   imageUrl1: PropTypes.string,
   imageUrl2: PropTypes.string,
   description: PropTypes.string,
@@ -196,3 +230,5 @@ ActivityHistoryListItem.propTypes = {
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
 };
+
+export default ActivityHistoryList;
