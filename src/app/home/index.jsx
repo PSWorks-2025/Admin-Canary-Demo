@@ -3,18 +3,9 @@ import { useState, useContext } from 'react';
 import HeroSection from '../../components/HomePageSection/HeroSection/index.jsx';
 import StatsSection from '../../components/HomePageSection/StatsSection/index.jsx';
 import EventsSection from '../../components/HomePageSection/EventSection/index.jsx';
-import {
-  ScrollStoryList,
-  ScrollStoryListItem,
-} from '../../components/Lists/ScrollStoryList.jsx';
-import { TextInput } from '../../components/Inputs/TextInput.jsx';
-import { db } from '../../service/firebaseConfig.jsx';
-import { doc, updateDoc } from 'firebase/firestore';
-import { uploadImageToStorage } from '../../service/firebaseWrite.jsx';
-import SaveFloatingButton from '../../globalComponent/SaveButton/index.jsx';
 import StorySection from '../../components/HomePageSection/StorySection/index.jsx';
+import SaveFloatingButton from '../../globalComponent/SaveButton/index.jsx';
 import GlobalContext from '../../GlobalContext.jsx';
-import { FaLessThan } from 'react-icons/fa';
 
 const HomePage = () => {
   const {
@@ -22,105 +13,42 @@ const HomePage = () => {
     secondaryBackgroundColor,
     mainData,
     setMainData,
-    heroSections, 
+    heroSections,
     setHeroSections,
-    orgStats, 
+    orgStats,
     setOrgStats,
-    eventOverviews, 
+    eventOverviews,
     setEventOverviews,
-    storyOverviews, 
+    storyOverviews,
     setStoryOverviews,
-    enqueueImageUpload
+    sectionTitles,
+    setSectionTitles,
+    enqueueImageUpload,
+    handleGlobalSave,
   } = useContext(GlobalContext);
 
-  // const [heroSections, setHeroSections] = useState(mainData.hero_sections);
-  // const [orgStats, setOrgStats] = useState(mainData.org_stats);
-  // const [eventOverviews, setEventOverviews] = useState(
-  //   mainData.event_overviews
-  // );
-  // const [storyOverviews, setStoryOverviews] = useState(
-  //   mainData.story_overviews
-  // );
-  const [storiesTitle, setStoriesTitle] = useState(
-    mainData?.hero_sections?.stories?.title || ''
-  );
-  const setHasPendingChanges = () => {
-  }
-  // const enqueueImageUpload = ({ section, key, file, path }) => {
-  //   const tempUrl = URL.createObjectURL(file);
+  // I haven't heard it in years
 
-  //   if (section === 'hero') { // todo: add path for firebase deletion
-  //     setHeroSections((prev) => ({
-  //       ...prev,
-  //       home: { ...prev.home, image: tempUrl },
-  //     }));
-  //   } else if (section === 'events') {
-  //     setEventOverviews((prev) => ({
-  //       ...prev,
-  //       [key]: {
-  //         ...prev[key],
-  //         thumbnail: { ...prev[key].thumbnail, src: tempUrl },
-  //       },
-  //     }));
-  //   } else if (section === 'stories') {
-  //     setStoryOverviews((prev) => ({
-  //       ...prev,
-  //       [key]: {
-  //         ...prev[key],
-  //         thumbnail: { ...prev[key].thumbnail, src: tempUrl },
-  //       },
-  //     }));
-  //   }
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
-  //   setImageUploadQueue((prev) => [...prev, { section, key, file, path }]);
-  //   setHasPendingChanges(true);
-  // };
-
-  const handleFirstSectionChange = (value) => {
-    setHeroSections((prev) => ({
-      ...prev,
-      events: { ...prev.events, title: value },
-    }));
+  const handleEventsSectionTitleChange = (value) => {
+    setSectionTitles((prev) => ({ ...prev, events: value }));
     setHasPendingChanges(true);
   };
 
-  // const saveUpdates = async () => {
-  //   try {
-  //     const updatedHeroSections = { ...heroSections };
+  const handleStoriesSectionTitleChange = (value) => {
+    setSectionTitles((prev) => ({ ...prev, stories: value }));
+    setHasPendingChanges(true);
+  };
 
-  //     for (const { section, key, file, path } of imageUploadQueue) {
-  //       const url = await uploadImageToStorage(path, file);
-  //       if (!url) continue;
-
-  //       if (section === 'hero') {
-  //         updatedHeroSections.home.image = url;
-  //       } else if (section === 'events') {
-  //         eventOverviews[key].thumbnail.src = url;
-  //       } else if (section === 'stories') {
-  //         storyOverviews[key].thumbnail.src = url;
-  //       }
-  //     }
-
-  //     const docRef = doc(db, 'Main pages', 'components');
-  //     const mergedData = {
-  //       org_stats: orgStats,
-  //       hero_sections: {
-  //         ...updatedHeroSections,
-  //         stories: { ...updatedHeroSections.stories, title: storiesTitle },
-  //       },
-  //       event_overviews: eventOverviews,
-  //       story_overviews: storyOverviews,
-  //     };
-  //     await updateDoc(docRef, mergedData);
-  //     setMainData(mergedData);
-  //     setHasPendingChanges(false);
-  //     setImageUploadQueue([]);
-  //   } catch (err) {
-  //     console.error('Save error:', err);
-  //   } finally {
-  //     console.log('Finished Saving');
-  //   }
-  // };
+  const saveUpdates = async () => {
+    try {
+      await handleGlobalSave();
+      setHasPendingChanges(false);
+    } catch (err) {
+      console.error('Save error:', err);
+    }
+  };
 
   return (
     <div
@@ -143,8 +71,8 @@ const HomePage = () => {
       <EventsSection
         data={eventOverviews}
         setData={setEventOverviews}
-        sectionTitle={heroSections?.events?.title}
-        setSectionTitle={handleFirstSectionChange}
+        sectionTitle={sectionTitles.events}
+        setSectionTitle={handleEventsSectionTitleChange}
         buttonColor={secondaryBackgroundColor}
         enqueueImageUpload={enqueueImageUpload}
       />
@@ -153,15 +81,19 @@ const HomePage = () => {
         <StorySection
           data={storyOverviews}
           setData={setStoryOverviews}
-          title={storiesTitle}
-          setTitle={setStoriesTitle}
+          title={sectionTitles.stories}
+          setTitle={handleStoriesSectionTitleChange}
           buttonColor={secondaryBackgroundColor}
           enqueueImageUpload={enqueueImageUpload}
         />
       </div>
-      {/* <SaveFloatingButton visible={false} onSave={saveUpdates} /> */}
+      <SaveFloatingButton visible={hasPendingChanges} onSave={saveUpdates} />
     </div>
   );
+};
+
+HomePage.propTypes = {
+  // Add prop types if needed
 };
 
 export default HomePage;

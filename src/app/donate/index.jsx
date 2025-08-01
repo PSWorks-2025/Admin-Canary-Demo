@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-import PropTypes from "prop-types";
 import useImagePreloader from "../../hooks/useImagePreloader";
 import LoadingScreen from "../../components/screens/LoadingScreen";
 import FundraisingHeader from "../../components/FundraisingHeader";
@@ -7,6 +6,7 @@ import DonorList from "../../components/DonorList";
 import CampaignDetails from "../../components/FundRaisingSection/CampaignDetail";
 import { motion } from "framer-motion";
 import GlobalContext from "../../GlobalContext";
+import SaveFloatingButton from "../../globalComponent/SaveButton/index.jsx";
 
 const FundraisingPage = () => {
   const {
@@ -14,13 +14,14 @@ const FundraisingPage = () => {
     secondaryBackgroundColor,
     fundraising,
     setFundraising,
-    enqueueImageUpload,
-    handleGlobalSave,
+    sectionTitles,
+    setSectionTitles,
+    enqueueImageUpload
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
     fundraising?.image_url || "https://via.placeholder.com/300",
-    fundraising?.qr_code_url || "https://via.placeholder.com/300",
+    fundraising?.qr_code_url || "https://via.placeholder.com/300"
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
@@ -28,12 +29,6 @@ const FundraisingPage = () => {
 
   const handleSupportClick = () => {
     alert("Cảm ơn bạn đã ủng hộ! 🎉");
-  };
-
-  const handleSave = () => {
-    console.log("FundraisingPage: Triggering handleGlobalSave");
-    handleGlobalSave();
-    setHasChanges(false); // Reset hasChanges after saving
   };
 
   if (!imagesLoaded) {
@@ -56,6 +51,8 @@ const FundraisingPage = () => {
         enqueueImageUpload={enqueueImageUpload}
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
+        sectionTitles={sectionTitles}
+        setSectionTitles={setSectionTitles}
       />
       <CampaignDetails
         campaign_title={fundraising?.campaign_title || ""}
@@ -63,32 +60,19 @@ const FundraisingPage = () => {
         setFundraising={setFundraising}
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
+        sectionTitles={sectionTitles}
+        setSectionTitles={setSectionTitles}
       />
       <DonorList
         donors={fundraising?.donors || []}
         setFundraising={setFundraising}
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
+        sectionTitles={sectionTitles}
+        setSectionTitles={setSectionTitles}
       />
     </div>
   );
-};
-
-FundraisingPage.propTypes = {
-  campaign_title: PropTypes.string,
-  campaign_description: PropTypes.string,
-  image_url: PropTypes.string,
-  fundraiser_name: PropTypes.string,
-  amount_raised: PropTypes.number,
-  goal_amount: PropTypes.number,
-  qr_code_url: PropTypes.string,
-  donors: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      name: PropTypes.string,
-      amount: PropTypes.number,
-    })
-  ),
 };
 
 export default FundraisingPage;

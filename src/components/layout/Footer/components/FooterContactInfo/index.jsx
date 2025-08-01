@@ -13,7 +13,7 @@ const FooterContactInfo = ({ contactInfoData, setContactInfoData }) => {
     <div className="w-full space-y-2 mt-4">
       <TextInput
         className="w-full text-sm md:text-base text-secondary-paragraph outline-none bg-transparent rounded px-2 py-1"
-        value={contactInfoData.hotline}
+        value={contactInfoData?.hotline}
         onChange={(e) => handleFieldChange("hotline", e.target.value)}
         placeholder="Nhập số hotline"
       />

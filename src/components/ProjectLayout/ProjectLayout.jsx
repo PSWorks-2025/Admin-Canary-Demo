@@ -6,10 +6,11 @@ import SectionWrap from "../SectionWrap";
 import { useNavigate } from "react-router";
 import { IoIosArrowForward } from "react-icons/io";
 
-function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setHasChanges, buttonColor }) {
+function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setHasChanges, buttonColor, sectionTitles, setSectionTitles }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    //Em à xuân có lộc hạ có em, làm ơn đừng lỗi nữa
     console.log("ProjectLayout projects:", projects);
   }, [projects]);
 
@@ -21,17 +22,25 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
         title: "",
         abstract: "",
         thumbnail: { src: "https://via.placeholder.com/300", alt: "", caption: "" },
-        started_time: null,
+        started_time: "",
       },
     }));
     setHasChanges(true);
   }, [setProjectOverviews, setHasChanges]);
 
+  const handleSectionTitleChange = useCallback((value) => {
+    setSectionTitles((prev) => ({ ...prev, projects: value }));
+    setHasChanges(true);
+  }, [setSectionTitles, setHasChanges]);
+
   return (
     <SectionWrap className="py-10 w-full flex flex-col items-center" borderColor={buttonColor}>
-      <h2 className="text-2xl md:text-[2.5rem] font-bold mb-4 text-primary-title text-center">
-        Dự án & hoạt động nổi bật đã thực hiện
-      </h2>
+      <TextInput
+        className="text-2xl md:text-[2.5rem] w-full font-bold mb-4 text-primary-title text-center outline-none"
+        value={sectionTitles?.projects || "Dự án & hoạt động nổi bật đã thực hiện"}
+        onChange={(e) => handleSectionTitleChange(e.target.value)}
+        placeholder="Nhập tiêu đề mục dự án"
+      />
       <div className="w-full flex justify-center mb-4">
         <button
           onClick={handleAddProject}
@@ -43,14 +52,14 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-[1152px] mb-8 px-2 sm:px-4">
         {Object.entries(projects)
           .map(([key, project]) => [key, project])
-          .sort((a, b) => a[0].slice(8) - b[0].slice(8))
+          .sort((a, b) => b[0].slice(8) - a[0].slice(8)) 
           .map(([key, project]) => (
             <ProjectListItem
               key={`project_${key}`}
               id={key}
               title={project.title}
               imageUrl={project.thumbnail?.src}
-              started_time={project.started_time || ""}
+              started_time={project.started_time}
               setProjectOverviews={setProjectOverviews}
               enqueueImageUpload={enqueueImageUpload}
               setHasChanges={setHasChanges}
@@ -68,6 +77,8 @@ ProjectLayout.propTypes = {
   enqueueImageUpload: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
+  sectionTitles: PropTypes.object.isRequired,
+  setSectionTitles: PropTypes.func.isRequired,
 };
 
 function ProjectListItem({
@@ -81,10 +92,22 @@ function ProjectListItem({
   navigate,
 }) {
   const [localTitle, setLocalTitle] = useState(title || "");
-  const [localStartedTime, setLocalStartedTime] = useState(started_time || "");
+  const [localStartedTime, setLocalStartedTime] = useState(() => {
+    if (!started_time) return "";
+    try {
+      const date = started_time?.toDate ? started_time.toDate() : new Date(started_time);
+      if (date instanceof Date && !isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+      return "";
+    } catch (error) {
+      console.error(`Invalid started_time for project ${id}:`, started_time, error);
+      return "";
+    }
+  });
 
   useEffect(() => {
-    console.log("ProjectListItem props updated:", { id, imageUrl, title, started_time, localTitle, localStartedTime });
+    console.log("ProjectListItem props:", { id, imageUrl, title, started_time, localTitle, localStartedTime });
   }, [id, imageUrl, title, started_time, localTitle, localStartedTime]);
 
   const debounce = useCallback((func, wait) => {
@@ -98,8 +121,13 @@ function ProjectListItem({
   const handleChange = useCallback(
     (field, value) => {
       console.log(`TextInput changed: ${field} = ${value}`);
-      const isValidDate = (dateStr) => !isNaN(new Date(dateStr).getTime());
-      const dateValue = field === "started_time" && value && isValidDate(value) ? value : value;
+      if (field === "started_time" && value) {
+        const date = new Date(value);
+        if (isNaN(date.getTime())) {
+          console.error(`Invalid date for ${field}: ${value}`);
+          return;
+        }
+      }
       const debouncedUpdate = debounce((field, value) => {
         setProjectOverviews((prev) => ({
           ...prev,
@@ -108,9 +136,9 @@ function ProjectListItem({
               title: "",
               abstract: "",
               thumbnail: { src: "", alt: "", caption: "" },
-              started_time: null,
+              started_time: "",
             },
-            [field === "description" ? "abstract" : field]: dateValue,
+            [field === "description" ? "abstract" : field]: value,
             thumbnail: {
               ...prev[id]?.thumbnail || { src: "", alt: "", caption: "" },
               title: field === "title" ? value : prev[id]?.title || "",
@@ -163,7 +191,7 @@ function ProjectListItem({
               title: "",
               abstract: "",
               thumbnail: { src: "", alt: "", caption: "" },
-              started_time: null,
+              started_time: "",
             },
             thumbnail: {
               ...prev[id]?.thumbnail || { src: "", alt: "", caption: "" },
@@ -234,23 +262,23 @@ function ProjectListItem({
           </svg>
         </button>
         <div className="absolute bottom-0 z-20">
-        <TextInput
-          className="px-3 pb-3 ml-2 w-full text-sm md:text-base text-white font-semibold rounded outline-none z-20"
-          value={localTitle}
-          onChange={(e) => {
-            handleChange("title", e.target.value);
-          }}
-          placeholder="Nhập tiêu đề dự án"
-        />
-        <TextInput
-          type="date"
-          className="px-3 pb-3 ml-2 text-sm md:text-base text-white font-semibold rounded outline-none z-20"
-          value={localStartedTime}
-          onChange={(e) => {
-            handleChange("started_time", e.target.value);
-          }}
-          placeholder="Chọn ngày bắt đầu"
-        />
+          <TextInput
+            className="px-3 pb-3 ml-2 w-full text-sm md:text-base text-white font-semibold rounded outline-none z-20"
+            value={localTitle}
+            onChange={(e) => {
+              handleChange("title", e.target.value);
+            }}
+            placeholder="Nhập tiêu đề dự án"
+          />
+          <TextInput
+            type="date"
+            className="px-3 pb-3 ml-2 text-sm md:text-base text-white font-semibold rounded outline-none z-20"
+            value={localStartedTime}
+            onChange={(e) => {
+              handleChange("started_time", e.target.value);
+            }}
+            placeholder="Chọn ngày bắt đầu"
+          />
         </div>
         <button
           className="absolute bottom-0 right-0 p-3 text-sm md:text-base text-white font-semibold z-20"
@@ -272,7 +300,11 @@ ProjectListItem.propTypes = {
   id: PropTypes.string.isRequired,
   title: PropTypes.string,
   imageUrl: PropTypes.string,
-  started_time: PropTypes.string,
+  started_time: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.instanceOf(Date),
+    PropTypes.shape({ toDate: PropTypes.func }),
+  ]),
   setProjectOverviews: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,

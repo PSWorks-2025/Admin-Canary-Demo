@@ -13,15 +13,16 @@ function Events() {
   const {
     primaryBackgroundColor,
     secondaryBackgroundColor,
-    tertitaryBackgroundColor,
+    tertiaryBackgroundColor,
     heroSections,
     setHeroSections,
     projectOverviews,
     setProjectOverviews,
     eventOverviews,
     setEventOverviews,
+    sectionTitles,
+    setSectionTitles,
     enqueueImageUpload,
-    handleGlobalSave,
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
@@ -50,29 +51,32 @@ function Events() {
     return <LoadingScreen />;
   }
 
-  const projectOverview =
-    Object.keys(projectOverviews).length > 0
-      ? {
-          heading: 'Tổng quan dự án',
-          title: projectOverviews[Object.keys(projectOverviews)[0]].title || '',
-          description:
-            projectOverviews[Object.keys(projectOverviews)[0]].abstract || '',
-          images: Object.values(projectOverviews).map(
-            (project) =>
-              project.thumbnail?.src ||
-              'https://blog.photobucket.com/hubfs/upload_pics_online.png'
-          ),
-          started_time:
-            projectOverviews[Object.keys(projectOverviews)[0]].started_time ||
-            '',
-        }
-      : {
-          heading: 'Tổng quan dự án',
-          title: '',
-          description: '',
-          images: [],
-          started_time: '',
-        };
+  const projectOverview = Object.keys(projectOverviews).length > 0
+    ? {
+        heading: "Tổng quan dự án",
+        title: projectOverviews[Object.keys(projectOverviews)[0]].title || "",
+        description: projectOverviews[Object.keys(projectOverviews)[0]].abstract || "",
+        images: Object.values(projectOverviews).map(
+          (project) => project.thumbnail?.src || "https://blog.photobucket.com/hubfs/upload_pics_online.png"
+        ),
+        started_time: (() => {
+          const startedTime = projectOverviews[Object.keys(projectOverviews)[0]].started_time;
+          try {
+            const date = startedTime?.toDate ? startedTime.toDate() : new Date(startedTime);
+            return date instanceof Date && !isNaN(date.getTime()) ? date.toISOString() : "";
+          } catch (error) {
+            console.error("Invalid started_time in projectOverview:", startedTime, error);
+            return "";
+          }
+        })(),
+      }
+    : {
+        heading: "Tổng quan dự án",
+        title: "",
+        description: "",
+        images: [],
+        started_time: "",
+      };
 
   const donateOverview = {
     heading: 'Hãy đồng hành cùng chúng mình',
@@ -96,41 +100,40 @@ function Events() {
   };
 
   return (
-    <div
-      style={{ backgroundColor: primaryBackgroundColor }}
-      className="w-full pt-20 pb-20"
-    >
-      <HeroSection
-        title={heroSections?.events?.title}
-        description={heroSections?.events?.description}
-        backgroundImage={heroSections?.events?.image}
-        setHeroSections={setHeroSections}
-        enqueueImageUpload={enqueueImageUpload}
-        setHasChanges={setHasChanges}
-      />
-      <div className="projects">
-        <DonateOverview
-          pageData={donateOverview}
+    <div style={{ backgroundColor: primaryBackgroundColor }} className="w-full pt-20 pb-20">
+        <HeroSection
+          title={heroSections?.events?.title}
+          description={heroSections?.events?.description}
+          backgroundImage={heroSections?.events?.image}
           setHeroSections={setHeroSections}
           enqueueImageUpload={enqueueImageUpload}
           setHasChanges={setHasChanges}
-          buttonColor={secondaryBackgroundColor}
         />
-        <ProjectLayout
-          projects={projectOverviews}
-          setProjectOverviews={setProjectOverviews}
-          enqueueImageUpload={enqueueImageUpload}
-          setHasChanges={setHasChanges}
-          buttonColor={secondaryBackgroundColor}
-        />
-        <EventsOverview
-          pageData={eventsOverview}
-          setEventOverviews={setEventOverviews}
-          enqueueImageUpload={enqueueImageUpload}
-          setHasChanges={setHasChanges}
-          buttonColor={secondaryBackgroundColor}
-          secondaryBackgroundColor={secondaryBackgroundColor}
-        />
+      <div className="projects">
+          <DonateOverview
+            pageData={donateOverview}
+            setHeroSections={setHeroSections}
+            enqueueImageUpload={enqueueImageUpload}
+            setHasChanges={setHasChanges}
+            buttonColor={secondaryBackgroundColor}
+          />
+          <ProjectLayout
+            projects={projectOverviews}
+            setProjectOverviews={setProjectOverviews}
+            enqueueImageUpload={enqueueImageUpload}
+            setHasChanges={setHasChanges}
+            buttonColor={secondaryBackgroundColor}
+            sectionTitles={sectionTitles}
+            setSectionTitles={setSectionTitles}
+          />
+          <EventsOverview
+            pageData={eventsOverview}
+            setEventOverviews={setEventOverviews}
+            enqueueImageUpload={enqueueImageUpload}
+            setHasChanges={setHasChanges}
+            buttonColor={secondaryBackgroundColor}
+            tertiaryBackgroundColor={tertiaryBackgroundColor}
+          />
       </div>
     </div>
   );

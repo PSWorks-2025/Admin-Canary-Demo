@@ -59,7 +59,7 @@ const EventsSection = ({
     }));
 
     enqueueImageUpload(
-      `main_pages.event_overviews.${key}.thumbnail.src`, // precise key path
+      `main_pages.event_overviews.${key}.thumbnail.src`,
       `main_pages/event_overviews/${key}/thumbnail.jpg`,
       file
     );
@@ -92,9 +92,12 @@ const EventsSection = ({
 
   return (
     <SectionWrap className="w-full" borderColor={buttonColor}>
-      <div className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none">
-        Các sự kiện nổi bật
-      </div>
+      <TextInput
+        className="w-full pt-20 font-bold text-[2.5rem] text-primary-title text-center outline-none"
+        value={sectionTitle}
+        onChange={(e) => setSectionTitle(e.target.value)}
+        placeholder="Nhập tiêu đề mục sự kiện"
+      />
       <div className="w-full flex justify-center mb-8">
         <button
           onClick={addEvent}
