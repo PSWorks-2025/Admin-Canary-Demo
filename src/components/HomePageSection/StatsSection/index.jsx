@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
+import ColorInput from '../../Inputs/ColorInput';
 
 const StatsSection = ({ data, setData, setHasPendingChanges }) => {
   const [primaryColorStat, setPrimaryColorStat] = useState(
@@ -102,17 +103,17 @@ const StatsSection = ({ data, setData, setHasPendingChanges }) => {
       </div>
 
       <div className="w-full h-20 flex justify-center items-center gap-4 px-2 sm:px-4">
-        <input
+        <ColorInput
           type="color"
           value={primaryColorStat}
           onChange={(e) => setPrimaryColorStat(e.target.value)}
-          className="w-8 h-8 md:w-10 md:h-10 rounded-full cursor-pointer"
+          // className="w-8 h-8 md:w-10 md:h-10 rounded-full cursor-pointer"
         />
-        <input
+        <ColorInput
           type="color"
           value={secondaryColorStat}
           onChange={(e) => setSecondaryColorStat(e.target.value)}
-          className="w-8 h-8 md:w-10 md:h-10 rounded-full cursor-pointer"
+          // className="w-8 h-8 md:w-10 md:h-10 rounded-full cursor-pointer"
         />
       </div>
 

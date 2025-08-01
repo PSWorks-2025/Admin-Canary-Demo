@@ -11,7 +11,7 @@ const MainColorPicker = () => {
     tertiaryBackgroundColor,
     setTertiaryBackgroundColor,
   } = useContext(GlobalContext);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   const toggleVisibility = () => {
     setIsVisible(!isVisible);
@@ -33,30 +33,30 @@ const MainColorPicker = () => {
           <span className="sr-only">{isVisible ? '↓' : '↑'}</span>
         </button>
         <label className="text-xs sm:text-sm flex items-center mt-4 sm:mt-0">
-          Background:
+          Primary:
           <ColorInput
             type="color"
             value={primaryBackgroundColor}
             onChange={(e) => setPrimaryBackgroundColor(e.target.value)}
-            className="ml-1 w-5 h-5 sm:w-6 sm:h-6"
+
           />
         </label>
         <label className="text-xs sm:text-sm flex items-center">
-          Header/Button:
+          Secondary:
           <ColorInput
             type="color"
             value={secondaryBackgroundColor}
             onChange={(e) => setSecondaryBackgroundColor(e.target.value)}
-            className="ml-1 w-5 h-5 sm:w-6 sm:h-6"
+
           />
         </label>
         <label className="text-xs sm:text-sm flex items-center">
-          Footer:
+          Tertitary:
           <ColorInput
             type="color"
             value={tertiaryBackgroundColor}
             onChange={(e) => setTertiaryBackgroundColor(e.target.value)}
-            className="ml-1 w-5 h-5 sm:w-6 sm:h-6"
+
           />
         </label>
       </div>
