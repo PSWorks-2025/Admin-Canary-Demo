@@ -333,6 +333,8 @@ export const GlobalProvider = ({ children }) => {
     handleGlobalSave,
     enqueueImageUpload,
     imageUploadQueue,
+
+    // Main data
     activityHistory,
     setActivityHistory,
     eventOverviews,
