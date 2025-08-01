@@ -288,7 +288,6 @@ function EventsOverview({
                       className="absolute bottom-2 right-2 z-10"
                     >
                       <button
-                        onClick={(e) => e.stopPropagation()}
                         className="group flex items-center justify-center whitespace-nowrap overflow-hidden transition-all duration-500 ease-in-out text-white text-sm font-semibold rounded-full w-9 h-9 hover:w-auto hover:px-4 hover:brightness-90"
                         style={{
                           backgroundColor: tertiaryBackgroundColor,

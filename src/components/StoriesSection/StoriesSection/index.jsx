@@ -211,13 +211,15 @@ const StoriesSection = ({
               <button
                 className="text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200 mt-2"
                 style={{ backgroundColor: buttonColor }}
-                onClick={() => navigate('/edit-content', {
-                  state: {
-                    id: story?.id,
-                    title: story?.title,
-                    thumbnail: story?.thumbnail?.src,
-                  },
-                })}
+                onClick={() => {
+                  navigate('/edit-content', {
+                    state: {
+                      id: story?.id,
+                      title: story?.title,
+                      thumbnail: story?.thumbnail?.src,
+                    },
+                  });
+                }}
               >
                 Đọc thêm
               </button>
@@ -299,13 +301,15 @@ const StoriesSection = ({
               <button
                 className="text-white font-medium px-3 py-2 rounded-full hover:opacity-50 transition-opacity duration-200 mt-2"
                 style={{ backgroundColor: buttonColor }}
-                onClick={() => navigate('/edit-content', {
-                  state: {
-                    id: story?.id,
-                    title: story?.title,
-                    thumbnailSrc: story?.thumbnail?.src,
-                  },
-                })}
+                onClick={() =>
+                  navigate('/edit-content', {
+                    state: {
+                      id: story?.id,
+                      title: story?.title,
+                      thumbnail: story?.imageUrl,
+                    },
+                  })
+                }
               >
                 Đọc thêm
               </button>

@@ -61,7 +61,7 @@ const EventsSection = ({
     enqueueImageUpload(
       `main_pages.event_overviews.${key}.thumbnail.src`, // precise key path
       `main_pages/event_overviews/${key}/thumbnail.jpg`,
-      file,
+      file
     );
   };
 
@@ -115,7 +115,10 @@ const EventsSection = ({
           }))
           .sort((a, b) => new Date(b.started_time) - new Date(a.started_time))
           .map(({ key, title, description, imageUrl }) => (
-            <div key={key} className="w-full mt-12 flex flex-col md:flex-row relative">
+            <div
+              key={key}
+              className="w-full mt-12 flex flex-col md:flex-row relative"
+            >
               <div className="w-full md:w-1/2 h-80 md:h-84 px-2 md:px-4 mb-4 md:mb-0">
                 <ImageInput
                   handleImageUpload={(e) =>
@@ -125,7 +128,10 @@ const EventsSection = ({
                   top="top-2"
                   className="w-full h-full bg-cover bg-center rounded-lg"
                   style={{
-                    backgroundImage: `url("${imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'}")`,
+                    backgroundImage: `url("${
+                      imageUrl ||
+                      'https://blog.photobucket.com/hubfs/upload_pics_online.png'
+                    }")`,
                   }}
                 />
               </div>
@@ -152,7 +158,9 @@ const EventsSection = ({
                   className="py-2 px-5 rounded-full cursor-pointer font-semibold text-secondary-title mt-2 text-sm md:text-base w-fit"
                   style={{ backgroundColor: buttonColor }}
                   onClick={() =>
-                    navigate('/edit-content', { state: { id: key, title, thumbnailSrc: imageUrl } })
+                    navigate('/edit-content', {
+                      state: { id: key, title, thumbnail: imageUrl },
+                    })
                   }
                 >
                   Tìm hiểu thêm

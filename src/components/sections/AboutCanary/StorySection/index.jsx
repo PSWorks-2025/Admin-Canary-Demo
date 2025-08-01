@@ -177,7 +177,7 @@ const StorySection = ({
                     style={{ color: buttonColor }}
                     onClick={() =>
                       navigate('/edit-content', {
-                        state: { id, title: story.title, thumbnailSrc: story.thumbnail.src },
+                        state: { id, title: story.title, thumbnail: story.thumbnail.src },
                       })
                     }
                   >

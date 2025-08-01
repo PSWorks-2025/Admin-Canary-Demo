@@ -253,11 +253,11 @@ function ProjectListItem({
         />
         </div>
         <button
-          className="absolute bottom-0 right-0 p-3 text-sm md:text-base text-white font-semibold z-15"
+          className="absolute bottom-0 right-0 p-3 text-sm md:text-base text-white font-semibold z-20"
           onClick={(e) => {
             e.stopPropagation();
             navigate('/edit-content', {
-              state: { id, title: localTitle, thumbnailSrc: imageUrl },
+              state: { id, title: localTitle, thumbnail: imageUrl },
             });
           }}
         >
