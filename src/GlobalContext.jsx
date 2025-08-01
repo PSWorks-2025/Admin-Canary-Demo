@@ -16,9 +16,12 @@ export const GlobalProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Theme colors
-  const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState('#ffffff');
-  const [secondaryBackgroundColor, setSecondaryBackgroundColor] = useState('#ffffff');
-  const [tertiaryBackgroundColor, setTertiaryBackgroundColor] = useState('#4160df');
+  const [primaryBackgroundColor, setPrimaryBackgroundColor] =
+    useState('#ffffff');
+  const [secondaryBackgroundColor, setSecondaryBackgroundColor] =
+    useState('#4160df');
+  const [tertitaryBackgroundColor, setTertiaryBackgroundColor] =
+    useState('#fff');
 
   // Footer-specific states
   const [logoUrl, setLogoUrl] = useState('');
@@ -58,9 +61,15 @@ export const GlobalProvider = ({ children }) => {
         if (res?.global) {
           setGlobalData(res.global);
           setLogoUrl(res.global.logo || '');
-          setPrimaryBackgroundColor(res.global.primaryBackgroundColor || '#ffffff');
-          setSecondaryBackgroundColor(res.global.secondaryBackgroundColor || '#ffffff');
-          setTertiaryBackgroundColor(res.global.tertiaryBackgroundColor || '#4160df');
+          setPrimaryBackgroundColor(
+            res.global.primaryBackgroundColor || '#ffffff'
+          );
+          setSecondaryBackgroundColor(
+            res.global.secondaryBackgroundColor || '#4160df'
+          );
+          setTertiaryBackgroundColor(
+            res.global.secondaryBackgroundColor || '#ffffff'
+          );
           setGroupName(res.global.group_name || '');
           setGroupDescription(res.global.description || '');
           setContactInfoData({
@@ -122,7 +131,7 @@ export const GlobalProvider = ({ children }) => {
 
     for (const key in imageUploadQueue) {
       const { path, file } = imageUploadQueue[key];
-      console.log(path)
+      console.log(path);
       try {
         const storageRef = ref(storage, path);
         await uploadBytes(storageRef, file);
@@ -173,7 +182,7 @@ export const GlobalProvider = ({ children }) => {
         ...globalData,
         primaryBackgroundColor,
         secondaryBackgroundColor,
-        tertiaryBackgroundColor,
+        tertitaryBackgroundColor,
         group_name: groupName,
         description: groupDescription,
         hotline: contactInfoData.hotline,
@@ -187,11 +196,13 @@ export const GlobalProvider = ({ children }) => {
         activity_history: activityHistory.map((activity) => ({
           ...activity,
           started_time:
-            activity.started_time && !isNaN(new Date(activity.started_time).getTime())
+            activity.started_time &&
+            !isNaN(new Date(activity.started_time).getTime())
               ? Timestamp.fromDate(new Date(activity.started_time))
               : null,
           ended_time:
-            activity.ended_time && !isNaN(new Date(activity.ended_time).getTime())
+            activity.ended_time &&
+            !isNaN(new Date(activity.ended_time).getTime())
               ? Timestamp.fromDate(new Date(activity.ended_time))
               : null,
         })),
@@ -199,38 +210,52 @@ export const GlobalProvider = ({ children }) => {
         fundraising: {
           ...fundraising,
           amount_raised: fundraising.donors
-            ? fundraising.donors.reduce((sum, donor) => sum + (donor.amount || 0), 0)
+            ? fundraising.donors.reduce(
+                (sum, donor) => sum + (donor.amount || 0),
+                0
+              )
             : 0,
         },
         hero_sections: heroSections,
         highlights: highlights,
         members: members,
         org_stats: orgStats,
-        project_overviews: Object.entries(projectOverviews).reduce((acc, [key, project]) => ({
-          ...acc,
-          [key]: {
-            ...project,
-            started_time:
-              project.started_time && !isNaN(new Date(project.started_time).getTime())
-                ? Timestamp.fromDate(new Date(project.started_time))
-                : null,
-          },
-        }), {}),
+        project_overviews: Object.entries(projectOverviews).reduce(
+          (acc, [key, project]) => ({
+            ...acc,
+            [key]: {
+              ...project,
+              started_time:
+                project.started_time &&
+                !isNaN(new Date(project.started_time).getTime())
+                  ? Timestamp.fromDate(new Date(project.started_time))
+                  : null,
+            },
+          }),
+          {}
+        ),
         statements: statements,
-        story_overviews: Object.entries(storyOverviews).reduce((acc, [key, story]) => ({
-          ...acc,
-          [key]: {
-            ...story,
-            posted_time:
-              story.posted_time && !isNaN(new Date(story.posted_time).getTime())
-              ? Timestamp.fromDate(new Date(story.posted_time))
-              : null,
-          },
-        }), {}),
+        story_overviews: Object.entries(storyOverviews).reduce(
+          (acc, [key, story]) => ({
+            ...acc,
+            [key]: {
+              ...story,
+              posted_time:
+                story.posted_time &&
+                !isNaN(new Date(story.posted_time).getTime())
+                  ? Timestamp.fromDate(new Date(story.posted_time))
+                  : null,
+            },
+          }),
+          {}
+        ),
       };
 
       // Upload images and get updated data
-      const { updatedGlobal, updatedMain } = await uploadAllImagesInQueue(baseGlobalUpdate, baseMainUpdate);
+      const { updatedGlobal, updatedMain } = await uploadAllImagesInQueue(
+        baseGlobalUpdate,
+        baseMainUpdate
+      );
 
       // Merge updates
       const finalGlobalData = createFinalData(baseGlobalUpdate, updatedGlobal);
@@ -275,7 +300,7 @@ export const GlobalProvider = ({ children }) => {
     setPrimaryBackgroundColor,
     secondaryBackgroundColor,
     setSecondaryBackgroundColor,
-    tertiaryBackgroundColor,
+    tertitaryBackgroundColor, 
     setTertiaryBackgroundColor,
     logoUrl,
     setLogoUrl,

@@ -6,7 +6,7 @@ import FooterLogoAndGroupInfo from './components/FooterLogoAndGroupInfo';
 
 const Footer = () => {
   const {
-    tertiaryBackgroundColor,
+    secondaryBackgroundColor,
     logoUrl,
     setLogoUrl,
     setLogoFile,
@@ -23,7 +23,7 @@ const Footer = () => {
   return (
     <div
       className="w-full mx-auto px-2 sm:px-4 py-8 text-secondary-paragraph"
-      style={{ backgroundColor: tertiaryBackgroundColor }}
+      style={{ backgroundColor: secondaryBackgroundColor }}
     >
       <div className="w-full flex justify-center mb-4"></div>
       <div className="w-full flex flex-col md:flex-row">

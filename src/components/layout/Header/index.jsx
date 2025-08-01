@@ -10,18 +10,13 @@ const Header = ({ page }) => {
     setLogoUrl,
     setLogoFile,
     primaryBackgroundColor,
-    secondaryBackgroundColor,
-    tertiaryBackgroundColor,
-    setPrimaryBackgroundColor,
-    setSecondaryBackgroundColor,
-    setTertiaryBackgroundColor,
     globalData,
   } = useContext(GlobalContext);
 
   return (
     <header
       className="w-full h-16 sm:h-20 fixed top-0 z-50 shadow-md shadow-gray-200 text-primary-paragraph"
-      style={{ backgroundColor: secondaryBackgroundColor }}
+      style={{ backgroundColor: primaryBackgroundColor }}
     >
       <div className="w-full h-full flex flex-row justify-center sm:px-6 lg:px-8">
         <HeaderLogo />

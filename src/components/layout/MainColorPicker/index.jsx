@@ -8,7 +8,7 @@ const MainColorPicker = () => {
     setPrimaryBackgroundColor,
     secondaryBackgroundColor,
     setSecondaryBackgroundColor,
-    tertiaryBackgroundColor,
+    tertitaryBackgroundColor,
     setTertiaryBackgroundColor,
   } = useContext(GlobalContext);
   const [isVisible, setIsVisible] = useState(true);
@@ -29,7 +29,9 @@ const MainColorPicker = () => {
           className="absolute -top-10 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-white text-black rounded-full flex items-center justify-center shadow-md hover:bg-gray-100 transition-colors duration-200 z-60"
           aria-label={isVisible ? 'Hide color picker' : 'Show color picker'}
         >
-          <i className={`fas fa-chevron-${isVisible ? 'down' : 'up'} text-base`}></i>
+          <i
+            className={`fas fa-chevron-${isVisible ? 'down' : 'up'} text-base`}
+          ></i>
           <span className="sr-only">{isVisible ? '↓' : '↑'}</span>
         </button>
         <label className="text-xs sm:text-sm flex items-center mt-4 sm:mt-0">
@@ -38,7 +40,6 @@ const MainColorPicker = () => {
             type="color"
             value={primaryBackgroundColor}
             onChange={(e) => setPrimaryBackgroundColor(e.target.value)}
-
           />
         </label>
         <label className="text-xs sm:text-sm flex items-center">
@@ -47,16 +48,14 @@ const MainColorPicker = () => {
             type="color"
             value={secondaryBackgroundColor}
             onChange={(e) => setSecondaryBackgroundColor(e.target.value)}
-
           />
         </label>
         <label className="text-xs sm:text-sm flex items-center">
           Tertitary:
           <ColorInput
             type="color"
-            value={tertiaryBackgroundColor}
+            value={tertitaryBackgroundColor}
             onChange={(e) => setTertiaryBackgroundColor(e.target.value)}
-
           />
         </label>
       </div>

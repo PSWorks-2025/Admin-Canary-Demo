@@ -22,7 +22,7 @@ function Aboutpage() {
   const {
     primaryBackgroundColor,
     secondaryBackgroundColor,
-    tertiaryBackgroundColor,
+    tertitaryBackgroundColor,
     heroSections,
     setHeroSections,
     statements,
@@ -109,7 +109,7 @@ function Aboutpage() {
           buttonColor={secondaryBackgroundColor}
         />
       </div>
-      <SectionWrap borderColor={tertiaryBackgroundColor} className="w-full">
+      <SectionWrap borderColor={secondaryBackgroundColor} className="w-full">
         <div className="w-full pt-8 font-bold text-2xl sm:text-[2.5rem]  text-primary-title text-center">
           Đội ngũ thành viên
         </div>
@@ -151,7 +151,7 @@ function Aboutpage() {
           ))}
         </ScrollMemberList>
       </SectionWrap>
-      <SectionWrap borderColor={tertiaryBackgroundColor}>
+      <SectionWrap borderColor={secondaryBackgroundColor}>
         <div className="w-full pt-8 font-bold text-2xl sm:text-[2.5rem] text-primary-title text-center">
           Lịch sử hoạt động
         </div>
@@ -193,7 +193,7 @@ function Aboutpage() {
                 setActivityHistory={setActivityHistory}
                 enqueueImageUpload={enqueueImageUpload}
                 setHasChanges={setHasChanges}
-                buttonColor={tertiaryBackgroundColor}
+                buttonColor={secondaryBackgroundColor}
               />
             </div>
           ))}

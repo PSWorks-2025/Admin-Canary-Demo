@@ -13,7 +13,7 @@ function EventsOverview({
   enqueueImageUpload,
   setHasChanges,
   buttonColor,
-  tertiaryBackgroundColor,
+  secondaryBackgroundColor,
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [localHeading, setLocalHeading] = useState(pageData.heading || '');
@@ -290,7 +290,7 @@ function EventsOverview({
                       <button
                         className="group flex items-center justify-center whitespace-nowrap overflow-hidden transition-all duration-500 ease-in-out text-white text-sm font-semibold rounded-full w-9 h-9 hover:w-auto hover:px-4 hover:brightness-90"
                         style={{
-                          backgroundColor: tertiaryBackgroundColor,
+                          backgroundColor: secondaryBackgroundColor,
                           minWidth: '2rem',
                           minHeight: '2rem',
                         }} // Ensures it's always circular when collapsed
