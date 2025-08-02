@@ -14,9 +14,10 @@ function EventsOverview({
   setHasChanges,
   buttonColor,
   tertiaryBackgroundColor,
+  sectionTitles, // Add sectionTitles prop
+  setSectionTitles, // Add setSectionTitles prop
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [localHeading, setLocalHeading] = useState(pageData.heading || '');
   const [localTitles, setLocalTitles] = useState(
     pageData.events.map((event) => event.title || '')
   );
@@ -32,12 +33,11 @@ function EventsOverview({
   const handleChange = useCallback(
     (index, field, value) => {
       console.log(`EventsOverview[${index}]: Updating ${field} to ${value}`);
-      const debouncedUpdate = debounce((index, field, value) => {
-        if (field === 'heading') {
-          console.log(
-            'EventsOverview: Heading is UI-only, not saved to Firestore'
-          );
-        } else {
+      if (field === 'heading') {
+        setSectionTitles((prev) => ({ ...prev, events_overview: value }));
+        setHasChanges(true);
+      } else {
+        const debouncedUpdate = debounce((index, field, value) => {
           const eventId = pageData.events[index]?.id;
           if (eventId) {
             setEventOverviews((prev) => ({
@@ -61,20 +61,16 @@ function EventsOverview({
             }));
             setHasChanges(true);
           }
-        }
-      }, 500);
-      if (field === 'heading') {
-        setLocalHeading(value);
-      } else {
+        }, 500);
         setLocalTitles((prev) => {
           const newTitles = [...prev];
           newTitles[index] = value;
           return newTitles;
         });
+        debouncedUpdate(index, field, value);
       }
-      debouncedUpdate(index, field, value);
     },
-    [pageData.events, setEventOverviews, setHasChanges]
+    [pageData.events, setEventOverviews, setSectionTitles, setHasChanges]
   );
 
   const handleImageUpload = useCallback(
@@ -209,7 +205,7 @@ function EventsOverview({
     <SectionWrap className="w-full" borderColor={buttonColor}>
       <TextInput
         className="w-full text-2xl sm:text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-4"
-        value={localHeading}
+        value={sectionTitles.events_overview}
         onChange={(e) => handleChange(0, 'heading', e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
@@ -293,7 +289,7 @@ function EventsOverview({
                           backgroundColor: tertiaryBackgroundColor,
                           minWidth: '2rem',
                           minHeight: '2rem',
-                        }} // Ensures it's always circular when collapsed
+                        }}
                       >
                         <span className="block group-hover:hidden mx-auto text-base leading-none">
                           <IoIosArrowForward className="inline-block w-4 h-4 md:w-5 md:h-5" />
@@ -360,6 +356,9 @@ EventsOverview.propTypes = {
   enqueueImageUpload: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
+  tertiaryBackgroundColor: PropTypes.string.isRequired,
+  sectionTitles: PropTypes.object.isRequired, // Add prop
+  setSectionTitles: PropTypes.func.isRequired, // Add prop
 };
 
 export default EventsOverview;

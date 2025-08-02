@@ -47,6 +47,8 @@ export const GlobalProvider = ({ children }) => {
     campaign_details: 'Chi Tiết Chiến Dịch',
     donor_list: 'Danh Sách Ủng Hộ',
     events: 'Sự kiện',
+    donate_overview: 'Hãy đồng hành cùng chúng mình', // Added for DonateOverview
+    events_overview: 'Tổng kết các sự kiện đã qua', // Added for EventsOverview
   });
 
   useEffect(() => {
@@ -109,6 +111,8 @@ export const GlobalProvider = ({ children }) => {
             campaign_details: res.main.section_titles?.campaign_details || 'Chi Tiết Chiến Dịch',
             donor_list: res.main.section_titles?.donor_list || 'Danh Sách Ủng Hộ',
             events: res.main.section_titles?.events || 'Sự kiện',
+            donate_overview: res.main.section_titles?.donate_overview || 'Hãy đồng hành cùng chúng mình',
+            events_overview: res.main.section_titles?.events_overview || 'Tổng kết các sự kiện đã qua',
           });
         }
       } catch (error) {
@@ -205,11 +209,11 @@ export const GlobalProvider = ({ children }) => {
             started_time:
               activity.started_time && !isNaN(new Date(activity.started_time).getTime())
                 ? Timestamp.fromDate(new Date(activity.started_time))
-                : activity.started_time || null, // Preserve existing Timestamp if valid
+                : activity.started_time || null,
             ended_time:
               activity.ended_time && !isNaN(new Date(activity.ended_time).getTime())
                 ? Timestamp.fromDate(new Date(activity.ended_time))
-                : activity.ended_time || null, // Preserve existing Timestamp if valid
+                : activity.ended_time || null,
           };
         }),
         event_overviews: Object.entries(eventOverviews).reduce((acc, [key, event]) => {
@@ -264,7 +268,7 @@ export const GlobalProvider = ({ children }) => {
             started_time:
               project.started_time && !isNaN(new Date(project.started_time).getTime())
                 ? Timestamp.fromDate(new Date(project.started_time))
-                : project.started_time || null, // Preserve existing Timestamp if valid
+                : project.started_time || null,
           };
           return acc;
         }, {}),
@@ -295,6 +299,8 @@ export const GlobalProvider = ({ children }) => {
           campaign_details: sectionTitles.campaign_details || 'Chi Tiết Chiến Dịch',
           donor_list: sectionTitles.donor_list || 'Danh Sách Ủng Hộ',
           events: sectionTitles.events || 'Sự kiện',
+          donate_overview: sectionTitles.donate_overview || 'Hãy đồng hành cùng chúng mình',
+          events_overview: sectionTitles.events_overview || 'Tổng kết các sự kiện đã qua',
         },
       };
 
@@ -308,6 +314,7 @@ export const GlobalProvider = ({ children }) => {
       console.log('Saving event_overviews:', finalMainData.event_overviews);
       console.log('Saving activity_history:', finalMainData.activity_history);
       console.log('Saving project_overviews:', finalMainData.project_overviews);
+      console.log('Saving section_titles:', finalMainData.section_titles);
       await Promise.all([
         setDoc(globalRef, finalGlobalData),
         setDoc(mainRef, finalMainData),

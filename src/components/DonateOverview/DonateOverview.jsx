@@ -11,8 +11,9 @@ function DonateOverview({
   enqueueImageUpload,
   setHasChanges,
   buttonColor,
+  sectionTitles, 
+  setSectionTitles, 
 }) {
-  const [localHeading, setLocalHeading] = useState(pageData.heading || '');
   const [localTitle1, setLocalTitle1] = useState(pageData.title1 || '');
   const [localTitle2, setLocalTitle2] = useState(pageData.title2 || '');
 
@@ -29,19 +30,23 @@ function DonateOverview({
   const handleChange = useCallback(
     (field, value) => {
       console.log(`DonateOverview: Updating ${field} to ${value}`);
-      const debouncedUpdate = debounce((field, value) => {
-        setHeroSections((prev) => ({
-          ...prev,
-          donate: { ...prev.donate, [field]: value },
-        }));
+      if (field === 'heading') {
+        setSectionTitles((prev) => ({ ...prev, donate_overview: value }));
         setHasChanges(true);
-      }, 500);
-      if (field === 'heading') setLocalHeading(value);
-      else if (field === 'title1') setLocalTitle1(value);
-      else setLocalTitle2(value);
-      debouncedUpdate(field, value);
+      } else {
+        const debouncedUpdate = debounce((field, value) => {
+          setHeroSections((prev) => ({
+            ...prev,
+            donate: { ...prev.donate, [field]: value },
+          }));
+          setHasChanges(true);
+        }, 500);
+        if (field === 'title1') setLocalTitle1(value);
+        else setLocalTitle2(value);
+        debouncedUpdate(field, value);
+      }
     },
-    [setHeroSections, setHasChanges]
+    [setHeroSections, setSectionTitles, setHasChanges]
   );
 
   const handleImageUpload = useCallback(
@@ -78,7 +83,7 @@ function DonateOverview({
     <SectionWrap className="w-full" borderColor={buttonColor}>
       <TextInput
         className="w-full text-2xl sm:text-[2.5rem] font-bold text-black outline-none bg-transparent text-center mb-4 sm:mb-6"
-        value={localHeading}
+        value={sectionTitles.donate_overview}
         onChange={(e) => handleChange('heading', e.target.value)}
         placeholder="Nhập tiêu đề phần"
       />
@@ -159,6 +164,8 @@ DonateOverview.propTypes = {
   enqueueImageUpload: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
+  sectionTitles: PropTypes.object.isRequired, 
+  setSectionTitles: PropTypes.func.isRequired, 
 };
 
 export default DonateOverview;

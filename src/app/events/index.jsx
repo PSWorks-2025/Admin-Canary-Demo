@@ -23,7 +23,6 @@ function Events() {
     sectionTitles,
     setSectionTitles,
     enqueueImageUpload,
-    handleGlobalSave,
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
@@ -48,7 +47,7 @@ function Events() {
 
   const projectOverview = Object.keys(projectOverviews).length > 0
     ? {
-        heading: "Tổng quan dự án",
+        heading: sectionTitles.projects, // Use sectionTitles.projects
         title: projectOverviews[Object.keys(projectOverviews)[0]].title || "",
         description: projectOverviews[Object.keys(projectOverviews)[0]].abstract || "",
         images: Object.values(projectOverviews).map(
@@ -66,7 +65,7 @@ function Events() {
         })(),
       }
     : {
-        heading: "Tổng quan dự án",
+        heading: sectionTitles.projects, // Use sectionTitles.projects
         title: "",
         description: "",
         images: [],
@@ -74,7 +73,7 @@ function Events() {
       };
 
   const donateOverview = {
-    heading: "Hãy đồng hành cùng chúng mình",
+    heading: sectionTitles.donate_overview, // Use sectionTitles.donate_overview
     title1: heroSections?.donate?.title1 || "Đặt mua bánh chưng",
     title2: heroSections?.donate?.title2 || "Ủng hộ hiện kim",
     images: heroSections?.donate?.images || [
@@ -84,7 +83,7 @@ function Events() {
   };
 
   const eventsOverview = {
-    heading: "Tổng kết các sự kiện đã qua",
+    heading: sectionTitles.events_overview, // Use sectionTitles.events_overview
     events: Object.entries(eventOverviews).map(([key, event]) => ({
       id: key,
       title: event.title || "",
@@ -94,39 +93,43 @@ function Events() {
 
   return (
     <div style={{ backgroundColor: primaryBackgroundColor }} className="w-full pt-20 pb-20">
-        <HeroSection
-          title={heroSections?.events?.title}
-          description={heroSections?.events?.description}
-          backgroundImage={heroSections?.events?.image}
+      <HeroSection
+        title={heroSections?.events?.title}
+        description={heroSections?.events?.description}
+        backgroundImage={heroSections?.events?.image}
+        setHeroSections={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
+        setHasChanges={setHasChanges}
+      />
+      <div className="projects">
+        <DonateOverview
+          pageData={donateOverview}
           setHeroSections={setHeroSections}
           enqueueImageUpload={enqueueImageUpload}
           setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
+          sectionTitles={sectionTitles}
+          setSectionTitles={setSectionTitles} 
         />
-      <div className="projects">
-          <DonateOverview
-            pageData={donateOverview}
-            setHeroSections={setHeroSections}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-            buttonColor={secondaryBackgroundColor}
-          />
-          <ProjectLayout
-            projects={projectOverviews}
-            setProjectOverviews={setProjectOverviews}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-            buttonColor={secondaryBackgroundColor}
-            sectionTitles={sectionTitles}
-            setSectionTitles={setSectionTitles}
-          />
-          <EventsOverview
-            pageData={eventsOverview}
-            setEventOverviews={setEventOverviews}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-            buttonColor={secondaryBackgroundColor}
-            tertiaryBackgroundColor={tertiaryBackgroundColor}
-          />
+        <ProjectLayout
+          projects={projectOverviews}
+          setProjectOverviews={setProjectOverviews}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
+          sectionTitles={sectionTitles}
+          setSectionTitles={setSectionTitles}
+        />
+        <EventsOverview
+          pageData={eventsOverview}
+          setEventOverviews={setEventOverviews}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
+          tertiaryBackgroundColor={tertiaryBackgroundColor}
+          sectionTitles={sectionTitles}
+          setSectionTitles={setSectionTitles} 
+        />
       </div>
     </div>
   );
