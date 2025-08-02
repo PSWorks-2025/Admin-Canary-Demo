@@ -111,7 +111,7 @@ function Events() {
         />
       <div className="projects">
           <DonateOverview
-            pageData={donateOverview}
+            pageData={heroSections.donate || donateOverview}
             setHeroSections={setHeroSections}
             enqueueImageUpload={enqueueImageUpload}
             setHasChanges={setHasChanges}
