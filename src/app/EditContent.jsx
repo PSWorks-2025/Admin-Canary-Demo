@@ -120,6 +120,8 @@ const EditContent = () => {
   }, [formData.gallery, formData.thumbnail, thumbnailPreview]);
 
   const handleSave = async () => {
+    console.log("hi");
+    
     const type = id.split("_")[0];
     const collectionName = type.charAt(0).toUpperCase() + type.slice(1);
 

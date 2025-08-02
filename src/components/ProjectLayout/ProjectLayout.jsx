@@ -37,7 +37,7 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
     <SectionWrap className="py-10 w-full flex flex-col items-center" borderColor={buttonColor}>
       <TextInput
         className="text-2xl md:text-[2.5rem] w-full font-bold mb-4 text-primary-title text-center outline-none"
-        value={sectionTitles?.projects || "Dự án & hoạt động nổi bật đã thực hiện"}
+        value={sectionTitles?.projects}
         onChange={(e) => handleSectionTitleChange(e.target.value)}
         placeholder="Nhập tiêu đề mục dự án"
       />
