@@ -28,7 +28,7 @@ export const GlobalProvider = ({ children }) => {
   const [contactInfoData, setContactInfoData] = useState({
     hotline: null,
     email: null,
-    address: null
+    address: null,
   });
   const [socialLinksData, setSocialLinksData] = useState({});
   const [imageUploadQueue, setImageUploadQueue] = useState({});
@@ -49,7 +49,8 @@ export const GlobalProvider = ({ children }) => {
     projects: 'Dự án & hoạt động nổi bật đã thực hiện',
     fundraising_header: 'Quỹ Gây Quỹ',
     campaign_details: 'Chi Tiết Chiến Dịch',
-    donor_list: 'Danh Sách Ủng Hộ'
+    donor_list: 'Danh Sách Ủng Hộ',
+    events: 'Sự kiện',
   });
 
   useEffect(() => {
@@ -73,20 +74,40 @@ export const GlobalProvider = ({ children }) => {
           setContactInfoData({
             hotline: res.global.hotline || null,
             email: res.global.email || null,
-            address: res.global.address || null
+            address: res.global.address || null,
           });
           setSocialLinksData(res.global.social_media || {});
         }
         if (res?.main) {
           setMainData(res.main);
-          setActivityHistory(res.main.activity_history || []);
+          setActivityHistory(
+            res.main.activity_history?.map((activity) => ({
+              ...activity,
+              started_time: activity.started_time?.toDate()
+                ? activity.started_time.toDate()
+                : activity.started_time || null,
+              ended_time: activity.ended_time?.toDate()
+                ? activity.ended_time.toDate()
+                : activity.ended_time || null,
+            }) || []
+          ));
           setEventOverviews(res.main.event_overviews || {});
           setFundraising(res.main.fundraising || {});
           setHeroSections(res.main.hero_sections || {});
           setHighlights(res.main.highlights || {});
           setMembers(res.main.members || []);
           setOrgStats(res.main.org_stats || {});
-          setProjectOverviews(res.main.project_overviews || {});
+          setProjectOverviews(
+            Object.entries(res.main.project_overviews || {}).reduce((acc, [key, project]) => {
+              acc[key] = {
+                ...project,
+                started_time: project.started_time?.toDate
+                  ? project.started_time.toDate()
+                  : project.started_time || null,
+              };
+              return acc;
+            }, {})
+          );
           setStatements(res.main.statements || {});
           setStoryOverviews(res.main.story_overviews || {});
           setSectionTitles({
@@ -96,7 +117,8 @@ export const GlobalProvider = ({ children }) => {
             projects: res.main.section_titles?.projects || 'Dự án & hoạt động nổi bật đã thực hiện',
             fundraising_header: res.main.section_titles?.fundraising_header || 'Quỹ Gây Quỹ',
             campaign_details: res.main.section_titles?.campaign_details || 'Chi Tiết Chiến Dịch',
-            donor_list: res.main.section_titles?.donor_list || 'Danh Sách Ủng Hộ'
+            donor_list: res.main.section_titles?.donor_list || 'Danh Sách Ủng Hộ',
+            events: res.main.section_titles?.events || 'Sự kiện',
           });
         }
       } catch (error) {
@@ -124,9 +146,9 @@ export const GlobalProvider = ({ children }) => {
       );
     }
 
-    setImageUploadQueue(prev => ({
+    setImageUploadQueue((prev) => ({
       ...prev,
-      [key]: { key, path, file }
+      [key]: { key, path, file },
     }));
   }, []);
 
@@ -182,19 +204,24 @@ export const GlobalProvider = ({ children }) => {
         hotline: contactInfoData.hotline,
         email: contactInfoData.email,
         address: contactInfoData.address,
-        social_media: socialLinksData
+        social_media: socialLinksData,
       };
 
       const baseMainUpdate = {
-        activity_history: activityHistory.map(activity => ({
-          ...activity,
-          started_time: activity.started_time && !isNaN(new Date(activity.started_time).getTime())
-            ? Timestamp.fromDate(new Date(activity.started_time))
-            : null,
-          ended_time: activity.ended_time && !isNaN(new Date(activity.ended_time).getTime())
-            ? Timestamp.fromDate(new Date(activity.ended_time))
-            : null
-        })),
+        activity_history: activityHistory.map((activity) => {
+          console.log('Saving activity_history:', { started_time: activity.started_time, ended_time: activity.ended_time });
+          return {
+            ...activity,
+            started_time:
+              activity.started_time && !isNaN(new Date(activity.started_time).getTime())
+                ? Timestamp.fromDate(new Date(activity.started_time))
+                : activity.started_time || null, // Preserve existing Timestamp if valid
+            ended_time:
+              activity.ended_time && !isNaN(new Date(activity.ended_time).getTime())
+                ? Timestamp.fromDate(new Date(activity.ended_time))
+                : activity.ended_time || null, // Preserve existing Timestamp if valid
+          };
+        }),
         event_overviews: Object.entries(eventOverviews).reduce((acc, [key, event]) => {
           acc[key] = {
             ...event,
@@ -203,11 +230,12 @@ export const GlobalProvider = ({ children }) => {
             thumbnail: {
               src: event.thumbnail?.src || 'https://via.placeholder.com/300',
               alt: event.thumbnail?.alt || '',
-              caption: event.thumbnail?.caption || ''
+              caption: event.thumbnail?.caption || '',
             },
-            started_time: event.started_time && !isNaN(new Date(event.started_time).getTime())
-              ? Timestamp.fromDate(new Date(event.started_time))
-              : null
+            started_time:
+              event.started_time && !isNaN(new Date(event.started_time).getTime())
+                ? Timestamp.fromDate(new Date(event.started_time))
+                : event.started_time || null,
           };
           return acc;
         }, {}),
@@ -220,17 +248,20 @@ export const GlobalProvider = ({ children }) => {
           qr_code_url: fundraising.qr_code_url || 'https://via.placeholder.com/300',
           goal_amount: Number(fundraising.goal_amount) || 0,
           amount_raised: Number(fundraising.amount_raised) || 0,
-          donors: Array.isArray(fundraising.donors) ? fundraising.donors.map(donor => ({
-            id: donor.id || `donor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            name: donor.name || '',
-            amount: Number(donor.amount) || 0
-          })) : []
+          donors: Array.isArray(fundraising.donors)
+            ? fundraising.donors.map((donor) => ({
+                id: donor.id || `donor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                name: donor.name || '',
+                amount: Number(donor.amount) || 0,
+              }))
+            : [],
         },
         hero_sections: heroSections,
         highlights: highlights,
         members: members,
         org_stats: orgStats,
         project_overviews: Object.entries(projectOverviews).reduce((acc, [key, project]) => {
+          console.log('Saving project_overviews:', { key, started_time: project.started_time });
           acc[key] = {
             ...project,
             title: project.title || '',
@@ -238,11 +269,12 @@ export const GlobalProvider = ({ children }) => {
             thumbnail: {
               src: project.thumbnail?.src || 'https://via.placeholder.com/300',
               alt: project.thumbnail?.alt || '',
-              caption: project.thumbnail?.caption || ''
+              caption: project.thumbnail?.caption || '',
             },
-            started_time: project.started_time && !isNaN(new Date(project.started_time).getTime())
-              ? Timestamp.fromDate(new Date(project.started_time))
-              : null
+            started_time:
+              project.started_time && !isNaN(new Date(project.started_time).getTime())
+                ? Timestamp.fromDate(new Date(project.started_time))
+                : project.started_time || null, // Preserve existing Timestamp if valid
           };
           return acc;
         }, {}),
@@ -255,11 +287,12 @@ export const GlobalProvider = ({ children }) => {
             thumbnail: {
               src: story.thumbnail?.src || 'https://via.placeholder.com/300',
               alt: story.thumbnail?.alt || '',
-              caption: story.thumbnail?.caption || ''
+              caption: story.thumbnail?.caption || '',
             },
-            posted_time: story.posted_time && !isNaN(new Date(story.posted_time).getTime())
-              ? Timestamp.fromDate(new Date(story.posted_time))
-              : null
+            posted_time:
+              story.posted_time && !isNaN(new Date(story.posted_time).getTime())
+                ? Timestamp.fromDate(new Date(story.posted_time))
+                : story.posted_time || null,
           };
           return acc;
         }, {}),
@@ -270,8 +303,9 @@ export const GlobalProvider = ({ children }) => {
           projects: sectionTitles.projects || 'Dự án & hoạt động nổi bật đã thực hiện',
           fundraising_header: sectionTitles.fundraising_header || 'Quỹ Gây Quỹ',
           campaign_details: sectionTitles.campaign_details || 'Chi Tiết Chiến Dịch',
-          donor_list: sectionTitles.donor_list || 'Danh Sách Ủng Hộ'
-        }
+          donor_list: sectionTitles.donor_list || 'Danh Sách Ủng Hộ',
+          events: sectionTitles.events || 'Sự kiện',
+        },
       };
 
       const { updatedGlobal, updatedMain } = await uploadAllImagesInQueue(baseGlobalUpdate, baseMainUpdate);
@@ -281,9 +315,12 @@ export const GlobalProvider = ({ children }) => {
       const globalRef = doc(db, 'Global', 'components');
       const mainRef = doc(db, 'Main pages', 'components');
 
+      console.log('Saving event_overviews:', finalMainData.event_overviews);
+      console.log('Saving activity_history:', finalMainData.activity_history);
+      console.log('Saving project_overviews:', finalMainData.project_overviews);
       await Promise.all([
         setDoc(globalRef, finalGlobalData),
-        setDoc(mainRef, finalMainData)
+        setDoc(mainRef, finalMainData),
       ]);
 
       setGlobalData(finalGlobalData);
@@ -356,7 +393,7 @@ export const GlobalProvider = ({ children }) => {
     storyOverviews,
     setStoryOverviews,
     sectionTitles,
-    setSectionTitles
+    setSectionTitles,
   };
 
   return (
@@ -367,7 +404,7 @@ export const GlobalProvider = ({ children }) => {
 };
 
 GlobalProvider.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
 };
 
 export default GlobalContext;

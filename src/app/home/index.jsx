@@ -27,8 +27,6 @@ const HomePage = () => {
     handleGlobalSave,
   } = useContext(GlobalContext);
 
-  // I haven't heard it in years
-
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const handleEventsSectionTitleChange = (value) => {
@@ -45,8 +43,9 @@ const HomePage = () => {
     try {
       await handleGlobalSave();
       setHasPendingChanges(false);
+      console.log('✅ HomePage data saved successfully!');
     } catch (err) {
-      console.error('Save error:', err);
+      console.error('❌ Save error:', err);
     }
   };
 
@@ -71,7 +70,7 @@ const HomePage = () => {
       <EventsSection
         data={eventOverviews}
         setData={setEventOverviews}
-        sectionTitle={sectionTitles.events}
+        sectionTitle={sectionTitles.events} 
         setSectionTitle={handleEventsSectionTitleChange}
         buttonColor={secondaryBackgroundColor}
         enqueueImageUpload={enqueueImageUpload}
@@ -90,10 +89,6 @@ const HomePage = () => {
       <SaveFloatingButton visible={hasPendingChanges} onSave={saveUpdates} />
     </div>
   );
-};
-
-HomePage.propTypes = {
-  // Add prop types if needed
 };
 
 export default HomePage;
