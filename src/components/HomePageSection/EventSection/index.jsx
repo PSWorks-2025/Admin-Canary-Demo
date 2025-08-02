@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router';
 import { ImageInput } from '../../Inputs/ImageInput';
 import { TextInput } from '../../Inputs/TextInput';
@@ -60,7 +61,7 @@ const EventsSection = ({
 
     enqueueImageUpload(
       `main_pages.event_overviews.${key}.thumbnail.src`,
-      `main_pages/event_overviews/${key}/thumbnail.jpg`,
+      `main_pages/event_overviews/${key}/thumbnail_${Date.now()}.jpg`, // Added timestamp for uniqueness
       file
     );
   };
@@ -193,6 +194,15 @@ const EventsSection = ({
       </div>
     </SectionWrap>
   );
+};
+
+EventsSection.propTypes = {
+  data: PropTypes.object.isRequired,
+  setData: PropTypes.func.isRequired,
+  sectionTitle: PropTypes.string,
+  setSectionTitle: PropTypes.func.isRequired,
+  enqueueImageUpload: PropTypes.func.isRequired,
+  buttonColor: PropTypes.string,
 };
 
 export default EventsSection;
