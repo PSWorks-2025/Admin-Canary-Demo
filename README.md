@@ -1,1 +1,1 @@
-# Canary-Charity-Club
+# Admin-Canary-Demo
