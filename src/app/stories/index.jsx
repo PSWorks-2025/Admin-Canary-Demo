@@ -59,8 +59,8 @@ function Story() {
   return (
     <div style={{ backgroundColor: primaryBackgroundColor }}>
       <HeroSection
-        heroTitle={heroSections?.stories?.title || ""}
-        heroDescription={heroSections?.stories?.description || ""}
+        title={heroSections?.stories?.title || ""}
+        description={heroSections?.stories?.description || ""}
         heroImage={heroSections?.stories?.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}
         setHeroSections={setHeroSections}
         enqueueImageUpload={enqueueImageUpload}

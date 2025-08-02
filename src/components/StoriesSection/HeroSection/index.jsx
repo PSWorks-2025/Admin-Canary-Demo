@@ -7,7 +7,7 @@ import { TextInput } from "../../Inputs/TextInput";
 const HeroSection = ({
   title,
   description,
-  backgroundImage,
+  heroImage,
   setHeroSections,
   enqueueImageUpload,
   setHasChanges,
@@ -67,7 +67,7 @@ const HeroSection = ({
       state: {
         id: "story_hero",
         title: localTitle,
-        thumbnail: backgroundImage
+        thumbnail: heroImage
       },
     });
   };
@@ -81,7 +81,7 @@ const HeroSection = ({
         right="right-2"
         className="w-full bg-cover bg-bottom flex justify-center items-end bg-blend-multiply hero_section"
         style={{
-          backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${backgroundImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png"})`,
+          backgroundImage: `linear-gradient(to bottom, transparent 70%, rgba(0, 0, 0, 0.6)), url(${heroImage || "https://blog.photobucket.com/hubfs/upload_pics_online.png"})`,
           height: "80vh sm:90vh md:calc(100vh - 5rem)",
         }}
       >
@@ -116,7 +116,7 @@ const HeroSection = ({
 HeroSection.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
-  backgroundImage: PropTypes.string,
+  heroImage: PropTypes.string,
   setHeroSections: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
