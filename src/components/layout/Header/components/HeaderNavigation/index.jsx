@@ -10,30 +10,30 @@ const HeaderNavigation = ({ page, globalData }) => {
           url: nav.url,
         }))
       : [
-          { 
-            id: 'page_0', 
-            name: 'Trang chủ', 
-            url: '/Canary-Charity-Club/' 
+          {
+            id: 'page_0',
+            name: 'Trang chủ',
+            url: '/Admin-Canary-Demo/',
           },
           {
             id: 'page_1',
             name: 'Về Canary',
-            url: '/Canary-Charity-Club/#/about',
+            url: '/Admin-Canary-Demo/#/about',
           },
           {
             id: 'page_2',
             name: 'Sự kiện',
-            url: '/Canary-Charity-Club/#/events',
+            url: '/Admin-Canary-Demo/#/events',
           },
           {
             id: 'page_3',
             name: 'Câu chuyện',
-            url: '/Canary-Charity-Club/#/stories',
+            url: '/Admin-Canary-Demo/#/stories',
           },
           {
             id: 'page_4',
             name: 'Ủng hộ',
-            url: '/Canary-Charity-Club/#/donate',
+            url: '/Admin-Canary-Demo/#/donate',
           },
         ]
   );
@@ -54,7 +54,7 @@ const HeaderNavigation = ({ page, globalData }) => {
                 href={nav.url}
                 className={
                   page === nav.url.split('#/')[1] ||
-                  (page === 'home' && nav.url === '/Canary-Charity-Club/')
+                  (page === 'home' && nav.url === '/Admin-Canary-Demo/')
                     ? 'text-secondary font-bold hover:text-secondary-hover text-sm lg:text-base'
                     : 'hover:text-primary-hover text-sm lg:text-base'
                 }
@@ -85,7 +85,7 @@ const HeaderNavigation = ({ page, globalData }) => {
                     onClick={() => setIsDropdownOpen(false)}
                     className={
                       page === nav.url.split('#/')[1] ||
-                      (page === 'home' && nav.url === '/Canary-Charity-Club/')
+                      (page === 'home' && nav.url === '/Admin-Canary-Demo/')
                         ? 'text-secondary font-bold hover:text-secondary-hover text-sm'
                         : 'hover:text-primary-hover text-sm'
                     }
