@@ -318,6 +318,7 @@ export const GlobalProvider = ({ children }) => {
       console.log('Saving event_overviews:', finalMainData.event_overviews);
       console.log('Saving activity_history:', finalMainData.activity_history);
       console.log('Saving project_overviews:', finalMainData.project_overviews);
+
       await Promise.all([
         setDoc(globalRef, finalGlobalData),
         setDoc(mainRef, finalMainData),

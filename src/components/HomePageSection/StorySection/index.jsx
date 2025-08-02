@@ -153,7 +153,7 @@ const StorySection = ({
                       top="top-2"
                       left="left-2"
                       className="w-full h-60 md:h-60 bg-no-repeat md:bg-cover md:bg-center rounded-lg"
-                      style={{ backgroundImage: `url("${story.thumbnail.src}")` }}
+                      style={{ backgroundImage: `url("${story?.thumbnail?.src}")` }}
                     />
                   </div>
                   <TextInput
