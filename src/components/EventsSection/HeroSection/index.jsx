@@ -9,6 +9,7 @@ const HeroSection = ({
   backgroundImage,
   setHeroSections,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
 }) => {
   const [localTitle, setLocalTitle] = useState(title || '');
@@ -44,12 +45,13 @@ const HeroSection = ({
       if (file instanceof File || file instanceof Blob) {
         console.log(`HeroSection: Enqueuing image for image`);
         const blobUrl = URL.createObjectURL(file);
-        const storagePath = `hero/events/${file.name}`;
-        enqueueImageUpload(
-          `main_pages.hero_sections.events.image`,
-          storagePath,
-          file
-        );
+        const storagePath = `main_pages/hero_sections/events/image.jpg`;
+        enqueueImageUpload({
+          key: `main_pages.hero_sections.events.image`,
+          path: storagePath,
+          file,
+          oldUrl: backgroundImage,
+        });
         setHeroSections((prev) => ({
           ...prev,
           events: { ...prev.events, image: blobUrl },
@@ -59,7 +61,7 @@ const HeroSection = ({
         console.error(`HeroSection: Invalid file for image:`, file);
       }
     },
-    [enqueueImageUpload, setHeroSections, setHasChanges]
+    [enqueueImageUpload, enqueueImageDelete, setHeroSections, setHasChanges, backgroundImage]
   );
 
   return (
@@ -74,7 +76,7 @@ const HeroSection = ({
           }")`,
         }}
       >
-        <div className="w-full sm:w-3/4 md:w-1/2 absolute left-4 sm:left-10 ">
+        <div className="w-full sm:w-3/4 md:w-1/2 absolute left-4 sm:left-10">
           <TextInput
             className="ml-8 sm:mb-2 md:mb-4 p-2 w-full text-2xl sm:text-3xl md:text-[2.5rem] font-semibold text-white outline-none bg-transparent"
             style={{ textShadow: 'rgba(0, 0, 0, 0.6) 0px 1px 3px' }}
@@ -103,6 +105,7 @@ HeroSection.propTypes = {
   backgroundImage: PropTypes.string,
   setHeroSections: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
 };
 

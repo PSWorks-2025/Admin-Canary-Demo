@@ -7,6 +7,7 @@ const VisionSection = ({
   vision,
   setStatements,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
 }) => {
   const [localTitle, setLocalTitle] = useState(vision?.title || '');
@@ -42,12 +43,13 @@ const VisionSection = ({
     (field, file) => {
       if (file instanceof File || file instanceof Blob) {
         const blobUrl = URL.createObjectURL(file);
-        const storagePath = `about/statements/vision/${file.name}`;
-        enqueueImageUpload(
-          `main_pages.statements.vision.${field}`,
-          storagePath,
-          file
-        );
+        const storagePath = `main_pages/statements/vision/image.jpg`;
+        enqueueImageUpload({
+          key: `main_pages.statements.vision.${field}`,
+          path: storagePath,
+          file,
+          oldUrl: vision?.imageUrl,
+        });
         setStatements((prev) => ({
           ...prev,
           vision: { ...prev.vision, [field]: blobUrl },
@@ -55,7 +57,7 @@ const VisionSection = ({
         setHasChanges(true);
       }
     },
-    [enqueueImageUpload, setStatements, setHasChanges]
+    [enqueueImageUpload, setStatements, setHasChanges, vision?.imageUrl]
   );
 
   return (
@@ -106,6 +108,7 @@ VisionSection.propTypes = {
   }),
   setStatements: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
 };
 

@@ -10,6 +10,7 @@ const HeroSection = ({
   description,
   setHeroSections,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
 }) => {
   const [localTitle, setLocalTitle] = useState(title || "");
@@ -43,8 +44,13 @@ const HeroSection = ({
     (field, file) => {
       if (file instanceof File || file instanceof Blob) {
         const blobUrl = URL.createObjectURL(file);
-        const storagePath = `hero_sections/about/${file.name}`;
-        enqueueImageUpload(`main_pages.hero_sections.about.${field}`, storagePath, file);
+        const storagePath = `main_pages/hero_sections/about/coverImage.jpg`;
+        enqueueImageUpload({
+          key: `main_pages.hero_sections.about.${field}`,
+          path: storagePath,
+          file,
+          oldUrl: coverImage,
+        });
         setHeroSections((prev) => ({
           ...prev,
           about: { ...prev.about, [field]: blobUrl },
@@ -52,7 +58,7 @@ const HeroSection = ({
         setHasChanges(true);
       }
     },
-    [enqueueImageUpload, setHeroSections, setHasChanges]
+    [enqueueImageUpload, setHeroSections, setHasChanges, coverImage]
   );
 
   return (
@@ -95,6 +101,7 @@ HeroSection.propTypes = {
   description: PropTypes.string,
   setHeroSections: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
 };
 

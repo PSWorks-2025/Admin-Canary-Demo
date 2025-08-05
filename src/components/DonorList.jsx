@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { TextInput } from './Inputs/TextInput';
-import SectionWrap from './SectionWrap';
+import { TextInput } from '../../Inputs/TextInput';
+import SectionWrap from '../../SectionWrap';
 
 const DonorList = ({ donors, setFundraising, setHasChanges, buttonColor, sectionTitles, setSectionTitles }) => {
   const [localDonors, setLocalDonors] = useState(donors || []);

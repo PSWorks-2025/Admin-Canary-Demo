@@ -9,6 +9,7 @@ function DonateOverview({
   pageData,
   setHeroSections,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
   buttonColor,
 }) {
@@ -49,12 +50,13 @@ function DonateOverview({
       if (file instanceof File || file instanceof Blob) {
         console.log(`DonateOverview: Enqueuing image for images[${index}]`);
         const blobUrl = URL.createObjectURL(file);
-        const storagePath = `hero/donate/${file.name}`;
-        enqueueImageUpload(
-          `main_pages.hero_sections.donate.images.${index}`,
-          storagePath,
-          file
-        );
+        const storagePath = `main_pages/hero_sections/donate/image${index}.jpg`;
+        enqueueImageUpload({
+          key: `main_pages.hero_sections.donate.images.${index}`,
+          path: storagePath,
+          file,
+          oldUrl: pageData.images[index],
+        });
         setHeroSections((prev) => {
           const newImages = [...(prev.donate?.images || ['', ''])];
           newImages[index] = blobUrl;
@@ -71,7 +73,7 @@ function DonateOverview({
         );
       }
     },
-    [enqueueImageUpload, setHeroSections, setHasChanges]
+    [enqueueImageUpload, enqueueImageDelete, setHeroSections, setHasChanges, pageData.images]
   );
 
   return (
@@ -157,6 +159,7 @@ DonateOverview.propTypes = {
   }).isRequired,
   setHeroSections: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
 };

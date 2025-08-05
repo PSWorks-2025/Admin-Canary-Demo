@@ -11,9 +11,10 @@ function EventsOverview({
   pageData,
   setEventOverviews,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
   buttonColor,
-  secondaryBackgroundColor,
+  tertiaryBackgroundColor,
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [localHeading, setLocalHeading] = useState(pageData.heading || '');
@@ -95,7 +96,7 @@ function EventsOverview({
         console.error(`EventsOverview[${id}]: Selected file is not an image`);
         return;
       }
-      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB is enough please let crystal skies still be a masterpiece
       if (file.size > MAX_FILE_SIZE) {
         console.error(`EventsOverview[${id}]: File size exceeds 5MB`);
         return;
@@ -103,12 +104,13 @@ function EventsOverview({
 
       const blobUrl = URL.createObjectURL(file);
       console.log(`EventsOverview[${id}]: Blob URL created:`, blobUrl);
-      const storagePath = `events/${id}/${file.name}`;
-      enqueueImageUpload(
-        `main_pages.event_overviews.${id}.thumbnail.src`,
-        storagePath,
-        file
-      );
+      const storagePath = `main_pages/event_overviews/${id}/thumbnail.jpg`;
+      enqueueImageUpload({
+        key: `main_pages.event_overviews.${id}.thumbnail.src`,
+        path: storagePath,
+        file,
+        oldUrl: pageData.events.find((event) => event.id === id)?.imageUrl,
+      });
       setEventOverviews((prev) => {
         console.log(
           `EventsOverview[${id}]: Updating eventOverviews with new image:`,
@@ -132,7 +134,7 @@ function EventsOverview({
       });
       setHasChanges(true);
     },
-    [enqueueImageUpload, setEventOverviews, setHasChanges]
+    [enqueueImageUpload, enqueueImageDelete, setEventOverviews, setHasChanges, pageData.events]
   );
 
   const handleAddEvent = useCallback(() => {
@@ -157,6 +159,10 @@ function EventsOverview({
   const handleDeleteEvent = useCallback(
     (id, index) => {
       console.log(`EventsOverview[${id}]: Deleting event`);
+      const event = pageData.events.find((e) => e.id === id);
+      if (event?.imageUrl && !event.imageUrl.startsWith('https://via.placeholder.com')) {
+        enqueueImageDelete(`main_pages/event_overviews/${id}/thumbnail.jpg`);
+      }
       setEventOverviews((prev) => {
         const newEvents = { ...prev };
         delete newEvents[id];
@@ -168,7 +174,7 @@ function EventsOverview({
       );
       setHasChanges(true);
     },
-    [setEventOverviews, setHasChanges]
+    [setEventOverviews, enqueueImageDelete, setHasChanges, pageData.events]
   );
 
   const nextImage = useCallback(() => {
@@ -279,8 +285,7 @@ function EventsOverview({
                         id: event.id,
                         title:
                           localTitles[index + currentIndex] ||
-                          event.title ||
-                          '',
+                          event.title || '',
                         thumbnail:
                           event.imageUrl || 'https://via.placeholder.com/300',
                       }}
@@ -290,10 +295,10 @@ function EventsOverview({
                       <button
                         className="group flex items-center justify-center whitespace-nowrap overflow-hidden transition-all duration-500 ease-in-out text-white text-sm font-semibold rounded-full w-9 h-9 hover:w-auto hover:px-4 hover:brightness-90"
                         style={{
-                          backgroundColor: secondaryBackgroundColor,
+                          backgroundColor: tertiaryBackgroundColor,
                           minWidth: '2rem',
                           minHeight: '2rem',
-                        }} // Ensures it's always circular when collapsed
+                        }}
                       >
                         <span className="block group-hover:hidden mx-auto text-base leading-none">
                           <IoIosArrowForward className="inline-block w-4 h-4 md:w-5 md:h-5" />
@@ -358,8 +363,10 @@ EventsOverview.propTypes = {
   }).isRequired,
   setEventOverviews: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
+  tertiaryBackgroundColor: PropTypes.string.isRequired,
 };
 
 export default EventsOverview;

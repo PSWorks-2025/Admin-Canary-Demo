@@ -34,6 +34,7 @@ function Aboutpage() {
     activityHistory,
     setActivityHistory,
     enqueueImageUpload,
+    enqueueImageDelete,
     storyOverviews,
     setStoryOverviews,
     sectionTitles,
@@ -41,6 +42,7 @@ function Aboutpage() {
     projectOverviews,
     setProjectOverviews,
     handleGlobalSave,
+    isSaving,
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
@@ -82,6 +84,7 @@ function Aboutpage() {
   };
 
   const saveUpdates = async () => {
+    if (isSaving) return;
     try {
       await handleGlobalSave();
       setHasChanges(false);
@@ -99,42 +102,46 @@ function Aboutpage() {
       className="w-full mx-auto overflow-x-hidden pt-20"
       style={{ backgroundColor: primaryBackgroundColor }}
     >
-        <HeroSection
-          coverImage={heroSections?.about?.coverImage}
-          backgroundColor={primaryBackgroundColor}
-          title={heroSections?.about?.title}
-          description={heroSections?.about?.description}
-          setHeroSections={setHeroSections}
+      <HeroSection
+        coverImage={heroSections?.about?.coverImage}
+        backgroundColor={primaryBackgroundColor}
+        title={heroSections?.about?.title}
+        description={heroSections?.about?.description}
+        setHeroSections={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
+        enqueueImageDelete={enqueueImageDelete}
+        setHasChanges={setHasChanges}
+      />
+      <SectionWrap className="w-full" borderColor={secondaryBackgroundColor}>
+        <MissionSection
+          mission={
+            statements?.mission || { title: '', description: '', imageUrl: '' }
+          }
+          setStatements={setStatements}
           enqueueImageUpload={enqueueImageUpload}
+          enqueueImageDelete={enqueueImageDelete}
           setHasChanges={setHasChanges}
         />
-      <SectionWrap className="w-full" borderColor={secondaryBackgroundColor}>
-          <MissionSection
-            mission={
-              statements?.mission || { title: '', description: '', imageUrl: '' }
-            }
-            setStatements={setStatements}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-          />
-          <VisionSection
-            vision={
-              statements?.vision || { title: '', description: '', imageUrl: '' }
-            }
-            setStatements={setStatements}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-          />
+        <VisionSection
+          vision={
+            statements?.vision || { title: '', description: '', imageUrl: '' }
+          }
+          setStatements={setStatements}
+          enqueueImageUpload={enqueueImageUpload}
+          enqueueImageDelete={enqueueImageDelete}
+          setHasChanges={setHasChanges}
+        />
       </SectionWrap>
       <div className="w-full">
-          <StorySection
-            data={storyOverviews}
-            setData={setStoryOverviews}
-            title={sectionTitles.stories}
-            setTitle={handleStoriesSectionTitleChange}
-            enqueueImageUpload={enqueueImageUpload}
-            buttonColor={secondaryBackgroundColor}
-          />
+        <StorySection
+          data={storyOverviews}
+          setData={setStoryOverviews}
+          title={sectionTitles.stories}
+          setTitle={handleStoriesSectionTitleChange}
+          enqueueImageUpload={enqueueImageUpload}
+          enqueueImageDelete={enqueueImageDelete}
+          buttonColor={secondaryBackgroundColor}
+        />
       </div>
       <SectionWrap borderColor={secondaryBackgroundColor} className="w-full">
         <TextInput
@@ -168,15 +175,16 @@ function Aboutpage() {
               key={`member_${index}`}
               className="relative w-full max-w-[12rem] md:max-w-[16rem] mx-auto"
             >
-                <ScrollMemberListItem
-                  index={index}
-                  imageUrl={member.image}
-                  name={member.name}
-                  role={member.role}
-                  setMembers={setMembers}
-                  enqueueImageUpload={enqueueImageUpload}
-                  setHasChanges={setHasChanges}
-                />
+              <ScrollMemberListItem
+                index={index}
+                imageUrl={member.image}
+                name={member.name}
+                role={member.role}
+                setMembers={setMembers}
+                enqueueImageUpload={enqueueImageUpload}
+                enqueueImageDelete={enqueueImageDelete}
+                setHasChanges={setHasChanges}
+              />
             </div>
           ))}
         </ScrollMemberList>
@@ -225,6 +233,7 @@ function Aboutpage() {
                 description={activity.text}
                 setActivityHistory={setActivityHistory}
                 enqueueImageUpload={enqueueImageUpload}
+                enqueueImageDelete={enqueueImageDelete}
                 setHasChanges={setHasChanges}
                 buttonColor={secondaryBackgroundColor}
               />
@@ -232,15 +241,17 @@ function Aboutpage() {
           ))}
         </ActivityHistoryList>
       </SectionWrap>
-        <ProjectLayout
-          projects={projectOverviews}
-          setProjectOverviews={setProjectOverviews}
-          enqueueImageUpload={enqueueImageUpload}
-          setHasChanges={setHasChanges}
-          buttonColor={secondaryBackgroundColor}
-          sectionTitles={sectionTitles}
-          setSectionTitles={setSectionTitles}
-        />
+      <ProjectLayout
+        projects={projectOverviews}
+        setProjectOverviews={setProjectOverviews}
+        enqueueImageUpload={enqueueImageUpload}
+        enqueueImageDelete={enqueueImageDelete}
+        setHasChanges={setHasChanges}
+        buttonColor={secondaryBackgroundColor}
+        sectionTitles={sectionTitles}
+        setSectionTitles={setSectionTitles}
+      />
+      <SaveFloatingButton visible={hasChanges} onSave={saveUpdates} disabled={isSaving} />
       <div className="mt-8 md:mt-16 pb-20" />
     </div>
   );

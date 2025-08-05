@@ -6,11 +6,10 @@ import SectionWrap from "../SectionWrap";
 import { useNavigate } from "react-router";
 import { IoIosArrowForward } from "react-icons/io";
 
-function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setHasChanges, buttonColor, sectionTitles, setSectionTitles }) {
+function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, enqueueImageDelete, setHasChanges, buttonColor, sectionTitles, setSectionTitles }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    //Em à xuân có lộc hạ có em, làm ơn đừng lỗi nữa
     console.log("ProjectLayout projects:", projects);
   }, [projects]);
 
@@ -62,6 +61,7 @@ function ProjectLayout({ projects, setProjectOverviews, enqueueImageUpload, setH
               started_time={project.started_time}
               setProjectOverviews={setProjectOverviews}
               enqueueImageUpload={enqueueImageUpload}
+              enqueueImageDelete={enqueueImageDelete}
               setHasChanges={setHasChanges}
               navigate={navigate}
             />
@@ -75,6 +75,7 @@ ProjectLayout.propTypes = {
   projects: PropTypes.object.isRequired,
   setProjectOverviews: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
   sectionTitles: PropTypes.object.isRequired,
@@ -88,6 +89,7 @@ function ProjectListItem({
   started_time,
   setProjectOverviews,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
   navigate,
 }) {
@@ -177,10 +179,15 @@ function ProjectListItem({
 
       const blobUrl = URL.createObjectURL(file);
       console.log("Blob URL created:", blobUrl);
-      const storagePath = `projects/${id}/${file.name}`;
+      const storagePath = `main_pages/project_overviews/${id}/thumbnail.jpg`;
 
       console.log("Enqueuing image upload:", { path: `main_pages.project_overviews.${id}.thumbnail.src`, storagePath });
-      enqueueImageUpload(`main_pages.project_overviews.${id}.thumbnail.src`, storagePath, file);
+      enqueueImageUpload({
+        key: `main_pages.project_overviews.${id}.thumbnail.src`,
+        path: storagePath,
+        file,
+        oldUrl: imageUrl,
+      });
 
       setProjectOverviews((prev) => {
         console.log("Updating projectOverviews with new image:", blobUrl);
@@ -203,19 +210,13 @@ function ProjectListItem({
       });
       setHasChanges(true);
     },
-    [id, enqueueImageUpload, setProjectOverviews, setHasChanges]
+    [id, enqueueImageUpload, setProjectOverviews, setHasChanges, imageUrl]
   );
 
-  useEffect(() => {
-    return () => {
-      if (imageUrl && imageUrl.startsWith("blob:")) {
-        console.log("Revoking blob URL:", imageUrl);
-        URL.revokeObjectURL(imageUrl);
-      }
-    };
-  }, [imageUrl]);
-
   const handleDelete = useCallback(() => {
+    if (imageUrl && !imageUrl.startsWith('https://via.placeholder.com')) {
+      enqueueImageDelete(`main_pages/project_overviews/${id}/thumbnail.jpg`);
+    }
     setProjectOverviews((prev) => {
       const newProjects = Object.keys(prev)
         .filter((key) => key !== id)
@@ -223,7 +224,7 @@ function ProjectListItem({
       return newProjects;
     });
     setHasChanges(true);
-  }, [id, setProjectOverviews, setHasChanges]);
+  }, [id, setProjectOverviews, enqueueImageDelete, setHasChanges, imageUrl]);
 
   return (
     <div className="relative h-80 rounded-lg overflow-hidden shadow-md">
@@ -307,6 +308,7 @@ ProjectListItem.propTypes = {
   ]),
   setProjectOverviews: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   navigate: PropTypes.func.isRequired,
 };

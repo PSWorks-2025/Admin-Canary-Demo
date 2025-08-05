@@ -33,6 +33,7 @@ export function ActivityHistoryListItem({
   description,
   setActivityHistory,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
   buttonColor,
 }) {
@@ -103,8 +104,13 @@ export function ActivityHistoryListItem({
       if (file instanceof File || file instanceof Blob) {
         console.log(`ActivityHistoryListItem[${index}]: Enqueuing image for ${field}`);
         const blobUrl = URL.createObjectURL(file);
-        const storagePath = `about/activity_history/${field}/${file.name}`;
-        enqueueImageUpload(`main_pages.activity_history.${index}.${field}`, storagePath, file);
+        const storagePath = `main_pages/activity_history/${index}/${field}.jpg`;
+        enqueueImageUpload({
+          key: `main_pages.activity_history.${index}.${field}`,
+          path: storagePath,
+          file,
+          oldUrl: field === 'image1' ? imageUrl1 : imageUrl2,
+        });
         setActivityHistory((prev) =>
           prev.map((activity, i) =>
             i === index ? { ...activity, [field]: blobUrl } : activity
@@ -115,14 +121,20 @@ export function ActivityHistoryListItem({
         console.error(`ActivityHistoryListItem[${index}]: Invalid file for ${field}:`, file);
       }
     },
-    [index, enqueueImageUpload, setActivityHistory, setHasChanges]
+    [index, enqueueImageUpload, setActivityHistory, setHasChanges, imageUrl1, imageUrl2]
   );
 
   const handleDelete = useCallback(() => {
     console.log(`ActivityHistoryListItem[${index}]: Deleting activity`);
+    if (imageUrl1 && !imageUrl1.startsWith('https://via.placeholder.com')) {
+      enqueueImageDelete(`main_pages/activity_history/${index}/image1.jpg`);
+    }
+    if (imageUrl2 && !imageUrl2.startsWith('https://via.placeholder.com')) {
+      enqueueImageDelete(`main_pages/activity_history/${index}/image2.jpg`);
+    }
     setActivityHistory((prev) => prev.filter((_, i) => i !== index));
     setHasChanges(true);
-  }, [index, setActivityHistory, setHasChanges]);
+  }, [index, setActivityHistory, enqueueImageDelete, setHasChanges, imageUrl1, imageUrl2]);
 
   return (
     <div className="relative">
@@ -227,8 +239,7 @@ ActivityHistoryListItem.propTypes = {
   description: PropTypes.string,
   setActivityHistory: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
 };
-
-export default ActivityHistoryList;

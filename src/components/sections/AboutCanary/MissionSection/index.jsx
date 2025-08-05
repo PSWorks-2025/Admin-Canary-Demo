@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { ImageInput } from "../../../Inputs/ImageInput";
 import { TextInput } from "../../../Inputs/TextInput";
 
-const MissionSection = ({ mission, setStatements, enqueueImageUpload, setHasChanges }) => {
+const MissionSection = ({ mission, setStatements, enqueueImageUpload, enqueueImageDelete, setHasChanges }) => {
   const [localTitle, setLocalTitle] = useState(mission?.title || "");
   const [localDescription, setLocalDescription] = useState(mission?.description || "");
 
@@ -35,8 +35,13 @@ const MissionSection = ({ mission, setStatements, enqueueImageUpload, setHasChan
     (field, file) => {
       if (file instanceof File || file instanceof Blob) {
         const blobUrl = URL.createObjectURL(file);
-        const storagePath = `about/statements/mission/${file.name}`;
-        enqueueImageUpload(`main_pages.statements.mission.${field}`, storagePath, file);
+        const storagePath = `main_pages/statements/mission/image.jpg`;
+        enqueueImageUpload({
+          key: `main_pages.statements.mission.${field}`,
+          path: storagePath,
+          file,
+          oldUrl: mission?.imageUrl,
+        });
         setStatements((prev) => ({
           ...prev,
           mission: { ...prev.mission, [field]: blobUrl },
@@ -44,7 +49,7 @@ const MissionSection = ({ mission, setStatements, enqueueImageUpload, setHasChan
         setHasChanges(true);
       }
     },
-    [enqueueImageUpload, setStatements, setHasChanges]
+    [enqueueImageUpload, setStatements, setHasChanges, mission?.imageUrl]
   );
 
   return (
@@ -88,6 +93,7 @@ MissionSection.propTypes = {
   }),
   setStatements: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
 };
 

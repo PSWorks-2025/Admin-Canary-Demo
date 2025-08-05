@@ -11,6 +11,7 @@ const EventsSection = ({
   sectionTitle,
   setSectionTitle,
   enqueueImageUpload,
+  enqueueImageDelete,
   buttonColor,
 }) => {
   const navigate = useNavigate();
@@ -30,23 +31,24 @@ const EventsSection = ({
   }, [data]);
 
   const handleEventChange = (key, field, value) => {
-    setData((prev) => {
-      const updated = { ...prev };
-      updated[key] = {
-        ...updated[key],
+    setData((prev) => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
         [field === 'description' ? 'abstract' : field]: value,
         thumbnail: {
-          ...updated[key].thumbnail,
-          title: field === 'title' ? value : updated[key].title,
+          ...prev[key].thumbnail,
+          title: field === 'title' ? value : prev[key].title,
         },
-      };
-      return updated;
-    });
+      },
+    }));
   };
 
   const handleEventImageUpload = (key, file) => {
     if (!(file instanceof File)) return;
     const tempUrl = URL.createObjectURL(file);
+    const path = `main_pages/event_overviews/${key}/thumbnail.jpg`;
+    const oldUrl = data[key]?.thumbnail?.src;
 
     setData((prev) => ({
       ...prev,
@@ -59,11 +61,12 @@ const EventsSection = ({
       },
     }));
 
-    enqueueImageUpload(
-      `main_pages.event_overviews.${key}.thumbnail.src`,
-      `main_pages/event_overviews/${key}/thumbnail_${Date.now()}.jpg`, // Added timestamp for uniqueness
-      file
-    );
+    enqueueImageUpload({
+      key: `main_pages.event_overviews.${key}.thumbnail.src`,
+      path,
+      file,
+      oldUrl,
+    });
   };
 
   const addEvent = () => {
@@ -84,6 +87,10 @@ const EventsSection = ({
   };
 
   const deleteEvent = (key) => {
+    const imageUrl = data[key]?.thumbnail?.src;
+    if (imageUrl && !imageUrl.startsWith('https://via.placeholder.com')) {
+      enqueueImageDelete(`main_pages/event_overviews/${key}/thumbnail.jpg`);
+    }
     setData((prev) => {
       const updated = { ...prev };
       delete updated[key];
@@ -134,7 +141,7 @@ const EventsSection = ({
                   style={{
                     backgroundImage: `url("${
                       imageUrl ||
-                      'https://blog.photobucket.com/hubfs/upload_pics_online.png'
+                      'https://via.placeholder.com/300'
                     }")`,
                   }}
                 />
@@ -202,6 +209,7 @@ EventsSection.propTypes = {
   sectionTitle: PropTypes.string,
   setSectionTitle: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   buttonColor: PropTypes.string,
 };
 

@@ -5,7 +5,7 @@ import GlobalContext from '../../../GlobalContext';
 // path: Main pages.heroSections.home
 
 const HeroSection = () => {
-  const { heroSections, setHeroSections, enqueueImageUpload } =
+  const { heroSections, setHeroSections, enqueueImageUpload, enqueueImageDelete } =
     useContext(GlobalContext);
   const [localImage, setLocalImage] = useState(heroSections.home?.image || '');
 
@@ -17,11 +17,9 @@ const HeroSection = () => {
   const handleLocalImageChange = (file) => {
     if (!file) return;
     const tempUrl = URL.createObjectURL(file);
-    console.log(tempUrl);
-    // Update local preview
+    const oldUrl = heroSections.home?.image;
     setLocalImage(tempUrl);
 
-    // Update parent state through setHeroSections
     setHeroSections((prev) => ({
       ...prev,
       home: {
@@ -30,12 +28,12 @@ const HeroSection = () => {
       },
     }));
 
-    // Queue image upload
-    enqueueImageUpload(
-      'main_pages.hero_sections.home.image',
-      'main_pages/hero_sections/home/image.jsx',
-      file
-    );
+    enqueueImageUpload({
+      key: 'main_pages.hero_sections.home.image',
+      path: 'main_pages/hero_sections/home/image.jpg',
+      file,
+      oldUrl,
+    });
   };
 
   useEffect(() => {

@@ -94,6 +94,7 @@ export function ScrollMemberListItem({
   role,
   setMembers,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
 }) {
   const [localName, setLocalName] = useState(name || "");
@@ -130,8 +131,13 @@ export function ScrollMemberListItem({
       if (file instanceof File || file instanceof Blob) {
         console.log(`ScrollMemberListItem[${index}]: Enqueuing image`);
         const blobUrl = URL.createObjectURL(file);
-        const storagePath = `about/members/${file.name}`;
-        enqueueImageUpload(`main_pages.members.${index}.image`, storagePath, file);
+        const storagePath = `main_pages/members/${index}/image.jpg`;
+        enqueueImageUpload({
+          key: `main_pages.members.${index}.image`,
+          path: storagePath,
+          file,
+          oldUrl: imageUrl,
+        });
         setMembers((prev) =>
           prev.map((member, i) =>
             i === index ? { ...member, image: blobUrl } : member
@@ -142,14 +148,17 @@ export function ScrollMemberListItem({
         console.error(`ScrollMemberListItem[${index}]: Invalid file`, file);
       }
     },
-    [index, enqueueImageUpload, setMembers, setHasChanges]
+    [index, enqueueImageUpload, setMembers, setHasChanges, imageUrl]
   );
 
   const handleDelete = useCallback(() => {
     console.log(`ScrollMemberListItem[${index}]: Deleting member`);
+    if (imageUrl && !imageUrl.startsWith('https://via.placeholder.com')) {
+      enqueueImageDelete(`main_pages/members/${index}/image.jpg`);
+    }
     setMembers((prev) => prev.filter((_, i) => i !== index));
     setHasChanges(true);
-  }, [index, setMembers, setHasChanges]);
+  }, [index, setMembers, enqueueImageDelete, setHasChanges, imageUrl]);
 
   return (
     <div className="w-64 h-full relative flex-shrink-0">
@@ -205,5 +214,6 @@ ScrollMemberListItem.propTypes = {
   role: PropTypes.string,
   setMembers: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
 };

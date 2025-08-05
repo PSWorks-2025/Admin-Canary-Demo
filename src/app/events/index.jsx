@@ -8,6 +8,7 @@ import './styles.css';
 import useImagePreloader from '../../hooks/useImagePreloader.js';
 import LoadingScreen from '../../components/screens/LoadingScreen.jsx';
 import GlobalContext from '../../GlobalContext.jsx';
+import SaveFloatingButton from '../../globalComponent/SaveButton/index.jsx';
 
 function Events() {
   const {
@@ -23,6 +24,9 @@ function Events() {
     sectionTitles,
     setSectionTitles,
     enqueueImageUpload,
+    enqueueImageDelete,
+    handleGlobalSave,
+    isSaving,
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
@@ -46,6 +50,16 @@ function Events() {
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
   const [hasChanges, setHasChanges] = useState(false);
+
+  const saveUpdates = async () => {
+    if (isSaving) return;
+    try {
+      await handleGlobalSave();
+      setHasChanges(false);
+    } catch (err) {
+      console.error('Save error:', err);
+    }
+  };
 
   if (!imagesLoaded) {
     return <LoadingScreen />;
@@ -101,40 +115,45 @@ function Events() {
 
   return (
     <div style={{ backgroundColor: primaryBackgroundColor }} className="w-full pt-20 pb-20">
-        <HeroSection
-          title={heroSections?.events?.title}
-          description={heroSections?.events?.description}
-          backgroundImage={heroSections?.events?.image}
+      <HeroSection
+        title={heroSections?.events?.title}
+        description={heroSections?.events?.description}
+        backgroundImage={heroSections?.events?.image}
+        setHeroSections={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
+        enqueueImageDelete={enqueueImageDelete}
+        setHasChanges={setHasChanges}
+      />
+      <div className="projects">
+        <DonateOverview
+          pageData={heroSections.donate || donateOverview}
           setHeroSections={setHeroSections}
           enqueueImageUpload={enqueueImageUpload}
+          enqueueImageDelete={enqueueImageDelete}
           setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
         />
-      <div className="projects">
-          <DonateOverview
-            pageData={heroSections.donate || donateOverview}
-            setHeroSections={setHeroSections}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-            buttonColor={secondaryBackgroundColor}
-          />
-          <ProjectLayout
-            projects={projectOverviews}
-            setProjectOverviews={setProjectOverviews}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-            buttonColor={secondaryBackgroundColor}
-            sectionTitles={sectionTitles}
-            setSectionTitles={setSectionTitles}
-          />
-          <EventsOverview
-            pageData={eventsOverview}
-            setEventOverviews={setEventOverviews}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-            buttonColor={secondaryBackgroundColor}
-            tertiaryBackgroundColor={tertiaryBackgroundColor}
-          />
+        <ProjectLayout
+          projects={projectOverviews}
+          setProjectOverviews={setProjectOverviews}
+          enqueueImageUpload={enqueueImageUpload}
+          enqueueImageDelete={enqueueImageDelete}
+          setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
+          sectionTitles={sectionTitles}
+          setSectionTitles={setSectionTitles}
+        />
+        <EventsOverview
+          pageData={eventsOverview}
+          setEventOverviews={setEventOverviews}
+          enqueueImageUpload={enqueueImageUpload}
+          enqueueImageDelete={enqueueImageDelete}
+          setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
+          tertiaryBackgroundColor={tertiaryBackgroundColor}
+        />
       </div>
+      <SaveFloatingButton visible={hasChanges} onSave={saveUpdates} disabled={isSaving} />
     </div>
   );
 }

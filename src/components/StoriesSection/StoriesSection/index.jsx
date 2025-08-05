@@ -9,6 +9,7 @@ const StoriesSection = ({
   pageData,
   setStoryOverviews,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
   buttonColor,
   sectionTitles,
@@ -61,15 +62,30 @@ const StoriesSection = ({
   const handleImageUpload = useCallback(
     (id, file) => {
       if (file instanceof File || file instanceof Blob) {
+        if (!file.type.startsWith('image/')) {
+          console.error(`StoriesSection[${id}]: Selected file is not an image`);
+          return;
+        }
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        if (file.size > MAX_FILE_SIZE) {
+          console.error(`StoriesSection[${id}]: File size exceeds 5MB`);
+          return;
+        }
+
         console.log(`StoriesSection[${id}]: Enqueuing image for thumbnail.src`);
         const blobUrl = URL.createObjectURL(file);
-        const storagePath = `stories/${file.name}`;
-        enqueueImageUpload(`main_pages.story_overviews.${id}.thumbnail.src`, storagePath, file);
+        const storagePath = `main_pages/story_overviews/${id}/thumbnail.jpg`;
+        enqueueImageUpload({
+          key: `main_pages.story_overviews.${id}.thumbnail.src`,
+          path: storagePath,
+          file,
+          oldUrl: pageData.stories.find(story => story.id === id)?.imageUrl,
+        });
         setStoryOverviews(prev => ({
           ...prev,
           [id]: {
             ...prev[id],
-            thumbnail: { ...prev[id]?.thumbnail || { src: '', alt: '', caption: '' }, src: blobUrl }
+            thumbnail: { ...prev[id]?.thumbnail || { src: '', alt: '', caption: '' }, src: blobUrl, alt: file.name }
           }
         }));
         setLocalStories(prev =>
@@ -80,7 +96,7 @@ const StoriesSection = ({
         console.error(`StoriesSection[${id}]: Invalid file for thumbnail.src:`, file);
       }
     },
-    [enqueueImageUpload, setStoryOverviews, setHasChanges]
+    [enqueueImageUpload, enqueueImageDelete, setStoryOverviews, setHasChanges, pageData.stories]
   );
 
   const handleAddStory = useCallback(() => {
@@ -92,7 +108,7 @@ const StoriesSection = ({
         title: '',
         abstract: '',
         thumbnail: {
-          src: 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+          src: 'https://via.placeholder.com/300',
           alt: '',
           caption: ''
         },
@@ -105,7 +121,7 @@ const StoriesSection = ({
         id: newKey,
         title: '',
         description: '',
-        imageUrl: 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+        imageUrl: 'https://via.placeholder.com/300',
         posted_time: new Date().toISOString().split('T')[0]
       }
     ]);
@@ -115,6 +131,10 @@ const StoriesSection = ({
   const handleDeleteStory = useCallback(
     id => {
       console.log(`StoriesSection[${id}]: Deleting story`);
+      const story = pageData.stories.find(s => s.id === id);
+      if (story?.imageUrl && !story.imageUrl.startsWith('https://via.placeholder.com')) {
+        enqueueImageDelete(`main_pages/story_overviews/${id}/thumbnail.jpg`);
+      }
       setStoryOverviews(prev => {
         const newStories = Object.keys(prev)
           .filter(k => k !== id)
@@ -124,7 +144,7 @@ const StoriesSection = ({
       setLocalStories(prev => prev.filter(story => story.id !== id));
       setHasChanges(true);
     },
-    [setStoryOverviews, setHasChanges]
+    [setStoryOverviews, enqueueImageDelete, setHasChanges, pageData.stories]
   );
 
   return (
@@ -146,7 +166,7 @@ const StoriesSection = ({
                 left="left-2"
                 className="w-full h-full bg-no-repeat"
                 style={{
-                  backgroundImage: `url("${story.imageUrl || 'https://via.placeholder.com/144x144'}")`
+                  backgroundImage: `url("${story.imageUrl || 'https://via.placeholder.com/300'}")`
                 }}
               />
               <button
@@ -222,7 +242,7 @@ const StoriesSection = ({
                 top="top-2"
                 left="left-2"
                 style={{
-                  backgroundImage: `url("${story.imageUrl || 'https://via.placeholder.com/144x144'}")`
+                  backgroundImage: `url("${story.imageUrl || 'https://via.placeholder.com/300'}")`
                 }}
                 className="w-full h-full object-cover bg-center bg-no-repeat"
               />
@@ -308,6 +328,7 @@ StoriesSection.propTypes = {
   }).isRequired,
   setStoryOverviews: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
   sectionTitles: PropTypes.object.isRequired,

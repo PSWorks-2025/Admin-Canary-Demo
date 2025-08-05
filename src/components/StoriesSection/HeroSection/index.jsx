@@ -10,6 +10,7 @@ const HeroSection = ({
   heroImage,
   setHeroSections,
   enqueueImageUpload,
+  enqueueImageDelete,
   setHasChanges,
   buttonColor,
 }) => {
@@ -47,8 +48,13 @@ const HeroSection = ({
       if (file instanceof File || file instanceof Blob) {
         console.log(`HeroSection[stories]: Enqueuing image for image`);
         const blobUrl = URL.createObjectURL(file);
-        const storagePath = `hero/stories/${file.name}`;
-        enqueueImageUpload(`main_pages.hero_sections.stories.image`, storagePath, file);
+        const storagePath = `main_pages/hero_sections/stories/image.jpg`;
+        enqueueImageUpload({
+          key: `main_pages.hero_sections.stories.image`,
+          path: storagePath,
+          file,
+          oldUrl: heroImage,
+        });
         setHeroSections((prev) => ({
           ...prev,
           stories: { ...prev.stories, image: blobUrl },
@@ -58,12 +64,12 @@ const HeroSection = ({
         console.error(`HeroSection[stories]: Invalid file for image:`, file);
       }
     },
-    [enqueueImageUpload, setHeroSections, setHasChanges]
+    [enqueueImageUpload, enqueueImageDelete, setHeroSections, setHasChanges, heroImage]
   );
 
   const handleReadMore = (e) => {
     e.stopPropagation();
-      navigate("/edit-content", {
+    navigate("/edit-content", {
       state: {
         id: "story_hero",
         title: localTitle,
@@ -119,6 +125,7 @@ HeroSection.propTypes = {
   heroImage: PropTypes.string,
   setHeroSections: PropTypes.func.isRequired,
   enqueueImageUpload: PropTypes.func.isRequired,
+  enqueueImageDelete: PropTypes.func.isRequired,
   setHasChanges: PropTypes.func.isRequired,
   buttonColor: PropTypes.string.isRequired,
 };

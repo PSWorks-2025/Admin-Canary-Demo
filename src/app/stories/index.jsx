@@ -5,6 +5,7 @@ import StoriesSection from "../../components/StoriesSection/StoriesSection";
 import useImagePreloader from "../../hooks/useImagePreloader";
 import LoadingScreen from "../../components/screens/LoadingScreen";
 import GlobalContext from "../../GlobalContext";
+import SaveFloatingButton from "../../globalComponent/SaveButton/index.jsx";
 
 function Story() {
   const {
@@ -17,7 +18,9 @@ function Story() {
     sectionTitles,
     setSectionTitles,
     enqueueImageUpload,
-    handleGlobalSave
+    enqueueImageDelete,
+    handleGlobalSave,
+    isSaving,
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
@@ -29,6 +32,16 @@ function Story() {
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
   const [hasChanges, setHasChanges] = useState(false);
+
+  const saveUpdates = async () => {
+    if (isSaving) return;
+    try {
+      await handleGlobalSave();
+      setHasChanges(false);
+    } catch (err) {
+      console.error('Save error:', err);
+    }
+  };
 
   if (!imagesLoaded) {
     return <LoadingScreen />;
@@ -64,6 +77,7 @@ function Story() {
         heroImage={heroSections?.stories?.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}
         setHeroSections={setHeroSections}
         enqueueImageUpload={enqueueImageUpload}
+        enqueueImageDelete={enqueueImageDelete}
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
       />
@@ -71,11 +85,13 @@ function Story() {
         pageData={storiesData}
         setStoryOverviews={setStoryOverviews}
         enqueueImageUpload={enqueueImageUpload}
+        enqueueImageDelete={enqueueImageDelete}
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
         sectionTitles={sectionTitles}
         setSectionTitles={setSectionTitles}
       />
+      <SaveFloatingButton visible={hasChanges} onSave={saveUpdates} disabled={isSaving} />
     </div>
   );
 }

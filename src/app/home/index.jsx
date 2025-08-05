@@ -25,6 +25,7 @@ const HomePage = () => {
     setSectionTitles,
     enqueueImageUpload,
     handleGlobalSave,
+    isSaving,
   } = useContext(GlobalContext);
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -40,6 +41,7 @@ const HomePage = () => {
   };
 
   const saveUpdates = async () => {
+    if (isSaving) return;
     try {
       await handleGlobalSave();
       setHasPendingChanges(false);
@@ -86,7 +88,7 @@ const HomePage = () => {
           enqueueImageUpload={enqueueImageUpload}
         />
       </div>
-      <SaveFloatingButton visible={hasPendingChanges} onSave={saveUpdates} />
+      <SaveFloatingButton visible={hasPendingChanges} onSave={saveUpdates} disabled={isSaving} />
     </div>
   );
 };

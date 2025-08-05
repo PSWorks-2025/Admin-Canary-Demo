@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { doc, setDoc } from 'firebase/firestore';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes, deleteObject } from 'firebase/storage';
 import { Timestamp } from 'firebase/firestore';
 import { db, storage } from './service/firebaseConfig.jsx';
 import { readData } from './service/firebaseRead.jsx';
@@ -14,6 +14,7 @@ export const GlobalProvider = ({ children }) => {
   const [globalData, setGlobalData] = useState({});
   const [mainData, setMainData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Theme colors
   const [primaryBackgroundColor, setPrimaryBackgroundColor] = useState('#ffffff');
@@ -32,6 +33,7 @@ export const GlobalProvider = ({ children }) => {
   });
   const [socialLinksData, setSocialLinksData] = useState({});
   const [imageUploadQueue, setImageUploadQueue] = useState({});
+  const [imageDeleteQueue, setImageDeleteQueue] = useState({});
   const [activityHistory, setActivityHistory] = useState([]);
   const [eventOverviews, setEventOverviews] = useState({});
   const [fundraising, setFundraising] = useState({});
@@ -130,12 +132,13 @@ export const GlobalProvider = ({ children }) => {
     handleGetData();
   }, []);
 
-  const enqueueImageUpload = useCallback((keyOrObj, path, file) => {
+  const enqueueImageUpload = useCallback((keyOrObj, path, file, oldUrl) => {
     let key;
     if (typeof keyOrObj === 'object' && keyOrObj.key) {
       key = keyOrObj.key;
       path = keyOrObj.path;
       file = keyOrObj.file;
+      oldUrl = keyOrObj.oldUrl;
     } else {
       key = keyOrObj;
     }
@@ -148,17 +151,47 @@ export const GlobalProvider = ({ children }) => {
 
     setImageUploadQueue((prev) => ({
       ...prev,
-      [key]: { key, path, file },
+      [key]: { key, path, file, oldUrl },
     }));
   }, []);
+
+  const enqueueImageDelete = useCallback((path) => {
+    if (!path) return;
+    setImageDeleteQueue((prev) => ({
+      ...prev,
+      [path]: true,
+    }));
+  }, []);
+
+  const deleteImagesInQueue = async () => {
+    const deletePromises = Object.keys(imageDeleteQueue).map(async (path) => {
+      try {
+        const storageRef = ref(storage, path);
+        await deleteObject(storageRef);
+        console.log(`✅ Deleted image at ${path}`);
+      } catch (error) {
+        if (error.code === 'storage/object-not-found') {
+          console.warn(`Image at ${path} already deleted or does not exist`);
+        } else {
+          console.error(`❌ Error deleting image at ${path}:`, error);
+        }
+      }
+    });
+
+    await Promise.all(deletePromises);
+    setImageDeleteQueue({});
+  };
 
   const uploadAllImagesInQueue = async (baseGlobalUpdate, baseMainUpdate) => {
     const updatedGlobal = { ...baseGlobalUpdate };
     const updatedMain = { ...baseMainUpdate };
 
     for (const key in imageUploadQueue) {
-      const { path, file } = imageUploadQueue[key];
+      const { path, file, oldUrl } = imageUploadQueue[key];
       try {
+        if (oldUrl && !oldUrl.startsWith('https://via.placeholder.com')) {
+          enqueueImageDelete(path);
+        }
         const storageRef = ref(storage, path);
         await uploadBytes(storageRef, file);
         const url = await getDownloadURL(storageRef);
@@ -193,6 +226,8 @@ export const GlobalProvider = ({ children }) => {
   };
 
   const handleGlobalSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     try {
       const baseGlobalUpdate = {
         ...globalData,
@@ -208,20 +243,17 @@ export const GlobalProvider = ({ children }) => {
       };
 
       const baseMainUpdate = {
-        activity_history: activityHistory.map((activity) => {
-          console.log('Saving activity_history:', { started_time: activity.started_time, ended_time: activity.ended_time });
-          return {
-            ...activity,
-            started_time:
-              activity.started_time && !isNaN(new Date(activity.started_time).getTime())
-                ? Timestamp.fromDate(new Date(activity.started_time))
-                : activity.started_time || null, // Preserve existing Timestamp if valid
-            ended_time:
-              activity.ended_time && !isNaN(new Date(activity.ended_time).getTime())
-                ? Timestamp.fromDate(new Date(activity.ended_time))
-                : activity.ended_time || null, // Preserve existing Timestamp if valid
-          };
-        }),
+        activity_history: activityHistory.map((activity) => ({
+          ...activity,
+          started_time:
+            activity.started_time && !isNaN(new Date(activity.started_time).getTime())
+              ? Timestamp.fromDate(new Date(activity.started_time))
+              : activity.started_time || null,
+          ended_time:
+            activity.ended_time && !isNaN(new Date(activity.ended_time).getTime())
+              ? Timestamp.fromDate(new Date(activity.ended_time))
+              : activity.ended_time || null,
+        })),
         event_overviews: Object.entries(eventOverviews).reduce((acc, [key, event]) => {
           acc[key] = {
             ...event,
@@ -261,7 +293,6 @@ export const GlobalProvider = ({ children }) => {
         members: members,
         org_stats: orgStats,
         project_overviews: Object.entries(projectOverviews).reduce((acc, [key, project]) => {
-          console.log('Saving project_overviews:', { key, started_time: project.started_time });
           acc[key] = {
             ...project,
             title: project.title || '',
@@ -274,7 +305,7 @@ export const GlobalProvider = ({ children }) => {
             started_time:
               project.started_time && !isNaN(new Date(project.started_time).getTime())
                 ? Timestamp.fromDate(new Date(project.started_time))
-                : project.started_time || null, // Preserve existing Timestamp if valid
+                : project.started_time || null,
           };
           return acc;
         }, {}),
@@ -308,16 +339,13 @@ export const GlobalProvider = ({ children }) => {
         },
       };
 
+      await deleteImagesInQueue();
       const { updatedGlobal, updatedMain } = await uploadAllImagesInQueue(baseGlobalUpdate, baseMainUpdate);
       const finalGlobalData = createFinalData(baseGlobalUpdate, updatedGlobal);
       const finalMainData = createFinalData(baseMainUpdate, updatedMain);
 
       const globalRef = doc(db, 'Global', 'components');
       const mainRef = doc(db, 'Main pages', 'components');
-
-      console.log('Saving event_overviews:', finalMainData.event_overviews);
-      console.log('Saving activity_history:', finalMainData.activity_history);
-      console.log('Saving project_overviews:', finalMainData.project_overviews);
 
       await Promise.all([
         setDoc(globalRef, finalGlobalData),
@@ -341,6 +369,8 @@ export const GlobalProvider = ({ children }) => {
       console.log('✅ Global and Main data saved successfully!');
     } catch (error) {
       console.error('❌ Error saving global/main data:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -370,8 +400,9 @@ export const GlobalProvider = ({ children }) => {
     setSocialLinksData,
     handleGlobalSave,
     enqueueImageUpload,
+    enqueueImageDelete,
     imageUploadQueue,
-
+    isSaving,
     // Main data
     activityHistory,
     setActivityHistory,

@@ -16,7 +16,10 @@ const FundraisingPage = () => {
     setFundraising,
     sectionTitles,
     setSectionTitles,
-    enqueueImageUpload
+    enqueueImageUpload,
+    enqueueImageDelete,
+    handleGlobalSave,
+    isSaving,
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
@@ -26,6 +29,16 @@ const FundraisingPage = () => {
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
   const [hasChanges, setHasChanges] = useState(false);
+
+  const saveUpdates = async () => {
+    if (isSaving) return;
+    try {
+      await handleGlobalSave();
+      setHasChanges(false);
+    } catch (err) {
+      console.error('Save error:', err);
+    }
+  };
 
   const handleSupportClick = () => {
     alert("Cảm ơn bạn đã ủng hộ! 🎉");
@@ -49,6 +62,7 @@ const FundraisingPage = () => {
         onSupportClick={handleSupportClick}
         setFundraising={setFundraising}
         enqueueImageUpload={enqueueImageUpload}
+        enqueueImageDelete={enqueueImageDelete}
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
         sectionTitles={sectionTitles}
@@ -71,6 +85,7 @@ const FundraisingPage = () => {
         sectionTitles={sectionTitles}
         setSectionTitles={setSectionTitles}
       />
+      <SaveFloatingButton visible={hasChanges} onSave={saveUpdates} disabled={isSaving} />
     </div>
   );
 };
