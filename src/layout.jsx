@@ -10,6 +10,8 @@ import GlobalContext from './GlobalContext.jsx';
 import { GlobalProvider } from './GlobalContext.jsx';
 import SaveFloatingButton from './globalComponent/SaveButton';
 import MainColorPicker from './components/layout/MainColorPicker/index.jsx';
+import HeaderEditor from '../Section-And-Core-Component/CanarySectionsModel/Header/HeaderEditor/index.jsx';
+import FooterEditor from '../Section-And-Core-Component/CanarySectionsModel/Footer/FooterEditor/index.jsx';
 
 const Layout = ({ children }) => {
   return (
@@ -33,9 +35,9 @@ const LayoutContent = ({ children }) => {
   
   return (
     <div className='w-full max-w-full'>
-      <Header page={page} {...globalProps} />
+      <HeaderEditor page={page} GlobalContext={GlobalContext} {...globalProps} />
       {children}
-      <Footer {...globalProps} />
+      <FooterEditor GlobalContext={GlobalContext} {...globalProps} />
       {location.pathname !== '/edit-content' && (
         <SaveFloatingButton visible={true} onClick={handleGlobalSave} />
       )}

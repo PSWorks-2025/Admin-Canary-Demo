@@ -1,24 +1,24 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  ScrollMemberList,
-  ScrollMemberListItem,
-} from '../../components/Lists/ScrollMemberList';
-import {
-  ActivityHistoryList,
-  ActivityHistoryListItem,
-} from '../../components/Lists/ActivityHistoryList';
+import { ScrollMemberList, ScrollMemberListItem } from '../../components/Lists/ScrollMemberList';
+import { ActivityHistoryList, ActivityHistoryListItem } from '../../components/Lists/ActivityHistoryList';
 import useImagePreloader from '../../hooks/useImagePreloader';
 import LoadingScreen from '../../components/screens/LoadingScreen';
 import SectionWrap from '../../components/SectionWrap';
 import GlobalContext from '../../GlobalContext';
 import StorySection from '../../components/HomePageSection/StorySection';
 import ProjectLayout from '../../components/ProjectLayout/ProjectLayout';
-import HeroSection from '../../components/sections/AboutCanary/HeroSection';
 import MissionSection from '../../components/sections/AboutCanary/MissionSection';
 import VisionSection from '../../components/sections/AboutCanary/VisionSection';
 import SaveFloatingButton from '../../globalComponent/SaveButton/index.jsx';
 import { TextInput } from '../../components/Inputs/TextInput';
+import AboutHeroSectionEditor from '../../../Section-And-Core-Component/CanarySectionsModel/AboutCanary/AboutHeroSection/AboutHeroSectionEditor';
+import MissionEditor from '../../../Section-And-Core-Component/CanarySectionsModel/AboutCanary/Mission/MissionEditor/index.jsx';
+import VisionEditor from '../../../Section-And-Core-Component/CanarySectionsModel/AboutCanary/Vision/VisionEditor/index.jsx';
+import StoriesHighlightEditor from '../../../Section-And-Core-Component/CanarySectionsModel/Home/StoriesHighlight/StoriesHighlightEditor/index.jsx';
+import MemberListEditor from '../../../Section-And-Core-Component/CanarySectionsModel/AboutCanary/Member/MemberListEditor/index.jsx';
+import ProjectsHighlightEditor from '../../../Section-And-Core-Component/CanarySectionsModel/AboutCanary/ProjectsHighlight/ProjectsHighlightEditor';
+import TimelineEditor from '../../../Section-And-Core-Component/CanarySectionsModel/AboutCanary/Timeline/TimelineEditor/index.jsx';
 
 function Aboutpage() {
   const {
@@ -44,22 +44,13 @@ function Aboutpage() {
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
-    heroSections?.about?.coverImage ||
-      'https://blog.photobucket.com/hubfs/upload_pics_online.png',
-    statements?.mission?.imageUrl ||
-      'https://blog.photobucket.com/hubfs/upload_pics_online.png',
-    statements?.vision?.imageUrl ||
-      'https://blog.photobucket.com/hubfs/upload_pics_online.png',
-    ...members.map(
-      (member) =>
-        member.image ||
-        'https://blog.photobucket.com/hubfs/upload_pics_online.png'
-    ),
+    heroSections?.about?.coverImage || 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+    statements?.mission?.imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+    statements?.vision?.imageUrl || 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+    ...members.map((member) => member.image || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'),
     ...activityHistory.flatMap((activity) => [
-      activity.image1 ||
-        'https://blog.photobucket.com/hubfs/upload_pics_online.png',
-      activity.image2 ||
-        'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+      activity.image1 || 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+      activity.image2 || 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
     ]),
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
@@ -95,49 +86,38 @@ function Aboutpage() {
   }
 
   return (
-    <div
-      className="w-full mx-auto overflow-x-hidden pt-20"
-      style={{ backgroundColor: primaryBackgroundColor }}
-    >
-        <HeroSection
-          coverImage={heroSections?.about?.coverImage}
-          backgroundColor={primaryBackgroundColor}
-          title={heroSections?.about?.title}
-          description={heroSections?.about?.description}
-          setHeroSections={setHeroSections}
+    <div className="w-full mx-auto overflow-x-hidden pt-20" style={{ backgroundColor: primaryBackgroundColor }}>
+      <AboutHeroSectionEditor
+        coverImage={heroSections?.about?.coverImage}
+        backgroundColor={primaryBackgroundColor}
+        title={heroSections?.about?.title}
+        description={heroSections?.about?.description}
+        setHeroSections={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
+        setHasChanges={setHasChanges}
+      />
+      <SectionWrap className="w-full" borderColor={secondaryBackgroundColor}>
+        <MissionEditor
+          mission={statements?.mission || { title: '', description: '', imageUrl: '' }}
+          setStatements={setStatements}
           enqueueImageUpload={enqueueImageUpload}
           setHasChanges={setHasChanges}
         />
-      <SectionWrap className="w-full" borderColor={secondaryBackgroundColor}>
-          <MissionSection
-            mission={
-              statements?.mission || { title: '', description: '', imageUrl: '' }
-            }
-            setStatements={setStatements}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-          />
-          <VisionSection
-            vision={
-              statements?.vision || { title: '', description: '', imageUrl: '' }
-            }
-            setStatements={setStatements}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-          />
+        <VisionEditor vision={statements?.vision || { title: '', description: '', imageUrl: '' }} setStatements={setStatements} enqueueImageUpload={enqueueImageUpload} setHasChanges={setHasChanges} />
       </SectionWrap>
       <div className="w-full">
-          <StorySection
-            data={storyOverviews}
-            setData={setStoryOverviews}
-            title={sectionTitles.stories}
-            setTitle={handleStoriesSectionTitleChange}
-            enqueueImageUpload={enqueueImageUpload}
-            buttonColor={secondaryBackgroundColor}
-          />
+        <StoriesHighlightEditor
+          data={storyOverviews}
+          setData={setStoryOverviews}
+          title={sectionTitles.stories}
+          setTitle={handleStoriesSectionTitleChange}
+          enqueueImageUpload={enqueueImageUpload}
+          buttonColor={secondaryBackgroundColor}
+        />
       </div>
       <SectionWrap borderColor={secondaryBackgroundColor} className="w-full">
-        <TextInput
+        <MemberListEditor members={members} setMembers={setMembers} enqueueImageUpload={enqueueImageUpload} setHasChanges={setHasChanges} />
+        {/* <TextInput
           className="w-full pt-8 font-bold text-2xl sm:text-[2.5rem] text-primary-title text-center outline-none"
           value={sectionTitles.members}
           onChange={(e) => handleMembersSectionTitleChange(e.target.value)}
@@ -179,10 +159,19 @@ function Aboutpage() {
                 />
             </div>
           ))}
-        </ScrollMemberList>
+        </ScrollMemberList> */}
       </SectionWrap>
       <SectionWrap borderColor={secondaryBackgroundColor}>
-        <TextInput
+        <TimelineEditor
+          activityHistory={activityHistory}
+          setActivityHistory={setActivityHistory}
+          handleActivityHistorySectionTitleChange={handleActivityHistorySectionTitleChange}
+          sectionTitles={sectionTitles}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
+        />
+        {/* <TextInput
           className="w-full pt-8 font-bold text-2xl sm:text-[2.5rem] text-primary-title text-center outline-none"
           value={sectionTitles.activity_history}
           onChange={(e) => handleActivityHistorySectionTitleChange(e.target.value)}
@@ -230,9 +219,10 @@ function Aboutpage() {
               />
             </div>
           ))}
-        </ActivityHistoryList>
+        </ActivityHistoryList> */}
       </SectionWrap>
-        <ProjectLayout
+      <SectionWrap borderColor={secondaryBackgroundColor}>
+        <ProjectsHighlightEditor
           projects={projectOverviews}
           setProjectOverviews={setProjectOverviews}
           enqueueImageUpload={enqueueImageUpload}
@@ -241,6 +231,7 @@ function Aboutpage() {
           sectionTitles={sectionTitles}
           setSectionTitles={setSectionTitles}
         />
+      </SectionWrap>
       <div className="mt-8 md:mt-16 pb-20" />
     </div>
   );

@@ -5,6 +5,8 @@ import StoriesSection from "../../components/StoriesSection/StoriesSection";
 import useImagePreloader from "../../hooks/useImagePreloader";
 import LoadingScreen from "../../components/screens/LoadingScreen";
 import GlobalContext from "../../GlobalContext";
+import StoryHeroSectionEditor from "../../../Section-And-Core-Component/CanarySectionsModel/Story/HeroSection/StoryHeroSectionEditor";
+import StoriesListEditor from "../../../Section-And-Core-Component/CanarySectionsModel/Story/StoriesList/StoriesListEditor";
 
 function Story() {
   const {
@@ -58,7 +60,7 @@ function Story() {
 
   return (
     <div style={{ backgroundColor: primaryBackgroundColor }}>
-      <HeroSection
+      <StoryHeroSectionEditor
         title={heroSections?.stories?.title || ""}
         description={heroSections?.stories?.description || ""}
         heroImage={heroSections?.stories?.image || "https://blog.photobucket.com/hubfs/upload_pics_online.png"}
@@ -67,7 +69,7 @@ function Story() {
         setHasChanges={setHasChanges}
         buttonColor={secondaryBackgroundColor}
       />
-      <StoriesSection
+      <StoriesListEditor
         pageData={storiesData}
         setStoryOverviews={setStoryOverviews}
         enqueueImageUpload={enqueueImageUpload}

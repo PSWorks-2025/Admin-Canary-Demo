@@ -7,6 +7,9 @@ import CampaignDetails from "../../components/FundRaisingSection/CampaignDetail"
 import { motion } from "framer-motion";
 import GlobalContext from "../../GlobalContext";
 import SaveFloatingButton from "../../globalComponent/SaveButton/index.jsx";
+import DonateProgressEditor from "../../../Section-And-Core-Component/CanarySectionsModel/Donate/DonateProgress/DonateProgressEditor/index.jsx";
+import CampaignDetailsEditor from "../../../Section-And-Core-Component/CanarySectionsModel/Donate/CampaignDetails/CampaignDetailEditor/index.jsx";
+import DonorListEditor from "../../../Section-And-Core-Component/CanarySectionsModel/Donate/DonorList/DonorListEditor/index.jsx";
 
 const FundraisingPage = () => {
   const {
@@ -40,7 +43,7 @@ const FundraisingPage = () => {
       style={{ backgroundColor: primaryBackgroundColor }}
       className="min-h-screen relative overflow-hidden p-6"
     >
-      <FundraisingHeader
+      <DonateProgressEditor
         image_url={fundraising?.image_url || "https://via.placeholder.com/300"}
         fundraiser_name={fundraising?.fundraiser_name || ""}
         amount_raised={fundraising?.amount_raised || 0}
@@ -54,7 +57,7 @@ const FundraisingPage = () => {
         sectionTitles={sectionTitles}
         setSectionTitles={setSectionTitles}
       />
-      <CampaignDetails
+      <CampaignDetailsEditor
         campaign_title={fundraising?.campaign_title || ""}
         campaign_description={fundraising?.campaign_description || ""}
         setFundraising={setFundraising}
@@ -63,7 +66,7 @@ const FundraisingPage = () => {
         sectionTitles={sectionTitles}
         setSectionTitles={setSectionTitles}
       />
-      <DonorList
+      <DonorListEditor
         donors={fundraising?.donors || []}
         setFundraising={setFundraising}
         setHasChanges={setHasChanges}

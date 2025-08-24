@@ -8,6 +8,10 @@ import './styles.css';
 import useImagePreloader from '../../hooks/useImagePreloader.js';
 import LoadingScreen from '../../components/screens/LoadingScreen.jsx';
 import GlobalContext from '../../GlobalContext.jsx';
+import EventsHeroSectionEditor from '../../../Section-And-Core-Component/CanarySectionsModel/Events/HeroSection/EventsHeroSectionEditor/index.jsx';
+import DonateOverivewEditor from '../../../Section-And-Core-Component/CanarySectionsModel/Events/DonateOverview/DonateOverviewEditor/index.jsx';
+import RecentProjectsEditor from '../../../Section-And-Core-Component/CanarySectionsModel/Events/RecentProjects/RecentProjectsEditor/index.jsx';
+import UpcomingEventsEditor from '../../../Section-And-Core-Component/CanarySectionsModel/Events/UpcomingEvents/UpcomingEventsEditor/index.jsx';
 
 function Events() {
   const {
@@ -26,22 +30,10 @@ function Events() {
   } = useContext(GlobalContext);
 
   const imagesToPreload = [
-    heroSections?.events?.image ||
-      'https://blog.photobucket.com/hubfs/upload_pics_online.png',
-    ...(heroSections?.donate?.images || ['', '']).map(
-      (img) =>
-        img || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'
-    ),
-    ...Object.values(projectOverviews || {}).map(
-      (project) =>
-        project.thumbnail?.src ||
-        'https://blog.photobucket.com/hubfs/upload_pics_online.png'
-    ),
-    ...Object.values(eventOverviews || {}).map(
-      (event) =>
-        event.thumbnail?.src ||
-        'https://blog.photobucket.com/hubfs/upload_pics_online.png'
-    ),
+    heroSections?.events?.image || 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+    ...(heroSections?.donate?.images || ['', '']).map((img) => img || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'),
+    ...Object.values(projectOverviews || {}).map((project) => project.thumbnail?.src || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'),
+    ...Object.values(eventOverviews || {}).map((event) => event.thumbnail?.src || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'),
   ];
   const imagesLoaded = useImagePreloader(imagesToPreload);
 
@@ -51,41 +43,37 @@ function Events() {
     return <LoadingScreen />;
   }
 
-  const projectOverview = Object.keys(projectOverviews).length > 0
-    ? {
-        heading: "Tổng quan dự án",
-        title: projectOverviews[Object.keys(projectOverviews)[0]].title || "",
-        description: projectOverviews[Object.keys(projectOverviews)[0]].abstract || "",
-        images: Object.values(projectOverviews).map(
-          (project) => project.thumbnail?.src || "https://blog.photobucket.com/hubfs/upload_pics_online.png"
-        ),
-        started_time: (() => {
-          const startedTime = projectOverviews[Object.keys(projectOverviews)[0]].started_time;
-          try {
-            const date = startedTime?.toDate ? startedTime.toDate() : new Date(startedTime);
-            return date instanceof Date && !isNaN(date.getTime()) ? date.toISOString() : "";
-          } catch (error) {
-            console.error("Invalid started_time in projectOverview:", startedTime, error);
-            return "";
-          }
-        })(),
-      }
-    : {
-        heading: "Tổng quan dự án",
-        title: "",
-        description: "",
-        images: [],
-        started_time: "",
-      };
+  const projectOverview =
+    Object.keys(projectOverviews).length > 0
+      ? {
+          heading: 'Tổng quan dự án',
+          title: projectOverviews[Object.keys(projectOverviews)[0]].title || '',
+          description: projectOverviews[Object.keys(projectOverviews)[0]].abstract || '',
+          images: Object.values(projectOverviews).map((project) => project.thumbnail?.src || 'https://blog.photobucket.com/hubfs/upload_pics_online.png'),
+          started_time: (() => {
+            const startedTime = projectOverviews[Object.keys(projectOverviews)[0]].started_time;
+            try {
+              const date = startedTime?.toDate ? startedTime.toDate() : new Date(startedTime);
+              return date instanceof Date && !isNaN(date.getTime()) ? date.toISOString() : '';
+            } catch (error) {
+              console.error('Invalid started_time in projectOverview:', startedTime, error);
+              return '';
+            }
+          })(),
+        }
+      : {
+          heading: 'Tổng quan dự án',
+          title: '',
+          description: '',
+          images: [],
+          started_time: '',
+        };
 
   const donateOverview = {
     heading: 'Hãy đồng hành cùng chúng mình',
     title1: heroSections?.donate?.title1 || 'Đặt mua bánh chưng',
     title2: heroSections?.donate?.title2 || 'Ủng hộ hiện kim',
-    images: heroSections?.donate?.images || [
-      'https://blog.photobucket.com/hubfs/upload_pics_online.png',
-      'https://blog.photobucket.com/hubfs/upload_pics_online.png',
-    ],
+    images: heroSections?.donate?.images || ['https://blog.photobucket.com/hubfs/upload_pics_online.png', 'https://blog.photobucket.com/hubfs/upload_pics_online.png'],
   };
 
   const eventsOverview = {
@@ -93,47 +81,45 @@ function Events() {
     events: Object.entries(eventOverviews).map(([key, event]) => ({
       id: key,
       title: event.title || '',
-      imageUrl:
-        event.thumbnail?.src ||
-        'https://blog.photobucket.com/hubfs/upload_pics_online.png',
+      imageUrl: event.thumbnail?.src || 'https://blog.photobucket.com/hubfs/upload_pics_online.png',
     })),
   };
 
   return (
     <div style={{ backgroundColor: primaryBackgroundColor }} className="w-full pt-20 pb-20">
-        <HeroSection
-          title={heroSections?.events?.title}
-          description={heroSections?.events?.description}
-          backgroundImage={heroSections?.events?.image}
+      <EventsHeroSectionEditor
+        title={heroSections?.events?.title}
+        description={heroSections?.events?.description}
+        backgroundImage={heroSections?.events?.image}
+        setHeroSections={setHeroSections}
+        enqueueImageUpload={enqueueImageUpload}
+        setHasChanges={setHasChanges}
+      />
+      <div className="projects">
+        <DonateOverivewEditor
+          pageData={heroSections.donate || donateOverview}
           setHeroSections={setHeroSections}
           enqueueImageUpload={enqueueImageUpload}
           setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
         />
-      <div className="projects">
-          <DonateOverview
-            pageData={heroSections.donate || donateOverview}
-            setHeroSections={setHeroSections}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-            buttonColor={secondaryBackgroundColor}
-          />
-          <ProjectLayout
-            projects={projectOverviews}
-            setProjectOverviews={setProjectOverviews}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-            buttonColor={secondaryBackgroundColor}
-            sectionTitles={sectionTitles}
-            setSectionTitles={setSectionTitles}
-          />
-          <EventsOverview
-            pageData={eventsOverview}
-            setEventOverviews={setEventOverviews}
-            enqueueImageUpload={enqueueImageUpload}
-            setHasChanges={setHasChanges}
-            buttonColor={secondaryBackgroundColor}
-            tertiaryBackgroundColor={tertiaryBackgroundColor}
-          />
+        <RecentProjectsEditor
+          projects={projectOverviews}
+          setProjectOverviews={setProjectOverviews}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
+          sectionTitles={sectionTitles}
+          setSectionTitles={setSectionTitles}
+        />
+        <UpcomingEventsEditor
+          pageData={eventsOverview}
+          setEventOverviews={setEventOverviews}
+          enqueueImageUpload={enqueueImageUpload}
+          setHasChanges={setHasChanges}
+          buttonColor={secondaryBackgroundColor}
+          tertiaryBackgroundColor={tertiaryBackgroundColor}
+        />
       </div>
     </div>
   );
